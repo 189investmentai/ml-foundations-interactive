@@ -44,5 +44,5 @@ These solutions can be:
 
 Solutions use the GitHub-hosted data:
 ```
-https://raw.githubusercontent.com/189investmentai/ml-foundations-interactive/main/streamcart_customers.csv
+https://raw.githubusercontent.com/189investmentai/ml-foundations-interactive/main/data/streamcart_customers.csv
 ```
