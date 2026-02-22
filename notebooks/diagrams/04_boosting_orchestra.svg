@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="2" stdDeviation="2" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+  
+  <text x="400" y="35" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="#1a1a1a">Boosting: The Orchestra</text>
+  <text x="400" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">Each musician corrects what the others missed - conducted by learning rate</text>
+  
+  <!-- Stage/Platform -->
+  <ellipse cx="400" cy="320" rx="350" ry="40" fill="#5D4037"/>
+  <ellipse cx="400" cy="315" rx="350" ry="40" fill="#795548"/>
+  
+  <!-- Conductor -->
+  <g transform="translate(370, 90)">
+    <circle cx="30" cy="25" r="18" fill="#FFC107"/>
+    <rect x="15" y="45" width="30" height="50" rx="5" fill="#333"/>
+    <!-- Baton -->
+    <line x1="50" y1="50" x2="80" y2="30" stroke="#333" stroke-width="3"/>
+    <text x="30" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">CONDUCTOR</text>
+    <text x="30" y="128" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#666">(learning_rate)</text>
+  </g>
+  
+  <!-- Musician 1 - Violin (Tree 1) - Big contribution -->
+  <g transform="translate(80, 180)">
+    <ellipse cx="50" cy="100" rx="45" ry="25" fill="#E3F2FD" stroke="#1976D2" stroke-width="2"/>
+    <circle cx="50" cy="45" r="22" fill="#FFCCBC"/>
+    <rect x="35" y="68" width="30" height="40" rx="3" fill="#1976D2"/>
+    <!-- Violin shape -->
+    <ellipse cx="85" cy="85" rx="20" ry="12" fill="#8D6E63"/>
+    <line x1="75" y1="75" x2="50" y2="60" stroke="#5D4037" stroke-width="2"/>
+    <text x="50" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#1565C0">Tree 1</text>
+    <text x="50" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#666">"Main melody"</text>
+    <!-- Volume bars -->
+    <rect x="20" y="165" width="60" height="8" rx="2" fill="#1976D2"/>
+    <text x="50" y="185" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">LOUD</text>
+  </g>
+  
+  <!-- Musician 2 - Cello (Tree 2) - Medium contribution -->
+  <g transform="translate(220, 195)">
+    <ellipse cx="50" cy="90" rx="40" ry="22" fill="#FFF3E0" stroke="#FF9800" stroke-width="2"/>
+    <circle cx="50" cy="40" r="20" fill="#FFCCBC"/>
+    <rect x="37" y="60" width="26" height="35" rx="3" fill="#FF9800"/>
+    <!-- Cello shape -->
+    <ellipse cx="80" cy="75" rx="15" ry="25" fill="#A1887F"/>
+    <line x1="73" y1="55" x2="55" y2="50" stroke="#5D4037" stroke-width="2"/>
+    <text x="50" y="125" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#E65100">Tree 2</text>
+    <text x="50" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#666">"Fills gaps"</text>
+    <!-- Volume bars -->
+    <rect x="20" y="150" width="40" height="8" rx="2" fill="#FF9800"/>
+    <text x="50" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">MEDIUM</text>
+  </g>
+  
+  <!-- Musician 3 - Flute (Tree 3) - Smaller contribution -->
+  <g transform="translate(360, 200)">
+    <ellipse cx="50" cy="85" rx="35" ry="20" fill="#FCE4EC" stroke="#E91E63" stroke-width="2"/>
+    <circle cx="50" cy="38" r="18" fill="#FFCCBC"/>
+    <rect x="38" y="56" width="24" height="32" rx="3" fill="#E91E63"/>
+    <!-- Flute -->
+    <rect x="65" y="55" width="40" height="6" rx="2" fill="#B0BEC5"/>
+    <text x="50" y="118" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#C2185B">Tree 3</text>
+    <text x="50" y="133" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#666">"Details"</text>
+    <!-- Volume bars -->
+    <rect x="25" y="143" width="25" height="8" rx="2" fill="#E91E63"/>
+    <text x="50" y="163" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">SOFT</text>
+  </g>
+  
+  <!-- Dots -->
+  <text x="490" y="280" font-family="Arial, sans-serif" font-size="30" fill="#999">...</text>
+  
+  <!-- Musician N - Triangle (Tree N) - Tiny contribution -->
+  <g transform="translate(540, 210)">
+    <ellipse cx="50" cy="80" rx="30" ry="18" fill="#E8EAF6" stroke="#5C6BC0" stroke-width="2"/>
+    <circle cx="50" cy="35" r="16" fill="#FFCCBC"/>
+    <rect x="40" y="51" width="20" height="28" rx="3" fill="#5C6BC0"/>
+    <!-- Triangle instrument -->
+    <path d="M 75 50 L 95 80 L 55 80 Z" fill="none" stroke="#78909C" stroke-width="2"/>
+    <text x="50" y="110" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#303F9F">Tree 100</text>
+    <text x="50" y="125" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#666">"Fine-tune"</text>
+    <!-- Volume bars -->
+    <rect x="35" y="135" width="10" height="8" rx="2" fill="#5C6BC0"/>
+    <text x="50" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">TINY</text>
+  </g>
+  
+  <!-- Music notes floating -->
+  <text x="150" y="160" font-family="Arial" font-size="20" fill="#1976D2">&#9834;</text>
+  <text x="280" y="175" font-family="Arial" font-size="16" fill="#FF9800">&#9835;</text>
+  <text x="420" y="170" font-family="Arial" font-size="14" fill="#E91E63">&#9833;</text>
+  <text x="580" y="185" font-family="Arial" font-size="12" fill="#5C6BC0">&#9834;</text>
+  
+  <!-- Final output - Grand piano -->
+  <g transform="translate(640, 230)">
+    <rect x="0" y="30" width="120" height="70" rx="5" fill="#C8E6C9" stroke="#4CAF50" stroke-width="3" filter="url(#shadow)"/>
+    <rect x="10" y="40" width="100" height="15" fill="#333"/>
+    <rect x="15" y="42" width="8" height="11" fill="white"/>
+    <rect x="25" y="42" width="8" height="11" fill="white"/>
+    <rect x="35" y="42" width="8" height="11" fill="white"/>
+    <rect x="45" y="42" width="8" height="11" fill="white"/>
+    <rect x="55" y="42" width="8" height="11" fill="white"/>
+    <rect x="65" y="42" width="8" height="11" fill="white"/>
+    <rect x="75" y="42" width="8" height="11" fill="white"/>
+    <rect x="85" y="42" width="8" height="11" fill="white"/>
+    <text x="60" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#2E7D32">FINAL</text>
+    <text x="60" y="92" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#666">Sum of all</text>
+  </g>
+  
+  <!-- Bottom boxes -->
+  <rect x="50" y="370" width="200" height="60" rx="5" fill="#FFF9C4" stroke="#FBC02D" stroke-width="1"/>
+  <text x="150" y="392" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#333">Early Stopping</text>
+  <text x="150" y="408" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">"Stop rehearsal when</text>
+  <text x="150" y="422" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">sound stops improving"</text>
+  
+  <rect x="300" y="370" width="200" height="60" rx="5" fill="#E3F2FD" stroke="#2196F3" stroke-width="1"/>
+  <text x="400" y="392" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#333">Learning Rate</text>
+  <text x="400" y="408" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">"How much each new</text>
+  <text x="400" y="422" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">musician contributes"</text>
+  
+  <rect x="550" y="370" width="200" height="60" rx="5" fill="#FFEBEE" stroke="#EF5350" stroke-width="1"/>
+  <text x="650" y="392" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#C62828">Overfitting Risk</text>
+  <text x="650" y="408" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">"Too many musicians =</text>
+  <text x="650" y="422" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">noise, not music"</text>
+</svg>
