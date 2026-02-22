@@ -33,6 +33,19 @@ This is exactly what ML does. Show it examples, it learns patterns, it makes pre
 
 So the question becomes: Can I show it good examples? And will its predictions lead to useful actions?
 
+### When ML Is Overkill
+
+Before reaching for ML, ask these questions:
+
+| Question | If yes... |
+|----------|-----------|
+| Do I have fewer than ~100 labeled examples? | Start with rules. ML needs data to learn. |
+| Does a simple rule already achieve 90%+ of the value? | Keep the rule. Complexity has costs. |
+| Is the pattern fixed and won't change? | Write the rule explicitly. ML is for patterns that drift. |
+| Do I need 100% accuracy? | ML won't give you that. Consider rule-based systems with human review. |
+
+**The heuristic:** Start with the simplest thing that works. Add ML when rules hit their ceiling and you have data to learn from.
+
 ### The Picture
 
 ```

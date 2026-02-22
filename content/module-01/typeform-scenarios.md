@@ -1,7 +1,7 @@
 # Module 1: Typeform Scenarios
 
 **Instructions for Typeform setup:**
-- Create one Typeform with 6 scenarios
+- Create one Typeform with 7 scenarios
 - Each scenario is multiple choice
 - After each answer, show the "Decision Receipt" as a thank-you screen or logic jump
 - Use branching: if they get Q1-Q2 wrong, add a remediation note before Q3
@@ -102,32 +102,27 @@ You can only act on 500 customers per week. You need to know: "Of the 500 highes
 
 ---
 
-## Scenario 5: Rules vs. ML
+## Scenario 5: Subtle Leakage Detection
 
 **Setup:**
-Your fraud team currently flags transactions for review using this rule:
+A colleague proposes these features for churn prediction:
+- tenure_months — how long they've been a customer
+- logins_last_7d — logins in the 7 days before snapshot
+- days_since_last_login — calculated as (today - last_login_date)
+- support_tickets_last_30d — tickets filed in past 30 days
 
-"If order amount > $500 AND account age < 7 days, flag for review"
-
-This catches about 40% of fraud. They ask if ML could do better.
-
-You have:
-- 100,000 historical transactions
-- 1,200 confirmed fraud cases
-- 15 features available (amount, device, velocity, etc.)
-
-**Question:** Should you use ML here?
+**Question:** Which one has a SUBTLE leakage risk?
 
 **Options:**
-- A) No—the rule is good enough and ML adds unnecessary complexity
-- B) Yes—ML can find complex patterns the rule misses
-- C) No—1,200 fraud cases isn't enough data
-- D) Yes—but only if you can guarantee 100% fraud detection
+- A) tenure_months
+- B) logins_last_7d
+- C) days_since_last_login
+- D) support_tickets_last_30d
 
-**Correct Answer:** B
+**Correct Answer:** C
 
 **Decision Receipt:**
-This is a good ML use case. The current rule catches 40% of fraud, which means 60% slips through. With 1,200 fraud examples and 15 features, ML can likely find patterns the simple rule misses—like device fingerprinting, velocity patterns, or combinations of signals. Option A is wrong because 40% recall is leaving money on the table. Option C is wrong—1,200 positive examples is workable. Option D sets an impossible bar; no model guarantees 100%.
+Option C is tricky. If "today" means the day you're BUILDING the model (not the snapshot date), then days_since_last_login includes information from AFTER the prediction point. Always calculate relative to the snapshot date, not the current date. This is a common bug in production pipelines where "today" shifts between training and scoring.
 
 ---
 
@@ -151,12 +146,34 @@ Your PM wants to "use ML to improve customer lifetime value."
 
 ---
 
+## Scenario 7: Cost-Based Decision
+
+**Setup:**
+The retention offer costs $40. A saved customer generates $180 in future revenue. The model predicts Customer X has 55% churn probability. Historical data shows 25% of at-risk customers who receive offers actually stay.
+
+Expected value formula: P(churn) × P(save|offer) × value - cost
+
+**Question:** Should you send the offer to Customer X?
+
+**Options:**
+- A) Yes—55% churn risk is high enough
+- B) No—the expected value is negative
+- C) Yes—$180 > $40
+- D) Need more information about other customers
+
+**Correct Answer:** B
+
+**Decision Receipt:**
+EV = 0.55 × 0.25 × $180 - $40 = $24.75 - $40 = -$15.25. Negative expected value means don't send the offer—you'd lose money on average. Not every "high-risk" customer deserves intervention. This is why you need probabilities, not binary labels—so you can do this cost-benefit math.
+
+---
+
 ## Scoring Summary
 
 Show at end of Typeform:
 
-**6/6 correct:** You've got strong problem-framing instincts. Move on to the Colab lab.
+**7/7 correct:** You've got strong problem-framing instincts. Move on to the Colab lab.
 
-**4-5/6 correct:** Good foundation. Review the ones you missed—these mistakes are common in real projects.
+**5-6/7 correct:** Good foundation. Review the ones you missed—these mistakes are common in real projects.
 
-**<4/6 correct:** Re-read the micro-lesson, especially the 7-line template section. Problem framing is the foundation; getting it wrong makes everything else harder.
+**<5/7 correct:** Re-read the micro-lesson, especially the 7-line template section. Problem framing is the foundation; getting it wrong makes everything else harder.

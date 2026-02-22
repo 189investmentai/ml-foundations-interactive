@@ -64,6 +64,39 @@ Fill this out before writing any code.
 
 ---
 
+## Metric Formulas
+
+**Precision@k** = (true positives in top k) / k
+
+**Lift@k** = Precision@k / base_rate
+
+**Example:** Base churn rate = 8%. Model's top 500 contains 200 churners.
+- Precision@500 = 200/500 = 40%
+- Lift@500 = 40% / 8% = 5x better than random
+
+---
+
+## Label Creation Template (SQL)
+
+```sql
+SELECT user_id,
+       CASE WHEN cancel_date BETWEEN snapshot_date 
+                 AND snapshot_date + INTERVAL '30 days'
+            THEN 1 ELSE 0 END AS churn_30d
+FROM users
+WHERE snapshot_date = '2024-01-01'
+```
+
+---
+
+## Stakeholder Validation Script
+
+Before building, confirm with stakeholders:
+
+> "I'm defining 'churn' as [subscription canceled within 30 days of prediction]. That means [voluntary cancels] count, but [payment failures, pauses] don't. Does that match how you'd measure success?"
+
+---
+
 ## Label Definition Checklist
 
 - [ ] Label matches the prediction you actually want
