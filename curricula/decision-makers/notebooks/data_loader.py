@@ -14,13 +14,13 @@ import pandas as pd
 USE_LOCAL = True  # Set to False when deploying to Colab
 
 # GitHub raw URL for the public data repo
-GITHUB_BASE_URL = "https://raw.githubusercontent.com/189investmentai/ml-foundations-interactive/main/"
+GITHUB_BASE_URL = "https://raw.githubusercontent.com/189investmentai/ml-foundations-interactive/main/shared/data/"
 
 # ============================================================
 # DO NOT EDIT BELOW THIS LINE
 # ============================================================
 
-LOCAL_PATH = "../data/"
+LOCAL_PATH = "../../../shared/data/"
 
 def get_data_url(filename):
     """Get the appropriate URL/path for a data file."""
