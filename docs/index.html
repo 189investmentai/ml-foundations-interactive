@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ML Foundations - Full Curriculum</title>
+  <style>
+    :root {
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --text: #1a1a2e;
+      --muted: #6b7280;
+      --accent-dm: #6366f1;
+      --accent-dm-light: #eef2ff;
+      --accent-pr: #0891b2;
+      --accent-pr-light: #ecfeff;
+      --border: #e5e7eb;
+      --radius: 12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    /* Hero */
+    .hero {
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+    .hero-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .hero p {
+      font-size: 1.125rem;
+      color: var(--muted);
+      max-width: 640px;
+      margin: 0 auto 32px;
+    }
+
+    /* Stats */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .stat { text-align: center; }
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* Differentiators */
+    .diff-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 48px 0;
+    }
+    .diff-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      text-align: center;
+    }
+    .diff-card .icon { font-size: 1.75rem; margin-bottom: 10px; }
+    .diff-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+    .diff-card p { font-size: 0.82rem; color: var(--muted); }
+
+    /* Stream section */
+    .stream {
+      padding: 64px 0;
+    }
+    .stream + .stream {
+      border-top: 1px solid var(--border);
+    }
+    .stream-header {
+      margin-bottom: 40px;
+    }
+    .stream-badge {
+      display: inline-block;
+      padding: 5px 14px;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .stream-badge.dm { background: var(--accent-dm-light); color: var(--accent-dm); }
+    .stream-badge.pr { background: var(--accent-pr-light); color: var(--accent-pr); }
+
+    .stream-header h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+    .stream-header p {
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 600px;
+    }
+
+    .stream-meta {
+      display: flex;
+      gap: 24px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .stream-meta span {
+      font-size: 0.85rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .stream-meta span strong { color: var(--text); }
+
+    /* Deliverable pills */
+    .deliverables {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    /* Module list */
+    .module-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .module-item {
+      display: grid;
+      grid-template-columns: 48px 1fr auto;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      background: var(--surface);
+      transition: background 0.15s;
+    }
+    .module-item:hover { background: #f9fafb; }
+    .module-num {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-align: center;
+    }
+    .module-info h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .module-info p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .module-tags {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .tag {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      opacity: 0.7;
+    }
+    .tag[title]:hover { opacity: 1; }
+    .tag.lesson { background: #10b981; }
+    .tag.quiz { background: #f59e0b; }
+    .tag.drill { background: #ef4444; }
+    .tag.lab { background: #6366f1; }
+    .tag.cheat { background: #8b5cf6; }
+    .tag.play { background: #0891b2; }
+
+    /* Tag legend */
+    .tag-legend {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+      padding: 0 4px;
+    }
+    .tag-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* Section dividers */
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 10px 20px;
+      background: #f3f4f6;
+    }
+
+    /* Sample CTA */
+    .sample-cta {
+      margin-top: 32px;
+      padding: 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .sample-cta-text h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .sample-cta-text p {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .sample-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .sample-btn.dm {
+      background: var(--accent-dm);
+      color: white;
+    }
+    .sample-btn.dm:hover { background: #4f46e5; }
+    .sample-btn.pr {
+      background: var(--accent-pr);
+      color: white;
+    }
+    .sample-btn.pr:hover { background: #0e7490; }
+
+    /* Footer */
+    footer {
+      padding: 48px 0;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      margin-top: 24px;
+    }
+    footer p {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    footer a { color: var(--text); }
+
+    /* Toggle button for sections */
+    .section-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      margin-top: 12px;
+      transition: all 0.15s;
+    }
+    .section-toggle:hover { border-color: var(--text); color: var(--text); }
+
+    @media (max-width: 640px) {
+      .hero { padding: 48px 0 40px; }
+      .stats { gap: 24px; }
+      .module-item { grid-template-columns: 36px 1fr; }
+      .module-tags { display: none; }
+      .sample-cta { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge" style="background:#f0fdf4;color:#16a34a;">Interactive &middot; Self-Paced &middot; No Fluff</div>
+      <h1>ML Foundations</h1>
+      <p>Two practical curricula for professionals who want to understand and apply machine learning - without sitting through lectures or fighting with environments.</p>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-number">2</div>
+          <div class="stat-label">Curricula</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">10 + 22</div>
+          <div class="stat-label">Modules</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">22</div>
+          <div class="stat-label">Interactive Playgrounds</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">6</div>
+          <div class="stat-label">Deliverables per Module</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Differentiators -->
+  <div class="container">
+    <div class="diff-row">
+      <div class="diff-card">
+        <div class="icon">🧪</div>
+        <h3>Learn by Doing</h3>
+        <p>Every module: Read &rarr; Decide &rarr; Build &rarr; Debug &rarr; Explain</p>
+      </div>
+      <div class="diff-card">
+        <div class="icon">🎮</div>
+        <h3>Interactive Playgrounds</h3>
+        <p>HTML simulations that let you drag, tweak, and see ML concepts in real time</p>
+      </div>
+      <div class="diff-card">
+        <div class="icon">🐛</div>
+        <h3>Debug Drills</h3>
+        <p>Intentionally broken notebooks - find the bug, fix it, write the postmortem</p>
+      </div>
+      <div class="diff-card">
+        <div class="icon">📊</div>
+        <h3>One Case Company</h3>
+        <p>StreamCart - subscription e-commerce with churn, fraud, and LTV problems</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Decision Makers Stream -->
+  <section class="stream" id="decision-makers">
+    <div class="container">
+      <div class="stream-header">
+        <div class="stream-badge dm">Decision Makers</div>
+        <h2>ML Foundations for Business</h2>
+        <p>For PMs, analysts, and leaders who work with ML teams but don't build models. Learn to frame, evaluate, and communicate about ML projects with confidence.</p>
+        <div class="stream-meta">
+          <span><strong>10</strong> modules</span>
+          <span><strong>60–90 min</strong> per module</span>
+          <span><strong>Zero</strong> prerequisites</span>
+        </div>
+        <div class="deliverables">
+          <span class="pill">📖 Micro-lesson</span>
+          <span class="pill">📝 Quiz</span>
+          <span class="pill">🐛 Debug Drill</span>
+          <span class="pill">🧪 Practice Lab</span>
+          <span class="pill">📋 Cheatsheet</span>
+          <span class="pill">💬 Explain-it Prompt</span>
+        </div>
+      </div>
+
+      <div class="module-list">
+        <div class="section-label">Framing &amp; First Models</div>
+        <div class="module-item">
+          <div class="module-num">01</div>
+          <div class="module-info">
+            <h3>Is This Even an ML Problem?</h3>
+            <p>The 7-line framing template, ML vs. rules, leakage red flags, and metric matching</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">02</div>
+          <div class="module-info">
+            <h3>Your First Prediction Model</h3>
+            <p>Logistic regression - turn customer features into a churn probability you can act on</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">03</div>
+          <div class="module-info">
+            <h3>When Linear Isn't Enough</h3>
+            <p>Decision trees - when the relationship between features and outcomes isn't a straight line</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">04</div>
+          <div class="module-info">
+            <h3>Combining Many Weak Learners</h3>
+            <p>Gradient boosting - squeeze more accuracy from tree-based models</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+
+        <div class="section-label">Features &amp; Evaluation</div>
+        <div class="module-item">
+          <div class="module-num">05</div>
+          <div class="module-info">
+            <h3>Features Make or Break Your Model</h3>
+            <p>Feature engineering - build features that help and avoid ones that quietly destroy models</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">06</div>
+          <div class="module-info">
+            <h3>Is Your Model Actually Good?</h3>
+            <p>Evaluation - how to know if a model is actually useful for the business, not just the notebook</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+
+        <div class="section-label">Unsupervised &amp; Embeddings</div>
+        <div class="module-item">
+          <div class="module-num">07</div>
+          <div class="module-info">
+            <h3>Finding Structure Without Labels</h3>
+            <p>Clustering and anomaly detection - find patterns when you don't know what you're looking for</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">08</div>
+          <div class="module-info">
+            <h3>Teaching Machines What "Similar" Means</h3>
+            <p>Embeddings and similarity search - how machines understand semantic relationships</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+
+        <div class="section-label">NLP &amp; LLMs</div>
+        <div class="module-item">
+          <div class="module-num">09</div>
+          <div class="module-info">
+            <h3>From Keywords to Meaning</h3>
+            <p>NLP to transformers - from keyword search to machines that understand language</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">10</div>
+          <div class="module-info">
+            <h3>Working with LLMs</h3>
+            <p>Prompting, RAG, agents, and guardrails - build reliable systems on models that sometimes lie</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tag-legend">
+        <div class="tag-legend-item"><div class="tag lesson"></div> Lesson</div>
+        <div class="tag-legend-item"><div class="tag quiz"></div> Quiz</div>
+        <div class="tag-legend-item"><div class="tag drill"></div> Debug Drill</div>
+        <div class="tag-legend-item"><div class="tag lab"></div> Practice Lab</div>
+        <div class="tag-legend-item"><div class="tag cheat"></div> Cheatsheet</div>
+      </div>
+
+      <div class="sample-cta">
+        <div class="sample-cta-text">
+          <h3>Try the full Module 1 for free</h3>
+          <p>"Is This Even an ML Problem?" - includes all 6 deliverables so you can experience the complete teaching loop.</p>
+        </div>
+        <a href="https://www.notion.so/Free-Sample-ML-Foundations-for-Business-310d25c7612f81d89d97dc3f947d06c5?source=copy_link" class="sample-btn dm">View Free Sample &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Practitioners Stream -->
+  <section class="stream" id="practitioners">
+    <div class="container">
+      <div class="stream-header">
+        <div class="stream-badge pr">Practitioners</div>
+        <h2>ML Practitioners Course</h2>
+        <p>For engineers and data scientists who build and deploy models. Hands-on coding with interactive playgrounds, Colab notebooks, and production-focused drills.</p>
+        <div class="stream-meta">
+          <span><strong>23</strong> modules</span>
+          <span><strong>30–45 min</strong> per module</span>
+          <span><strong>Python &amp; pandas</strong> expected</span>
+        </div>
+        <div class="deliverables">
+          <span class="pill">📖 Micro-lesson</span>
+          <span class="pill">🎮 Interactive Playground</span>
+          <span class="pill">📝 Quiz</span>
+          <span class="pill">🐛 Debug Drill</span>
+          <span class="pill">🧪 Practice Lab</span>
+          <span class="pill">📋 Cheatsheet</span>
+        </div>
+      </div>
+
+      <div class="module-list">
+        <div class="section-label">Foundations</div>
+        <div class="module-item">
+          <div class="module-num">00</div>
+          <div class="module-info">
+            <h3>Welcome - How to Get the Most from This Course</h3>
+            <p>Course structure, the StreamCart case company, and how each module's teaching loop works</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">01</div>
+          <div class="module-info">
+            <h3>The ML Map - Where Things Break</h3>
+            <p>See the full ML pipeline end-to-end and learn where most bugs happen in practice</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">02</div>
+          <div class="module-info">
+            <h3>Data Leakage - The Silent Model Killer</h3>
+            <p>Recognize and prevent data leakage before it inflates your metrics and destroys production performance</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+
+        <div class="section-label">Core Algorithms</div>
+        <div class="module-item">
+          <div class="module-num">03</div>
+          <div class="module-info">
+            <h3>Linear Regression - Predicting with Straight Lines</h3>
+            <p>How linear models make predictions, why they fail, and when they're all you need</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">04</div>
+          <div class="module-info">
+            <h3>Logistic Regression - Classification with Probabilities</h3>
+            <p>Predict probabilities, understand the sigmoid, and learn why threshold choice matters more than accuracy</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">05</div>
+          <div class="module-info">
+            <h3>Decision Trees - 20 Questions for ML</h3>
+            <p>How trees make predictions, Gini impurity, overfitting control, and interpretability trade-offs</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">06</div>
+          <div class="module-info">
+            <h3>Ensemble Methods - The Wisdom of Crowds</h3>
+            <p>Why ensembles outperform single models - Random Forests, bagging, and boosting compared</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">07</div>
+          <div class="module-info">
+            <h3>Optimization - How Models Learn</h3>
+            <p>Gradient descent, learning rate, convergence - the mechanics behind parameter updates</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+
+        <div class="section-label">Evaluation &amp; Feature Engineering</div>
+        <div class="module-item">
+          <div class="module-num">08</div>
+          <div class="module-info">
+            <h3>Regression Metrics - Measuring Prediction Quality</h3>
+            <p>MSE, MAE, R² - which regression metric to use and how to interpret residual patterns</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">09</div>
+          <div class="module-info">
+            <h3>Classification Metrics - Beyond Accuracy</h3>
+            <p>Why accuracy lies - precision, recall, F1, AUC, and choosing the right metric for your action</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">10</div>
+          <div class="module-info">
+            <h3>Feature Engineering - Making Data Speak</h3>
+            <p>Turn raw data into features models can actually use - encoding, scaling, interactions, and time features</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">11</div>
+          <div class="module-info">
+            <h3>Regularization - Preventing Overfitting</h3>
+            <p>L1 vs. L2, why regularization works, and how to tune the strength parameter</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+
+        <div class="section-label">Embeddings &amp; Retrieval</div>
+        <div class="module-item">
+          <div class="module-num">12</div>
+          <div class="module-info">
+            <h3>Embeddings - Turning Anything into Numbers</h3>
+            <p>How embeddings work, word2vec intuition, and using embeddings for similarity search</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">13</div>
+          <div class="module-info">
+            <h3>Clustering - Finding Hidden Groups</h3>
+            <p>K-Means, hierarchical clustering, silhouette scores, and when clustering helps vs. hurts</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">14</div>
+          <div class="module-info">
+            <h3>Retrieval - Finding Needles in Haystacks</h3>
+            <p>TF-IDF, vector search, re-ranking - the foundations you need before building RAG</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+
+        <div class="section-label">Deep Learning &amp; NLP</div>
+        <div class="module-item">
+          <div class="module-num">15</div>
+          <div class="module-info">
+            <h3>Neural Networks - Learning Representations</h3>
+            <p>How neural networks learn, backpropagation intuition, and when to use them vs. simpler models</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">16</div>
+          <div class="module-info">
+            <h3>Transformers - The Architecture Behind Modern AI</h3>
+            <p>Self-attention, positional encoding, and why transformers changed everything</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+
+        <div class="section-label">LLMs &amp; Agents</div>
+        <div class="module-item">
+          <div class="module-num">17</div>
+          <div class="module-info">
+            <h3>LLM Fundamentals - Prompting, RAG, and Fine-Tuning</h3>
+            <p>Get the best results from LLMs through prompting strategies, retrieval augmentation, and fine-tuning</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">18</div>
+          <div class="module-info">
+            <h3>Tool Calling - LLMs That Take Action</h3>
+            <p>Give LLMs the ability to call functions, query databases, and interact with external systems</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">19</div>
+          <div class="module-info">
+            <h3>Agent Memory &amp; Planning</h3>
+            <p>Give agents persistent memory and implement multi-step planning with ReAct and reflection</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">20</div>
+          <div class="module-info">
+            <h3>Guardrails - Safety, Validation, and Evaluation</h3>
+            <p>Build robust AI systems with input validation, output filtering, and systematic evaluation</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+
+        <div class="section-label">Production</div>
+        <div class="module-item">
+          <div class="module-num">21</div>
+          <div class="module-info">
+            <h3>MLOps - From Notebook to Production</h3>
+            <p>Move models from experimentation to production - packaging, serving, CI/CD, and versioning</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+        <div class="module-item">
+          <div class="module-num">22</div>
+          <div class="module-info">
+            <h3>Monitoring - Keeping Models Healthy in Production</h3>
+            <p>Detect model degradation, set up drift alerts, and know when to retrain</p>
+          </div>
+          <div class="module-tags">
+            <div class="tag lesson" title="Lesson"></div>
+            <div class="tag quiz" title="Quiz"></div>
+            <div class="tag drill" title="Debug Drill"></div>
+            <div class="tag lab" title="Practice Lab"></div>
+            <div class="tag play" title="Playground"></div>
+            <div class="tag cheat" title="Cheatsheet"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tag-legend">
+        <div class="tag-legend-item"><div class="tag lesson"></div> Lesson</div>
+        <div class="tag-legend-item"><div class="tag quiz"></div> Quiz</div>
+        <div class="tag-legend-item"><div class="tag drill"></div> Debug Drill</div>
+        <div class="tag-legend-item"><div class="tag lab"></div> Practice Lab</div>
+        <div class="tag-legend-item"><div class="tag play"></div> Playground</div>
+        <div class="tag-legend-item"><div class="tag cheat"></div> Cheatsheet</div>
+      </div>
+
+      <div class="sample-cta">
+        <div class="sample-cta-text">
+          <h3>Try the full Module 5 for free</h3>
+          <p>"Decision Trees" - includes interactive playground, Colab lab, debug drill, quiz, and cheatsheet.</p>
+        </div>
+        <a href="https://www.notion.so/Free-Sample-ML-Practitioners-Course-310d25c7612f81b78346fcfc95977be3?source=copy_link" class="sample-btn pr">View Free Sample &rarr;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>ML Foundations - Built around <a href="https://github.com/189investmentai/ml-foundations-interactive">StreamCart</a>, a fictional subscription e-commerce company.</p>
+    </div>
+  </footer>
+
+</body>
+</html>
