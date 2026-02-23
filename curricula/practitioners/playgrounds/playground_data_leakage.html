@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Leakage Playground</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        h1 { font-size: 1.6rem; color: #0f172a; margin-bottom: 8px; }
+        .subtitle { color: #64748b; font-size: 0.9rem; }
+
+        /* Timeline */
+        .timeline-container {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .timeline-title { font-size: 1rem; font-weight: 600; margin-bottom: 16px; }
+
+        .timeline {
+            position: relative;
+            height: 120px;
+            background: linear-gradient(to right, #e0f2fe 0%, #e0f2fe 33%, #fef3c7 33%, #fef3c7 66%, #fee2e2 66%);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background: #1e293b;
+            z-index: 10;
+        }
+        .timeline-marker.draggable {
+            width: 4px;
+            background: #2563eb;
+            cursor: ew-resize;
+        }
+        .timeline-marker.draggable::before {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #2563eb;
+            box-shadow: 0 0 0 2px #dbeafe;
+        }
+        .timeline-marker.draggable.dragging {
+            background: #1d4ed8;
+        }
+        .timeline-marker.draggable.dragging::before {
+            background: #1d4ed8;
+            box-shadow: 0 0 0 3px #bfdbfe;
+        }
+        .timeline-marker::after {
+            content: attr(data-label);
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            font-weight: 600;
+            white-space: nowrap;
+            color: #475569;
+        }
+
+        .feature-block {
+            position: absolute;
+            height: 40px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .feature-block.safe { background: #22c55e; }
+        .feature-block.leaky { background: #ef4444; }
+        .feature-block:hover { transform: scale(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+
+        .timeline-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            padding: 0 8px;
+        }
+        .timeline-label { font-size: 0.75rem; color: #64748b; }
+        .timeline-interactions {
+            margin-top: 16px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .timeline-scrubber {
+            display: grid;
+            grid-template-columns: 160px 1fr 130px;
+            align-items: center;
+            gap: 10px;
+        }
+        .timeline-scrubber-label {
+            font-size: 0.8rem;
+            color: #334155;
+            font-weight: 600;
+        }
+        .timeline-scrubber input[type="range"] {
+            width: 100%;
+        }
+        .timeline-scrubber-value {
+            font-size: 0.78rem;
+            color: #1e293b;
+            font-weight: 600;
+            text-align: right;
+        }
+        .timeline-action-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .timeline-hint {
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+
+        /* Simulation controls */
+        .sim-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .sim-control-group {
+            background: white;
+            border-radius: 12px;
+            padding: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .sim-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+        .toggle-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .toggle-btn {
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #f8fafc;
+            padding: 8px 10px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #334155;
+        }
+        .toggle-btn:hover { border-color: #3b82f6; }
+        .toggle-btn.active {
+            border-color: #3b82f6;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-weight: 600;
+        }
+
+        /* Controls */
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .control-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .control-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 12px; }
+
+        .feature-list { display: flex; flex-direction: column; gap: 8px; }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .feature-item:hover { background: #f1f5f9; }
+        .feature-item.selected { border-color: #3b82f6; background: #eff6ff; }
+        .feature-item.safe-item { border-left: 4px solid #22c55e; }
+        .feature-item.leaky-item { border-left: 4px solid #ef4444; }
+        .feature-item-main { flex: 1; }
+        .feature-name { font-weight: 500; font-size: 0.85rem; }
+        .feature-desc { font-size: 0.75rem; color: #64748b; }
+        .inspect-btn {
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 5px 8px;
+            background: #fff;
+            color: #334155;
+            font-size: 0.72rem;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .inspect-btn:hover {
+            border-color: #3b82f6;
+            color: #1d4ed8;
+        }
+        .availability-checklist {
+            margin-top: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 10px;
+        }
+        .check-item {
+            font-size: 0.78rem;
+            color: #475569;
+        }
+        .check-item.good { color: #166534; }
+        .check-item.warn { color: #92400e; }
+        .check-item.bad { color: #991b1b; }
+
+        .inspector-body {
+            min-height: 196px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+        }
+        .inspector-title { font-weight: 600; margin-bottom: 8px; font-size: 0.9rem; }
+        .inspector-row {
+            margin-bottom: 10px;
+            font-size: 0.82rem;
+            color: #334155;
+        }
+        .inspector-row strong {
+            color: #0f172a;
+            display: inline-block;
+            margin-bottom: 2px;
+        }
+
+        /* Results */
+        .results {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .results-title { font-size: 1rem; font-weight: 600; margin-bottom: 16px; }
+        .results-note {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: -8px;
+            margin-bottom: 14px;
+        }
+
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .metric-card {
+            text-align: center;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        .metric-label { font-size: 0.7rem; font-weight: 600; color: #64748b; text-transform: uppercase; }
+        .metric-value { font-size: 1.5rem; font-weight: 700; font-family: 'SF Mono', Monaco, monospace; }
+        .metric-value.good { color: #16a34a; }
+        .metric-value.warn { color: #d97706; }
+        .metric-value.bad { color: #dc2626; }
+        .metric-subtext { font-size: 0.72rem; color: #64748b; margin-top: 4px; }
+
+        .warning-box {
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+        }
+        .warning-box.error { background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; }
+        .warning-box.success { background: #dcfce7; border: 1px solid #86efac; color: #166534; }
+        .warning-box.info { background: #e0f2fe; border: 1px solid #7dd3fc; color: #0369a1; }
+
+        /* Scenarios */
+        .scenarios {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .scenario-btn {
+            padding: 10px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .scenario-btn:hover { border-color: #3b82f6; }
+        .scenario-btn.active { border-color: #3b82f6; background: #3b82f6; color: white; }
+
+        /* Explanation */
+        .explanation {
+            background: #fef3c7;
+            border: 1px solid #fde047;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .explanation-title { font-weight: 600; margin-bottom: 8px; }
+        .explanation-text { font-size: 0.9rem; color: #78350f; }
+
+        @media (max-width: 768px) {
+            .sim-controls { grid-template-columns: 1fr; }
+            .controls { grid-template-columns: 1fr; }
+            .metrics-row { grid-template-columns: 1fr 1fr; }
+            .timeline-scrubber { grid-template-columns: 1fr; }
+            .timeline-scrubber-value { text-align: left; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚿 Data Leakage Playground</h1>
+            <p class="subtitle">See how using future information destroys your model's validity</p>
+        </header>
+
+        <div class="scenarios">
+            <button class="scenario-btn active" data-scenario="clean" onclick="loadScenario('clean', this)">✅ No Leakage</button>
+            <button class="scenario-btn" data-scenario="obvious" onclick="loadScenario('obvious', this)">🚨 Obvious Leakage</button>
+            <button class="scenario-btn" data-scenario="subtle" onclick="loadScenario('subtle', this)">🔍 Subtle Leakage</button>
+            <button class="scenario-btn" data-scenario="temporal" onclick="loadScenario('temporal', this)">⏰ Temporal Leakage</button>
+        </div>
+
+        <div class="sim-controls">
+            <div class="sim-control-group">
+                <div class="sim-label">Train/Test Split</div>
+                <div class="toggle-row">
+                    <button class="toggle-btn split-btn active" data-split="random" onclick="setSplitMethod('random')">Random Split</button>
+                    <button class="toggle-btn split-btn" data-split="time" onclick="setSplitMethod('time')">Time-Based Split</button>
+                </div>
+            </div>
+            <div class="sim-control-group">
+                <div class="sim-label">Production Data Pipeline</div>
+                <div class="toggle-row">
+                    <button class="toggle-btn prod-btn active" data-prod="freeze" onclick="setProductionMode('freeze')">Freeze at t=0</button>
+                    <button class="toggle-btn prod-btn" data-prod="leaky" onclick="setProductionMode('leaky')">Leaky Pipeline</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="timeline-container">
+            <div class="timeline-title">📅 Timeline: When Data Becomes Available</div>
+            <div class="timeline" id="timeline">
+                <div class="timeline-marker draggable" id="predictionMarker" style="left: 33%;" data-label="Prediction Time (t=0)"></div>
+                <div class="timeline-marker" id="targetMarker" style="left: 66%;" data-label="Target Observed (t=+30d)"></div>
+            </div>
+            <div class="timeline-labels">
+                <span class="timeline-label">Feature window (past)</span>
+                <span class="timeline-label">Prediction time (t=0)</span>
+                <span class="timeline-label">Outcome window (future)</span>
+            </div>
+            <div class="timeline-interactions">
+                <div class="timeline-scrubber">
+                    <div class="timeline-scrubber-label">Prediction Time Scrubber</div>
+                    <input id="predictionSlider" type="range" min="-35" max="20" step="1" value="0" oninput="setPredictionDayFromSlider(this.value)" onchange="finalizePredictionDay()">
+                    <div class="timeline-scrubber-value" id="predictionValue">t=0</div>
+                </div>
+                <div class="timeline-action-row">
+                    <div class="timeline-hint" id="timelineHint">Drag the blue marker or scrub the slider to shift prediction time.</div>
+                    <div class="toggle-row">
+                        <button class="toggle-btn" id="playTimelineBtn" onclick="toggleTimelinePlayback()">▶ Play time shift</button>
+                        <button class="toggle-btn" onclick="resetPredictionTimeline()">Reset to t=0</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="control-card">
+                <div class="control-title">📊 Available Features</div>
+                <div class="feature-list" id="featureList"></div>
+            </div>
+            <div class="control-card">
+                <div class="control-title">🎯 Selected for Model</div>
+                <div class="feature-list" id="selectedFeatures">
+                    <p style="color:#64748b; font-size:0.85rem;">Click features on the left to add them</p>
+                </div>
+                <div class="availability-checklist" id="availabilityChecklist"></div>
+            </div>
+            <div class="control-card">
+                <div class="control-title">🔍 Feature Inspector</div>
+                <div class="inspector-body" id="inspectorPanel">
+                    <p style="color:#64748b; font-size:0.85rem;">Click "Why?" on any feature to see leakage type and fix.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="results">
+            <div class="results-title">📈 Simulated Results</div>
+            <p class="results-note">These values illustrate typical leakage behavior in a simulation. Real effects vary by data, split strategy, and feature pipeline.</p>
+            <div class="metrics-row">
+                <div class="metric-card">
+                    <div class="metric-label">Train Accuracy</div>
+                    <div class="metric-value" id="trainAcc">--</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Test Accuracy</div>
+                    <div class="metric-value" id="testAcc">--</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Production Accuracy (sim)</div>
+                    <div class="metric-value" id="prodAcc">--</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Leakage Risk</div>
+                    <div class="metric-value" id="leakageRisk">--</div>
+                    <div class="metric-subtext" id="riskDetails"></div>
+                </div>
+            </div>
+            <div id="warningBox"></div>
+        </div>
+
+        <div class="explanation" id="explanation">
+            <div class="explanation-title">💡 What's Happening</div>
+            <div class="explanation-text" id="explanationText">
+                Select a scenario above to see how data leakage affects model performance.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const timelineConfig = {
+            minDay: -90,
+            maxDay: 70,
+            sliderMin: -35,
+            sliderMax: 20,
+            predictionDay: 0,
+            outcomeOffsetDays: 30
+        };
+
+        const leakageTypeLabels = {
+            none: 'None',
+            target: 'Target leakage',
+            future: 'Future information leakage',
+            temporal: 'Window overlap leakage',
+            aggregation: 'Aggregation leakage',
+            normalization: 'Normalization leakage'
+        };
+
+        const features = {
+            tenure_days: {
+                name: "Tenure (days)",
+                desc: "Days since signup at prediction time",
+                safe: true,
+                leakage: 0,
+                availableAt: -1,
+                leakageType: 'none',
+                whyLeaky: "Computed strictly from history available before scoring.",
+                fix: "No change needed."
+            },
+            orders_before: {
+                name: "Orders (past 90d)",
+                desc: "Orders before prediction date",
+                safe: true,
+                leakage: 0,
+                availableAt: -7,
+                leakageType: 'none',
+                whyLeaky: "Window is anchored in the past.",
+                fix: "No change needed."
+            },
+            support_tickets: {
+                name: "Support Tickets",
+                desc: "Tickets opened before prediction",
+                safe: true,
+                leakage: 0,
+                availableAt: -3,
+                leakageType: 'none',
+                whyLeaky: "Only uses pre-prediction events.",
+                fix: "No change needed."
+            },
+            avg_order_value: {
+                name: "Avg Order Value",
+                desc: "Historical average up to prediction time",
+                safe: true,
+                leakage: 0,
+                availableAt: -2,
+                leakageType: 'none',
+                whyLeaky: "Feature is calculated using frozen historical data.",
+                fix: "No change needed."
+            },
+            orders_after: {
+                name: "Orders (next 30d)",
+                desc: "Orders AFTER prediction date",
+                safe: false,
+                leakage: 0.95,
+                availableAt: 30,
+                leakageType: 'future',
+                whyLeaky: "It directly uses outcomes from the future window.",
+                fix: "Replace with an equivalent past-only window (for example orders_past_30d)."
+            },
+            churned_flag: {
+                name: "Has Churned",
+                desc: "Whether they churned (the target)",
+                safe: false,
+                leakage: 1,
+                availableAt: 30,
+                leakageType: 'target',
+                whyLeaky: "This is the label itself. The model is effectively shown the answer key.",
+                fix: "Remove it entirely from features and keep it only as target y."
+            },
+            last_order_days: {
+                name: "Days Since Last Order",
+                desc: "Can be wrong if not frozen at prediction time",
+                safe: false,
+                leakage: 0.55,
+                availableAt: 5,
+                leakageType: 'temporal',
+                whyLeaky: "If computed after scoring, the 'last order' may come from future behavior.",
+                fix: "Freeze reference date at t=0 and recompute using only events before t=0."
+            },
+            lifetime_value: {
+                name: "Lifetime Value",
+                desc: "Includes future purchases by default",
+                safe: false,
+                leakage: 0.75,
+                availableAt: 30,
+                leakageType: 'future',
+                whyLeaky: "Lifetime totals include post-prediction spend that was unknown at scoring time.",
+                fix: "Use a trailing metric such as LTV_90d_past anchored at prediction date."
+            },
+            normalized_spend: {
+                name: "Normalized Spend",
+                desc: "Spend / mean(all users)",
+                safe: false,
+                leakage: 0.35,
+                availableAt: 12,
+                leakageType: 'normalization',
+                whyLeaky: "Population mean may include future cohorts and data not available online.",
+                fix: "Compute normalization stats on the training window only, then freeze them."
+            },
+            rolling_orders: {
+                name: "Rolling 30d Orders",
+                desc: "Window may overlap into future data",
+                safe: false,
+                leakage: 0.45,
+                availableAt: 4,
+                leakageType: 'aggregation',
+                whyLeaky: "A rolling window can cross t=0 if boundaries are not explicit.",
+                fix: "Use a strictly backward-looking window ending at prediction time."
+            }
+        };
+
+        let selectedFeatures = [];
+        let currentScenario = 'clean';
+        let splitMethod = 'random';
+        let productionMode = 'freeze';
+        let inspectedFeatureKey = null;
+        let timelinePlaybackTimer = null;
+        let playbackDirection = 1;
+        let isDraggingPredictionMarker = false;
+
+        const scenarios = {
+            clean: {
+                available: ['tenure_days', 'orders_before', 'support_tickets', 'avg_order_value'],
+                preselected: ['tenure_days', 'orders_before'],
+                explanation: `<strong>No Leakage (Correct Setup):</strong> All features are available before prediction time (t=0).
+                    Drag prediction time left/right and notice which features stay safe.
+                    <br><br><strong>Key:</strong> Every feature is frozen at scoring time.`
+            },
+            obvious: {
+                available: ['tenure_days', 'orders_before', 'churned_flag', 'orders_after'],
+                preselected: ['tenure_days', 'churned_flag'],
+                explanation: `<strong>Obvious Leakage (Target in Features):</strong> "Has Churned" is the target itself.
+                    Shift prediction time and compare: this feature remains invalid for modeling.
+                    <br><br><strong>In production:</strong> you cannot use answers from the future.`
+            },
+            subtle: {
+                available: ['tenure_days', 'orders_before', 'lifetime_value', 'normalized_spend'],
+                preselected: ['tenure_days', 'lifetime_value'],
+                explanation: `<strong>Subtle Leakage:</strong> "Lifetime Value" often includes spend from after t=0.
+                    Time shifts and split strategy make this leakage easier or harder to notice.
+                    <br><br><strong>Why it's subtle:</strong> the feature name sounds valid unless the window is inspected.`
+            },
+            temporal: {
+                available: ['tenure_days', 'orders_before', 'last_order_days', 'rolling_orders'],
+                preselected: ['tenure_days', 'last_order_days', 'rolling_orders'],
+                explanation: `<strong>Temporal Leakage:</strong> rolling and recency features leak when windows overlap the future.
+                    Drag prediction time to see features switch between usable and leaky states.`
+            }
+        };
+
+        function clamp(value, min, max) {
+            return Math.min(max, Math.max(min, value));
+        }
+
+        function dayToPercent(day) {
+            const span = timelineConfig.maxDay - timelineConfig.minDay;
+            return ((day - timelineConfig.minDay) / span) * 100;
+        }
+
+        function percentToDay(percent) {
+            const span = timelineConfig.maxDay - timelineConfig.minDay;
+            return timelineConfig.minDay + (percent / 100) * span;
+        }
+
+        function getTargetDay() {
+            return timelineConfig.predictionDay + timelineConfig.outcomeOffsetDays;
+        }
+
+        function formatDay(day) {
+            if (day === 0) return 't=0';
+            return day > 0 ? `t=+${day}d` : `t=${day}d`;
+        }
+
+        function abbreviateFeatureName(name) {
+            return name.length > 14 ? `${name.slice(0, 13)}…` : name;
+        }
+
+        function getRiskLevel(maxLeakage) {
+            if (maxLeakage >= 0.95) return 'CRITICAL';
+            if (maxLeakage >= 0.7) return 'HIGH';
+            if (maxLeakage >= 0.35) return 'MEDIUM';
+            if (maxLeakage > 0) return 'LOW';
+            return 'NONE';
+        }
+
+        function getFeatureStatus(feature) {
+            const temporalLeak = feature.availableAt > timelineConfig.predictionDay;
+            const alwaysLeaky = feature.leakageType === 'target' || feature.leakageType === 'normalization';
+            const isLeaky = temporalLeak || alwaysLeaky;
+
+            let reason = 'Available by prediction time';
+            if (feature.leakageType === 'target') {
+                reason = 'Target label leakage';
+            } else if (feature.leakageType === 'normalization') {
+                reason = 'Population stats leakage';
+            } else if (temporalLeak) {
+                reason = 'Uses future data at this prediction time';
+            }
+
+            return { isLeaky, temporalLeak, alwaysLeaky, reason };
+        }
+
+        function getEffectiveLeakage(feature) {
+            const status = getFeatureStatus(feature);
+            if (!status.isLeaky) return 0;
+
+            if (feature.leakageType === 'target') return 1;
+            if (feature.leakageType === 'normalization') return Math.max(0.4, feature.leakage);
+
+            const dayGap = Math.max(1, feature.availableAt - timelineConfig.predictionDay);
+            const temporalFactor = clamp(dayGap / timelineConfig.outcomeOffsetDays, 0.25, 1);
+
+            if (feature.leakage <= 0) {
+                return clamp(0.2 + temporalFactor * 0.25, 0.2, 0.55);
+            }
+
+            return clamp(feature.leakage * temporalFactor, 0.15, 1);
+        }
+
+        function setSplitMethod(method) {
+            splitMethod = method;
+            document.querySelectorAll('.split-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.split === method);
+            });
+            updateResults();
+        }
+
+        function setProductionMode(mode) {
+            productionMode = mode;
+            document.querySelectorAll('.prod-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.prod === mode);
+            });
+            updateResults();
+        }
+
+        function setPredictionDayFromSlider(value) {
+            stopTimelinePlayback();
+            setPredictionDay(Number(value), 'drag');
+        }
+
+        function finalizePredictionDay() {
+            renderFeatures(scenarios[currentScenario].available);
+            updateTimeline();
+            updateResults();
+            renderInspector();
+        }
+
+        function setPredictionDay(day, source = 'manual') {
+            const roundedDay = Math.round(clamp(day, timelineConfig.sliderMin, timelineConfig.sliderMax));
+            if (roundedDay === timelineConfig.predictionDay && source !== 'reset') return;
+            timelineConfig.predictionDay = roundedDay;
+
+            if (source === 'playback' || source === 'drag') {
+                tickLightweight();
+            } else {
+                syncPredictionControls();
+                renderFeatures(scenarios[currentScenario].available);
+                updateTimeline();
+                updateResults();
+                renderInspector();
+            }
+
+            if (source !== 'playback' && source !== 'drag' && timelinePlaybackTimer) {
+                stopTimelinePlayback();
+            }
+        }
+
+        function tickLightweight() {
+            syncPredictionControls();
+            updateTimelinePositions();
+            updateMetricsOnly();
+            patchFeatureStatuses();
+        }
+
+        function updateTimelinePositions() {
+            const timeline = document.getElementById('timeline');
+            const targetDay = getTargetDay();
+            const predictionPercent = dayToPercent(timelineConfig.predictionDay);
+            const targetPercent = dayToPercent(targetDay);
+
+            timeline.style.background = `linear-gradient(to right, #e0f2fe 0%, #e0f2fe ${predictionPercent.toFixed(1)}%, #fef3c7 ${predictionPercent.toFixed(1)}%, #fef3c7 ${targetPercent.toFixed(1)}%, #fee2e2 ${targetPercent.toFixed(1)}%)`;
+
+            const predictionMarker = document.getElementById('predictionMarker');
+            const targetMarker = document.getElementById('targetMarker');
+            predictionMarker.style.left = `${predictionPercent}%`;
+            targetMarker.style.left = `${targetPercent}%`;
+            predictionMarker.dataset.label = `Prediction time (${formatDay(timelineConfig.predictionDay)})`;
+            targetMarker.dataset.label = `Target observed (${formatDay(targetDay)})`;
+
+            const blocks = timeline.querySelectorAll('.feature-block');
+            blocks.forEach(block => {
+                const key = block.dataset.featureKey;
+                if (!key || !features[key]) return;
+                const status = getFeatureStatus(features[key]);
+                block.className = `feature-block ${status.isLeaky ? 'leaky' : 'safe'}`;
+                block.title = `${features[key].name} | available ${formatDay(features[key].availableAt)} | ${status.isLeaky ? 'leaky now' : 'safe now'}`;
+            });
+        }
+
+        function updateMetricsOnly() {
+            const trainEl = document.getElementById('trainAcc');
+            const testEl = document.getElementById('testAcc');
+            const prodEl = document.getElementById('prodAcc');
+            const riskEl = document.getElementById('leakageRisk');
+            const riskDetailsEl = document.getElementById('riskDetails');
+
+            if (selectedFeatures.length === 0) {
+                trainEl.textContent = '--';
+                testEl.textContent = '--';
+                prodEl.textContent = '--';
+                riskEl.textContent = '--';
+                riskDetailsEl.textContent = '';
+                return;
+            }
+
+            const effectiveLeakages = selectedFeatures.map(key => getEffectiveLeakage(features[key])).filter(v => v > 0);
+            const usableCount = selectedFeatures.filter(key => !getFeatureStatus(features[key]).isLeaky).length;
+            const maxLeakage = effectiveLeakages.length > 0 ? Math.max(...effectiveLeakages) : 0;
+            const avgLeakage = effectiveLeakages.length > 0 ? effectiveLeakages.reduce((s, v) => s + v, 0) / effectiveLeakages.length : 0;
+
+            const signalGain = Math.min(0.12, usableCount * 0.035) + Math.min(0.06, Math.sqrt(selectedFeatures.length) * 0.02);
+            const base = 0.56 + signalGain;
+            const trainBoost = 0.15 * maxLeakage + 0.05 * avgLeakage;
+            const testBoost = splitMethod === 'random' ? (0.11 * maxLeakage + 0.05 * avgLeakage) : (0.05 * maxLeakage + 0.02 * avgLeakage);
+            const prodPenalty = productionMode === 'freeze' ? (0.22 * maxLeakage + 0.11 * avgLeakage) : (0.07 * maxLeakage + 0.03 * avgLeakage);
+
+            const trainAcc = clamp(base + trainBoost, 0.45, 0.99);
+            const testAcc = clamp(base + testBoost, 0.4, 0.99);
+            const prodAcc = clamp(base - prodPenalty, 0.3, 0.95);
+
+            trainEl.textContent = `${(trainAcc * 100).toFixed(0)}%`;
+            testEl.textContent = `${(testAcc * 100).toFixed(0)}%`;
+            prodEl.textContent = `${(prodAcc * 100).toFixed(0)}%`;
+
+            trainEl.className = `metric-value ${maxLeakage > 0 && trainAcc - testAcc > 0.07 ? 'warn' : 'good'}`;
+            testEl.className = `metric-value ${maxLeakage > 0 && splitMethod === 'random' && testAcc > 0.82 ? 'warn' : 'good'}`;
+            prodEl.className = `metric-value ${prodAcc < testAcc - 0.12 ? 'bad' : maxLeakage > 0 ? 'warn' : 'good'}`;
+
+            const riskLevel = getRiskLevel(maxLeakage);
+            riskEl.textContent = riskLevel;
+            riskDetailsEl.textContent = `${formatDay(timelineConfig.predictionDay)} | max ${(maxLeakage * 100).toFixed(0)}% | avg ${(avgLeakage * 100).toFixed(0)}%`;
+            riskEl.className = `metric-value ${riskLevel === 'CRITICAL' || riskLevel === 'HIGH' ? 'bad' : riskLevel === 'MEDIUM' ? 'warn' : 'good'}`;
+        }
+
+        function patchFeatureStatuses() {
+            document.querySelectorAll('#featureList .feature-item').forEach(item => {
+                const key = item.dataset.featureKey;
+                if (!key || !features[key]) return;
+                const feature = features[key];
+                const status = getFeatureStatus(feature);
+                const isSelected = selectedFeatures.includes(key);
+
+                item.className = `feature-item ${status.isLeaky ? 'leaky-item' : 'safe-item'} ${isSelected ? 'selected' : ''}`;
+                const nameEl = item.querySelector('.feature-name');
+                if (nameEl) nameEl.textContent = `${status.isLeaky ? '⚠️' : '✅'} ${feature.name}`;
+                const descEls = item.querySelectorAll('.feature-desc');
+                if (descEls[1]) descEls[1].textContent = `Available: ${formatDay(feature.availableAt)} | ${status.isLeaky ? 'Leaky at current t' : 'Usable at current t'}`;
+            });
+
+            document.querySelectorAll('#selectedFeatures .feature-item').forEach(item => {
+                const key = item.dataset.featureKey;
+                if (!key || !features[key]) return;
+                const feature = features[key];
+                const status = getFeatureStatus(feature);
+                const effectiveLeak = getEffectiveLeakage(feature);
+
+                item.className = `feature-item ${status.isLeaky ? 'leaky-item' : 'safe-item'}`;
+                const descEls = item.querySelectorAll('.feature-desc');
+                if (descEls[0]) descEls[0].textContent = status.isLeaky ? `Risk now: ${(effectiveLeak * 100).toFixed(0)}%` : 'Safe at current prediction time ✅';
+                if (descEls[1]) descEls[1].textContent = `Available: ${formatDay(feature.availableAt)} | ${status.reason}`;
+            });
+        }
+
+        function syncPredictionControls() {
+            const predictionValue = document.getElementById('predictionValue');
+            const predictionSlider = document.getElementById('predictionSlider');
+            const timelineHint = document.getElementById('timelineHint');
+
+            if (predictionSlider) predictionSlider.value = String(timelineConfig.predictionDay);
+            if (predictionValue) {
+                predictionValue.textContent = `${formatDay(timelineConfig.predictionDay)} -> target ${formatDay(getTargetDay())}`;
+            }
+
+            if (!timelineHint) return;
+            if (selectedFeatures.length === 0) {
+                timelineHint.textContent = 'Drag the blue marker or scrub the slider to shift prediction time.';
+                return;
+            }
+
+            const leakyNow = selectedFeatures.filter(key => getFeatureStatus(features[key]).isLeaky);
+            if (leakyNow.length === 0) {
+                timelineHint.textContent = `At ${formatDay(timelineConfig.predictionDay)}, all selected features are usable.`;
+            } else {
+                timelineHint.textContent = `${leakyNow.length}/${selectedFeatures.length} selected feature(s) are leaky at ${formatDay(timelineConfig.predictionDay)}.`;
+            }
+        }
+
+        function toggleTimelinePlayback() {
+            if (timelinePlaybackTimer) {
+                stopTimelinePlayback();
+                renderFeatures(scenarios[currentScenario].available);
+                updateTimeline();
+                updateResults();
+                renderInspector();
+                return;
+            }
+
+            const playBtn = document.getElementById('playTimelineBtn');
+            if (playBtn) playBtn.textContent = '■ Stop';
+            if (playBtn) playBtn.classList.add('active');
+
+            playbackDirection = 1;
+            let lastStepTime = 0;
+            const stepInterval = 250;
+
+            function playbackStep(timestamp) {
+                if (!timelinePlaybackTimer) return;
+                if (timestamp - lastStepTime >= stepInterval) {
+                    lastStepTime = timestamp;
+                    let nextDay = timelineConfig.predictionDay + playbackDirection;
+                    if (nextDay > timelineConfig.sliderMax) {
+                        playbackDirection = -1;
+                        nextDay = timelineConfig.predictionDay + playbackDirection;
+                    } else if (nextDay < timelineConfig.sliderMin) {
+                        playbackDirection = 1;
+                        nextDay = timelineConfig.predictionDay + playbackDirection;
+                    }
+                    setPredictionDay(nextDay, 'playback');
+                }
+                timelinePlaybackTimer = requestAnimationFrame(playbackStep);
+            }
+
+            timelinePlaybackTimer = requestAnimationFrame(playbackStep);
+        }
+
+        function stopTimelinePlayback() {
+            if (timelinePlaybackTimer) {
+                cancelAnimationFrame(timelinePlaybackTimer);
+                timelinePlaybackTimer = null;
+            }
+            const playBtn = document.getElementById('playTimelineBtn');
+            if (playBtn) playBtn.textContent = '▶ Play time shift';
+            if (playBtn) playBtn.classList.remove('active');
+        }
+
+        function resetPredictionTimeline() {
+            stopTimelinePlayback();
+            setPredictionDay(0, 'reset');
+        }
+
+        function beginPredictionDrag(event) {
+            event.preventDefault();
+            stopTimelinePlayback();
+            isDraggingPredictionMarker = true;
+            const marker = document.getElementById('predictionMarker');
+            marker.classList.add('dragging');
+            if (marker.setPointerCapture) marker.setPointerCapture(event.pointerId);
+            updatePredictionFromPointer(event);
+        }
+
+        function onPredictionDrag(event) {
+            if (!isDraggingPredictionMarker) return;
+            updatePredictionFromPointer(event);
+        }
+
+        function endPredictionDrag(event) {
+            if (!isDraggingPredictionMarker) return;
+            isDraggingPredictionMarker = false;
+            const marker = document.getElementById('predictionMarker');
+            marker.classList.remove('dragging');
+            if (marker.releasePointerCapture) {
+                try {
+                    marker.releasePointerCapture(event.pointerId);
+                } catch (e) {
+                    // Ignore pointer release errors when drag ends outside timeline.
+                }
+            }
+            finalizePredictionDay();
+        }
+
+        function updatePredictionFromPointer(event) {
+            const timeline = document.getElementById('timeline');
+            const rect = timeline.getBoundingClientRect();
+            const percent = clamp(((event.clientX - rect.left) / rect.width) * 100, 0, 100);
+            const day = Math.round(percentToDay(percent));
+            setPredictionDay(day, 'drag');
+        }
+
+        function setupTimelineInteractions() {
+            const predictionMarker = document.getElementById('predictionMarker');
+            const timeline = document.getElementById('timeline');
+
+            predictionMarker.addEventListener('pointerdown', beginPredictionDrag);
+            document.addEventListener('pointermove', onPredictionDrag);
+            document.addEventListener('pointerup', endPredictionDrag);
+
+            timeline.addEventListener('click', event => {
+                const clickedFeature = event.target.closest('.feature-block');
+                const clickedMarker = event.target.id === 'predictionMarker' || event.target.id === 'targetMarker';
+                if (clickedFeature || clickedMarker) return;
+                stopTimelinePlayback();
+                updatePredictionFromPointer(event);
+            });
+        }
+
+        function loadScenario(name, buttonEl = null) {
+            currentScenario = name;
+            const scenario = scenarios[name];
+
+            document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = buttonEl || document.querySelector(`.scenario-btn[data-scenario="${name}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            stopTimelinePlayback();
+            timelineConfig.predictionDay = 0;
+            selectedFeatures = [...scenario.preselected];
+            inspectedFeatureKey = selectedFeatures[0] || scenario.available[0] || null;
+
+            renderFeatures(scenario.available);
+            updateTimeline();
+            updateResults();
+            renderInspector();
+            syncPredictionControls();
+
+            document.getElementById('explanationText').innerHTML = scenario.explanation;
+        }
+
+        function renderFeatures(available) {
+            const list = document.getElementById('featureList');
+            list.innerHTML = '';
+
+            available.forEach(key => {
+                const feature = features[key];
+                const status = getFeatureStatus(feature);
+                const item = document.createElement('div');
+                item.dataset.featureKey = key;
+                item.className = `feature-item ${status.isLeaky ? 'leaky-item' : 'safe-item'} ${selectedFeatures.includes(key) ? 'selected' : ''}`;
+                item.innerHTML = `
+                    <div class="feature-item-main">
+                        <div class="feature-name">${status.isLeaky ? '⚠️' : '✅'} ${feature.name}</div>
+                        <div class="feature-desc">${feature.desc}</div>
+                        <div class="feature-desc">Available: ${formatDay(feature.availableAt)} | ${status.isLeaky ? 'Leaky at current t' : 'Usable at current t'}</div>
+                    </div>
+                    <button class="inspect-btn" type="button" onclick="event.stopPropagation(); inspectFeature('${key}')">Why?</button>
+                `;
+                item.onclick = () => toggleFeature(key);
+                list.appendChild(item);
+            });
+
+            renderSelected();
+        }
+
+        function renderSelected() {
+            const list = document.getElementById('selectedFeatures');
+            if (selectedFeatures.length === 0) {
+                list.innerHTML = '<p style="color:#64748b; font-size:0.85rem;">Click features on the left to add them</p>';
+                renderAvailabilityChecklist();
+                return;
+            }
+
+            list.innerHTML = '';
+            selectedFeatures.forEach(key => {
+                const feature = features[key];
+                const status = getFeatureStatus(feature);
+                const effectiveLeakage = getEffectiveLeakage(feature);
+                const item = document.createElement('div');
+                item.dataset.featureKey = key;
+                item.className = `feature-item ${status.isLeaky ? 'leaky-item' : 'safe-item'}`;
+                item.innerHTML = `
+                    <div class="feature-item-main">
+                        <div class="feature-name">${feature.name}</div>
+                        <div class="feature-desc">${status.isLeaky ? `Risk now: ${(effectiveLeakage * 100).toFixed(0)}%` : 'Safe at current prediction time ✅'}</div>
+                        <div class="feature-desc">Available: ${formatDay(feature.availableAt)} | ${status.reason}</div>
+                    </div>
+                    <button class="inspect-btn" type="button" onclick="event.stopPropagation(); inspectFeature('${key}')">Why?</button>
+                `;
+                item.onclick = () => toggleFeature(key);
+                list.appendChild(item);
+            });
+
+            renderAvailabilityChecklist();
+        }
+
+        function renderAvailabilityChecklist() {
+            const checklist = document.getElementById('availabilityChecklist');
+            if (selectedFeatures.length === 0) {
+                checklist.innerHTML = '';
+                return;
+            }
+
+            const statuses = selectedFeatures.map(key => getFeatureStatus(features[key]));
+            const availableAtPrediction = statuses.every(status => !status.temporalLeak);
+            const requiresFutureData = statuses.some(status => status.temporalLeak);
+            const carefulWindowing = selectedFeatures.some(key => ['temporal', 'aggregation'].includes(features[key].leakageType));
+            const usesFuturePopulationStats = selectedFeatures.some(key => ['normalization', 'target'].includes(features[key].leakageType));
+
+            checklist.innerHTML = `
+                <div class="check-item ${availableAtPrediction ? 'good' : 'bad'}">${availableAtPrediction ? '✅' : '❌'} Available at prediction time (${formatDay(timelineConfig.predictionDay)})</div>
+                <div class="check-item ${requiresFutureData ? 'bad' : 'good'}">${requiresFutureData ? '❌' : '✅'} Requires future data</div>
+                <div class="check-item ${carefulWindowing ? 'warn' : 'good'}">${carefulWindowing ? '⚠️' : '✅'} Requires careful windowing</div>
+                <div class="check-item ${usesFuturePopulationStats ? 'bad' : 'good'}">${usesFuturePopulationStats ? '❌' : '✅'} Uses population/target stats from future data</div>
+            `;
+        }
+
+        function inspectFeature(key) {
+            inspectedFeatureKey = key;
+            renderInspector();
+        }
+
+        function renderInspector() {
+            const panel = document.getElementById('inspectorPanel');
+            if (!inspectedFeatureKey || !features[inspectedFeatureKey]) {
+                panel.innerHTML = '<p style="color:#64748b; font-size:0.85rem;">Click "Why?" on any feature to see leakage type and fix.</p>';
+                return;
+            }
+
+            const feature = features[inspectedFeatureKey];
+            const status = getFeatureStatus(feature);
+            const effectiveLeakage = getEffectiveLeakage(feature);
+            const currentStatus = status.isLeaky
+                ? `Leaky at ${formatDay(timelineConfig.predictionDay)} (sim risk ${(effectiveLeakage * 100).toFixed(0)}%)`
+                : `Usable at ${formatDay(timelineConfig.predictionDay)}`;
+            const timelineStatus = status.temporalLeak
+                ? `Becomes available at ${formatDay(feature.availableAt)}.`
+                : 'Already available by the current prediction time.';
+
+            panel.innerHTML = `
+                <div class="inspector-title">${feature.name}</div>
+                <div class="inspector-row"><strong>Leakage type</strong><br>${feature.safe ? 'None (safe historical feature)' : leakageTypeLabels[feature.leakageType]}</div>
+                <div class="inspector-row"><strong>Status right now</strong><br>${currentStatus}</div>
+                <div class="inspector-row"><strong>Why it leaks</strong><br>${feature.whyLeaky}</div>
+                <div class="inspector-row"><strong>How to fix it</strong><br>${feature.fix}</div>
+                <div class="inspector-row"><strong>Availability</strong><br>${formatDay(feature.availableAt)} | ${timelineStatus}</div>
+            `;
+        }
+
+        function toggleFeature(key) {
+            if (selectedFeatures.includes(key)) {
+                selectedFeatures = selectedFeatures.filter(k => k !== key);
+            } else {
+                selectedFeatures.push(key);
+            }
+            if (!inspectedFeatureKey) inspectedFeatureKey = key;
+            renderFeatures(scenarios[currentScenario].available);
+            updateTimeline();
+            updateResults();
+            renderInspector();
+            syncPredictionControls();
+        }
+
+        function updateTimeline() {
+            const timeline = document.getElementById('timeline');
+            const blocks = timeline.querySelectorAll('.feature-block');
+            blocks.forEach(block => block.remove());
+
+            const targetDay = getTargetDay();
+            const predictionPercent = dayToPercent(timelineConfig.predictionDay);
+            const targetPercent = dayToPercent(targetDay);
+
+            timeline.style.background = `linear-gradient(
+                to right,
+                #e0f2fe 0%,
+                #e0f2fe ${predictionPercent.toFixed(1)}%,
+                #fef3c7 ${predictionPercent.toFixed(1)}%,
+                #fef3c7 ${targetPercent.toFixed(1)}%,
+                #fee2e2 ${targetPercent.toFixed(1)}%
+            )`;
+
+            const predictionMarker = document.getElementById('predictionMarker');
+            const targetMarker = document.getElementById('targetMarker');
+            predictionMarker.style.left = `${predictionPercent}%`;
+            targetMarker.style.left = `${targetPercent}%`;
+            predictionMarker.dataset.label = `Prediction time (${formatDay(timelineConfig.predictionDay)})`;
+            targetMarker.dataset.label = `Target observed (${formatDay(targetDay)})`;
+
+            selectedFeatures.forEach((key, index) => {
+                const feature = features[key];
+                const status = getFeatureStatus(feature);
+                const block = document.createElement('div');
+                block.className = `feature-block ${status.isLeaky ? 'leaky' : 'safe'}`;
+                block.dataset.featureKey = key;
+
+                const left = Math.min(86, Math.max(2, dayToPercent(feature.availableAt) - 6));
+                block.style.left = `${left}%`;
+                block.style.width = '12%';
+                block.style.top = `${14 + (index % 2) * 44}px`;
+                block.textContent = abbreviateFeatureName(feature.name.split('(')[0].trim());
+                block.title = `${feature.name} | available ${formatDay(feature.availableAt)} | ${status.isLeaky ? 'leaky now' : 'safe now'}`;
+                block.onclick = () => inspectFeature(key);
+
+                timeline.appendChild(block);
+            });
+        }
+
+        function updateResults() {
+            const trainEl = document.getElementById('trainAcc');
+            const testEl = document.getElementById('testAcc');
+            const prodEl = document.getElementById('prodAcc');
+            const riskEl = document.getElementById('leakageRisk');
+            const riskDetailsEl = document.getElementById('riskDetails');
+            const warningBox = document.getElementById('warningBox');
+
+            if (selectedFeatures.length === 0) {
+                trainEl.textContent = '--';
+                testEl.textContent = '--';
+                prodEl.textContent = '--';
+                riskEl.textContent = '--';
+                riskDetailsEl.textContent = '';
+                trainEl.className = 'metric-value';
+                testEl.className = 'metric-value';
+                prodEl.className = 'metric-value';
+                riskEl.className = 'metric-value';
+                warningBox.innerHTML = '';
+                return;
+            }
+
+            const statuses = selectedFeatures.map(key => getFeatureStatus(features[key]));
+            const effectiveLeakages = selectedFeatures.map(key => getEffectiveLeakage(features[key])).filter(val => val > 0);
+            const usableCount = statuses.filter(status => !status.isLeaky).length;
+            const maxLeakage = effectiveLeakages.length > 0 ? Math.max(...effectiveLeakages) : 0;
+            const avgLeakage = effectiveLeakages.length > 0 ? effectiveLeakages.reduce((sum, val) => sum + val, 0) / effectiveLeakages.length : 0;
+
+            const signalGain = Math.min(0.12, usableCount * 0.035) + Math.min(0.06, Math.sqrt(selectedFeatures.length) * 0.02);
+            const baseAccuracy = 0.56 + signalGain;
+
+            const trainLeakBoost = 0.15 * maxLeakage + 0.05 * avgLeakage;
+            const testLeakBoost = splitMethod === 'random'
+                ? (0.11 * maxLeakage + 0.05 * avgLeakage)
+                : (0.05 * maxLeakage + 0.02 * avgLeakage);
+            const productionPenalty = productionMode === 'freeze'
+                ? (0.22 * maxLeakage + 0.11 * avgLeakage)
+                : (0.07 * maxLeakage + 0.03 * avgLeakage);
+
+            const trainAcc = clamp(baseAccuracy + trainLeakBoost, 0.45, 0.99);
+            const testAcc = clamp(baseAccuracy + testLeakBoost, 0.4, 0.99);
+            const prodAcc = clamp(baseAccuracy - productionPenalty, 0.3, 0.95);
+
+            trainEl.textContent = `${(trainAcc * 100).toFixed(0)}%`;
+            testEl.textContent = `${(testAcc * 100).toFixed(0)}%`;
+            prodEl.textContent = `${(prodAcc * 100).toFixed(0)}%`;
+
+            trainEl.className = `metric-value ${maxLeakage > 0 && trainAcc - testAcc > 0.07 ? 'warn' : 'good'}`;
+            testEl.className = `metric-value ${maxLeakage > 0 && splitMethod === 'random' && testAcc > 0.82 ? 'warn' : 'good'}`;
+            prodEl.className = `metric-value ${prodAcc < testAcc - 0.12 ? 'bad' : maxLeakage > 0 ? 'warn' : 'good'}`;
+
+            const riskLevel = getRiskLevel(maxLeakage);
+            riskEl.textContent = riskLevel;
+            riskDetailsEl.textContent = `${formatDay(timelineConfig.predictionDay)} | max ${(maxLeakage * 100).toFixed(0)}% | avg ${(avgLeakage * 100).toFixed(0)}%`;
+            riskEl.className = `metric-value ${
+                riskLevel === 'CRITICAL' || riskLevel === 'HIGH'
+                    ? 'bad'
+                    : riskLevel === 'MEDIUM'
+                        ? 'warn'
+                        : 'good'
+            }`;
+
+            const splitMessage = splitMethod === 'random'
+                ? 'Random split can hide leakage by mixing future records into train and test.'
+                : 'Time-based split is safer and usually exposes leakage earlier.';
+            const unavailableInProd = selectedFeatures
+                .filter(key => getFeatureStatus(features[key]).temporalLeak)
+                .map(key => features[key].name);
+            const productionMessage = productionMode === 'freeze'
+                ? (unavailableInProd.length > 0
+                    ? `Freeze at ${formatDay(timelineConfig.predictionDay)} makes these unavailable: ${unavailableInProd.join(', ')}.`
+                    : `All selected features are available at ${formatDay(timelineConfig.predictionDay)}.`)
+                : 'Leaky pipeline mode keeps future features in production simulation (for comparison only).';
+
+            if (maxLeakage >= 0.7) {
+                warningBox.innerHTML = `
+                    <div class="warning-box error">
+                        <strong>🚨 High leakage risk detected</strong><br>
+                        Simulated offline performance is likely inflated and not deployment-safe.
+                        <br><br><strong>Split method:</strong> ${splitMessage}
+                        <br><strong>Production check:</strong> ${productionMessage}
+                    </div>
+                `;
+            } else if (maxLeakage > 0) {
+                warningBox.innerHTML = `
+                    <div class="warning-box info">
+                        <strong>⚠️ Leakage warning</strong><br>
+                        Some selected features require extra windowing or freeze logic.
+                        <br><br><strong>Split method:</strong> ${splitMessage}
+                        <br><strong>Production check:</strong> ${productionMessage}
+                    </div>
+                `;
+            } else {
+                warningBox.innerHTML = `
+                    <div class="warning-box success">
+                        <strong>✅ Leakage risk is low</strong><br>
+                        Selected features are available at or before prediction time.
+                        <br><br><strong>Split method:</strong> ${splitMessage}
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize
+        loadScenario('clean');
+        setupTimelineInteractions();
+        syncPredictionControls();
+    </script>
+</body>
+</html>

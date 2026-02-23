@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decision Trees Playground</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
+        .header-subtitle { font-size: 0.9rem; color: #64748b; }
+
+        .reset-btn {
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .reset-btn:hover { background: #f1f5f9; }
+
+        /* Start Banner */
+        .start-banner {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            border-radius: 16px;
+            padding: 24px 32px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        .start-banner-icon { font-size: 2.5rem; }
+        .start-banner-content h2 { font-size: 1.1rem; margin-bottom: 8px; }
+        .start-banner-content p { font-size: 0.9rem; opacity: 0.9; }
+        .start-banner-steps { display: flex; gap: 24px; margin-top: 12px; flex-wrap: wrap; }
+        .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+        .step-num {
+            background: rgba(255,255,255,0.2);
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 0.75rem;
+        }
+
+        /* Scenarios */
+        .scenarios-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+        }
+        .scenarios-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        .scenario-btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .scenario-btn.linear { background: #dbeafe; color: #1e40af; }
+        .scenario-btn.xor { background: #fce7f3; color: #9d174d; }
+        .scenario-btn.circles { background: #dcfce7; color: #166534; }
+        .scenario-btn.noisy { background: #fef3c7; color: #92400e; }
+        .scenario-btn.challenge { background: #22c55e; color: white; }
+        .scenario-hint {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 14px;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #475569;
+            display: none;
+            border-left: 3px solid #22c55e;
+        }
+        .scenario-hint.visible { display: block; }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .charts-area { display: flex; flex-direction: column; gap: 16px; }
+
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .chart-card.full { grid-column: 1 / -1; }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .chart-title { font-size: 0.8rem; font-weight: 600; color: #475569; }
+
+        canvas { display: block; width: 100%; }
+
+        /* Tree visualization */
+        .tree-viz {
+            background: #fefce8;
+            border-radius: 8px;
+            padding: 16px;
+            min-height: 200px;
+            overflow: auto;
+        }
+        .tree-node {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 8px 4px;
+        }
+        .tree-node-box {
+            background: white;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            text-align: center;
+            min-width: 100px;
+        }
+        .tree-node-box.decision { border-color: #3b82f6; background: #eff6ff; }
+        .tree-node-box.leaf { border-color: #22c55e; background: #f0fdf4; }
+        .tree-node-box.leaf.churned { border-color: #ef4444; background: #fef2f2; }
+
+        /* Sidebar */
+        .sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+        .sidebar-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .sidebar-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .control-group { margin-bottom: 16px; }
+        .control-group:last-child { margin-bottom: 0; }
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+        .control-value {
+            font-family: 'SF Mono', Monaco, monospace;
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: #22c55e;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            background: #22c55e;
+            cursor: pointer;
+        }
+
+        /* Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .metric-box {
+            text-align: center;
+            padding: 10px 8px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        .metric-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+        .metric-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1e293b;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+        .metric-value.good { color: #16a34a; }
+        .metric-value.warn { color: #d97706; }
+        .metric-value.bad { color: #dc2626; }
+
+        /* Insight */
+        .insight-bar {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1px solid #86efac;
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .insight-icon { font-size: 1.3rem; }
+        .insight-content { flex: 1; }
+        .insight-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #166534;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .insight-text { font-size: 0.9rem; color: #14532d; }
+
+        /* Toggle */
+        .toggle-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .toggle-chip {
+            padding: 6px 12px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            font-size: 0.75rem;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .toggle-chip.active {
+            background: #22c55e;
+            border-color: #22c55e;
+            color: white;
+        }
+
+        /* Help */
+        .help-panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .help-header {
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            cursor: pointer;
+            background: #f8fafc;
+        }
+        .help-header:hover { background: #f1f5f9; }
+        .help-title { font-size: 0.85rem; font-weight: 600; color: #475569; }
+        .help-toggle { font-size: 0.75rem; color: #64748b; }
+        .help-content {
+            padding: 16px;
+            display: none;
+            border-top: 1px solid #e2e8f0;
+        }
+        .help-content.visible { display: block; }
+        .help-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .help-item {
+            display: flex;
+            gap: 10px;
+            font-size: 0.8rem;
+            color: #475569;
+        }
+
+        @media (max-width: 1100px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .sidebar { flex-direction: row; flex-wrap: wrap; }
+            .sidebar-card { flex: 1; min-width: 260px; }
+        }
+        @media (max-width: 700px) {
+            .chart-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Decision Trees Playground</h1>
+                <span class="header-subtitle">Learn tree-based classification: How "20 Questions" becomes ML</span>
+            </div>
+            <button class="reset-btn" onclick="resetPlayground()">↻ Reset</button>
+        </header>
+
+        <div class="start-banner">
+            <div class="start-banner-icon">🌳</div>
+            <div class="start-banner-content">
+                <h2>Your Goal: Build a Tree That Generalizes</h2>
+                <p>Trees split data with yes/no questions. Too few splits = underfit. Too many = overfit.</p>
+                <div class="start-banner-steps">
+                    <div class="start-step"><span class="step-num">1</span> Adjust max depth</div>
+                    <div class="start-step"><span class="step-num">2</span> Watch decision regions form</div>
+                    <div class="start-step"><span class="step-num">3</span> Compare train vs test accuracy</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="scenarios-bar">
+            <span class="scenarios-label">Try a scenario:</span>
+            <button class="scenario-btn linear" onclick="loadPreset('linear')">📏 Linear</button>
+            <button class="scenario-btn xor" onclick="loadPreset('xor')">❌ XOR Pattern</button>
+            <button class="scenario-btn circles" onclick="loadPreset('circles')">⭕ Circles</button>
+            <button class="scenario-btn noisy" onclick="loadPreset('noisy')">🌊 Noisy</button>
+            <button class="scenario-btn challenge" onclick="loadPreset('challenge')">🎮 Find Best Depth</button>
+            <div class="scenario-hint" id="scenarioHint"></div>
+        </div>
+
+        <div class="main-grid">
+            <div class="charts-area">
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span class="chart-title">Training Data: Decision Regions</span>
+                        </div>
+                        <canvas id="trainChart" height="280"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span class="chart-title">Test Data: Generalization</span>
+                        </div>
+                        <canvas id="testChart" height="280"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card full">
+                    <div class="chart-header">
+                        <span class="chart-title">Tree Structure (Simplified View)</span>
+                    </div>
+                    <canvas id="treeChart" height="180"></canvas>
+                </div>
+
+                <div class="insight-bar">
+                    <div class="insight-icon">🌿</div>
+                    <div class="insight-content">
+                        <div class="insight-title">Tree Insight</div>
+                        <div class="insight-text" id="insightText">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Tree Complexity</div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Max Depth</span>
+                            <span class="control-value" id="depthValue">3</span>
+                        </div>
+                        <input type="range" id="depthSlider" min="1" max="10" step="1" value="3">
+                        <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:#94a3b8; margin-top:4px;">
+                            <span>Simple</span>
+                            <span>Complex</span>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Min Samples per Leaf</span>
+                            <span class="control-value" id="minSamplesValue">5</span>
+                        </div>
+                        <input type="range" id="minSamplesSlider" min="1" max="20" step="1" value="5">
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Performance</div>
+                    <div class="metrics-grid">
+                        <div class="metric-box" style="background:#dbeafe;">
+                            <div class="metric-label">Train Acc</div>
+                            <div class="metric-value" id="trainAccValue">--</div>
+                        </div>
+                        <div class="metric-box" style="background:#dcfce7;">
+                            <div class="metric-label">Test Acc</div>
+                            <div class="metric-value" id="testAccValue">--</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label"># Leaves</div>
+                            <div class="metric-value" id="leavesValue">--</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Actual Depth</div>
+                            <div class="metric-value" id="actualDepthValue">--</div>
+                        </div>
+                    </div>
+                    <div style="margin-top:12px; padding:10px; background:#fef3c7; border-radius:8px; font-size:0.75rem; color:#92400e;">
+                        <strong>Overfitting signal:</strong> Train acc much higher than test acc
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Data Settings</div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Sample Size</span>
+                            <span class="control-value" id="sampleValue">200</span>
+                        </div>
+                        <input type="range" id="sampleSlider" min="50" max="500" step="50" value="200">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Noise Level</span>
+                            <span class="control-value" id="noiseValue">0.1</span>
+                        </div>
+                        <input type="range" id="noiseSlider" min="0" max="0.4" step="0.05" value="0.1">
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Display</div>
+                    <div class="toggle-group">
+                        <div class="toggle-chip active" id="showRegionsToggle" onclick="toggleRegions()">Show Regions</div>
+                        <div class="toggle-chip active" id="showGridToggle" onclick="toggleGrid()">Show Grid</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="help-panel">
+            <div class="help-header" onclick="toggleHelp()">
+                <span class="help-title">📖 How to Read This</span>
+                <span class="help-toggle" id="helpToggle">Show ▼</span>
+            </div>
+            <div class="help-content" id="helpContent">
+                <div class="help-grid">
+                    <div class="help-item">
+                        <span>🔵/🔴</span>
+                        <span><strong>Points:</strong> Blue = Class 0, Red = Class 1. The two classes to separate.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>🟦/🟥</span>
+                        <span><strong>Regions:</strong> Colored areas show what the tree would predict in that zone.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>📊</span>
+                        <span><strong>Train vs Test:</strong> If train acc >> test acc, you're overfitting.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>🌳</span>
+                        <span><strong>Tree depth:</strong> More depth = more splits = more complex boundaries.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>🍃</span>
+                        <span><strong>Leaves:</strong> Final prediction boxes. More leaves = more memorization risk.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>⚖️</span>
+                        <span><strong>Sweet spot:</strong> Find depth where test accuracy peaks before dropping.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // STATE
+        // ============================================
+        let trainData = [];
+        let testData = [];
+        let tree = null;
+        let sampleSize = 200;
+        let noiseLevel = 0.1;
+        let maxDepth = 3;
+        let minSamplesLeaf = 5;
+        let showRegions = true;
+        let showGrid = true;
+        let dataPattern = 'xor';
+        let dprCached = window.devicePixelRatio || 1;
+
+        // ============================================
+        // DOM
+        // ============================================
+        const trainCanvas = document.getElementById('trainChart');
+        const testCanvas = document.getElementById('testChart');
+        const treeCanvas = document.getElementById('treeChart');
+
+        // ============================================
+        // DATA GENERATION
+        // ============================================
+        function generateData(pattern, n, noise) {
+            const data = [];
+            
+            for (let i = 0; i < n; i++) {
+                let x1, x2, label;
+                
+                switch (pattern) {
+                    case 'linear':
+                        x1 = Math.random() * 2 - 1;
+                        x2 = Math.random() * 2 - 1;
+                        label = (x1 + x2 > 0) ? 1 : 0;
+                        break;
+                    
+                    case 'xor':
+                        x1 = Math.random() * 2 - 1;
+                        x2 = Math.random() * 2 - 1;
+                        label = ((x1 > 0) !== (x2 > 0)) ? 1 : 0;
+                        break;
+                    
+                    case 'circles':
+                        const angle = Math.random() * Math.PI * 2;
+                        const isOuter = Math.random() > 0.5;
+                        const r = isOuter ? 0.6 + Math.random() * 0.3 : Math.random() * 0.35;
+                        x1 = Math.cos(angle) * r;
+                        x2 = Math.sin(angle) * r;
+                        label = isOuter ? 1 : 0;
+                        break;
+                    
+                    case 'noisy':
+                        x1 = Math.random() * 2 - 1;
+                        x2 = Math.random() * 2 - 1;
+                        label = ((x1 > 0) !== (x2 > 0)) ? 1 : 0;
+                        break;
+                    
+                    default:
+                        x1 = Math.random() * 2 - 1;
+                        x2 = Math.random() * 2 - 1;
+                        label = ((x1 > 0) !== (x2 > 0)) ? 1 : 0;
+                }
+                
+                if (Math.random() < noise) {
+                    label = 1 - label;
+                }
+                
+                data.push({ x1, x2, label });
+            }
+            
+            return data;
+        }
+
+        function splitData() {
+            const allData = generateData(dataPattern, sampleSize, noiseLevel);
+            const splitIdx = Math.floor(allData.length * 0.7);
+            const shuffled = allData.sort(() => Math.random() - 0.5);
+            trainData = shuffled.slice(0, splitIdx);
+            testData = shuffled.slice(splitIdx);
+        }
+
+        // ============================================
+        // DECISION TREE IMPLEMENTATION
+        // ============================================
+        class DecisionTreeNode {
+            constructor(depth = 0) {
+                this.depth = depth;
+                this.isLeaf = false;
+                this.prediction = null;
+                this.splitFeature = null;
+                this.splitValue = null;
+                this.left = null;
+                this.right = null;
+                this.samples = 0;
+                this.gini = 0;
+            }
+        }
+
+        function giniImpurity(labels) {
+            if (labels.length === 0) return 0;
+            const p1 = labels.filter(l => l === 1).length / labels.length;
+            return 2 * p1 * (1 - p1);
+        }
+
+        function buildTree(data, depth = 0) {
+            const node = new DecisionTreeNode(depth);
+            node.samples = data.length;
+            
+            const labels = data.map(d => d.label);
+            node.gini = giniImpurity(labels);
+            
+            const p1 = labels.filter(l => l === 1).length / labels.length;
+            node.prediction = p1 >= 0.5 ? 1 : 0;
+            
+            if (depth >= maxDepth || data.length < minSamplesLeaf * 2 || node.gini === 0) {
+                node.isLeaf = true;
+                return node;
+            }
+            
+            let bestGain = 0;
+            let bestFeature = null;
+            let bestValue = null;
+            let bestLeft = null;
+            let bestRight = null;
+            
+            for (const feature of ['x1', 'x2']) {
+                const values = [...new Set(data.map(d => d[feature]))].sort((a, b) => a - b);
+                
+                for (let i = 0; i < values.length - 1; i++) {
+                    const splitVal = (values[i] + values[i + 1]) / 2;
+                    const left = data.filter(d => d[feature] <= splitVal);
+                    const right = data.filter(d => d[feature] > splitVal);
+                    
+                    if (left.length < minSamplesLeaf || right.length < minSamplesLeaf) continue;
+                    
+                    const leftGini = giniImpurity(left.map(d => d.label));
+                    const rightGini = giniImpurity(right.map(d => d.label));
+                    const weightedGini = (left.length * leftGini + right.length * rightGini) / data.length;
+                    const gain = node.gini - weightedGini;
+                    
+                    if (gain > bestGain) {
+                        bestGain = gain;
+                        bestFeature = feature;
+                        bestValue = splitVal;
+                        bestLeft = left;
+                        bestRight = right;
+                    }
+                }
+            }
+            
+            if (bestGain <= 0) {
+                node.isLeaf = true;
+                return node;
+            }
+            
+            node.splitFeature = bestFeature;
+            node.splitValue = bestValue;
+            node.left = buildTree(bestLeft, depth + 1);
+            node.right = buildTree(bestRight, depth + 1);
+            
+            return node;
+        }
+
+        function predict(node, point) {
+            if (node.isLeaf) return node.prediction;
+            const val = point[node.splitFeature];
+            return val <= node.splitValue ? predict(node.left, point) : predict(node.right, point);
+        }
+
+        function countLeaves(node) {
+            if (node.isLeaf) return 1;
+            return countLeaves(node.left) + countLeaves(node.right);
+        }
+
+        function getActualDepth(node) {
+            if (node.isLeaf) return node.depth;
+            return Math.max(getActualDepth(node.left), getActualDepth(node.right));
+        }
+
+        function calculateAccuracy(data) {
+            if (!tree || data.length === 0) return 0;
+            const correct = data.filter(d => predict(tree, d) === d.label).length;
+            return correct / data.length;
+        }
+
+        // ============================================
+        // CANVAS
+        // ============================================
+        function setupCanvas(canvas) {
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dprCached;
+            canvas.height = rect.height * dprCached;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dprCached, dprCached);
+            return { width: rect.width, height: rect.height, ctx };
+        }
+
+        function drawDataChart(canvas, data, title) {
+            const { width, height, ctx } = setupCanvas(canvas);
+            const pad = { top: 15, right: 15, bottom: 30, left: 30 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const sx = x => pad.left + (x + 1) / 2 * plotW;
+            const sy = y => pad.top + (1 - (y + 1) / 2) * plotH;
+
+            // Draw decision regions
+            if (showRegions && tree) {
+                const res = 50;
+                const cellW = plotW / res;
+                const cellH = plotH / res;
+                
+                for (let i = 0; i < res; i++) {
+                    for (let j = 0; j < res; j++) {
+                        const x1 = (i / res) * 2 - 1;
+                        const x2 = 1 - (j / res) * 2;
+                        const pred = predict(tree, { x1, x2 });
+                        
+                        ctx.fillStyle = pred === 1 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(59, 130, 246, 0.15)';
+                        ctx.fillRect(pad.left + i * cellW, pad.top + j * cellH, cellW, cellH);
+                    }
+                }
+            }
+
+            // Grid
+            if (showGrid) {
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(sx(0), pad.top);
+                ctx.lineTo(sx(0), height - pad.bottom);
+                ctx.moveTo(pad.left, sy(0));
+                ctx.lineTo(width - pad.right, sy(0));
+                ctx.stroke();
+            }
+
+            // Draw decision boundaries from tree
+            if (tree) {
+                drawTreeBoundaries(ctx, tree, pad.left, pad.top, plotW, plotH);
+            }
+
+            // Points
+            data.forEach(d => {
+                const px = sx(d.x1);
+                const py = sy(d.x2);
+                
+                ctx.fillStyle = d.label === 1 ? '#ef4444' : '#3b82f6';
+                ctx.beginPath();
+                ctx.arc(px, py, 4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                if (tree) {
+                    const pred = predict(tree, d);
+                    if (pred !== d.label) {
+                        ctx.strokeStyle = '#fbbf24';
+                        ctx.lineWidth = 2;
+                        ctx.stroke();
+                    }
+                }
+            });
+
+            // Axes labels
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px -apple-system';
+            ctx.textAlign = 'center';
+            ctx.fillText('Feature 1', pad.left + plotW/2, height - 5);
+            ctx.save();
+            ctx.translate(10, pad.top + plotH/2);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText('Feature 2', 0, 0);
+            ctx.restore();
+        }
+
+        function drawTreeBoundaries(ctx, node, left, top, width, height, minX = -1, maxX = 1, minY = -1, maxY = 1) {
+            if (node.isLeaf) return;
+            
+            const sx = x => left + (x - minX) / (maxX - minX) * width;
+            const sy = y => top + (maxY - y) / (maxY - minY) * height;
+            
+            ctx.strokeStyle = '#22c55e';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            if (node.splitFeature === 'x1') {
+                const x = sx(node.splitValue);
+                ctx.moveTo(x, sy(maxY));
+                ctx.lineTo(x, sy(minY));
+            } else {
+                const y = sy(node.splitValue);
+                ctx.moveTo(sx(minX), y);
+                ctx.lineTo(sx(maxX), y);
+            }
+            ctx.stroke();
+            
+            if (node.left && !node.left.isLeaf) {
+                const newMax = node.splitFeature === 'x1' ? node.splitValue : maxX;
+                const newMaxY = node.splitFeature === 'x2' ? node.splitValue : maxY;
+                drawTreeBoundaries(ctx, node.left, left, top, width, height, minX, newMax, minY, newMaxY);
+            }
+            if (node.right && !node.right.isLeaf) {
+                const newMin = node.splitFeature === 'x1' ? node.splitValue : minX;
+                const newMinY = node.splitFeature === 'x2' ? node.splitValue : minY;
+                drawTreeBoundaries(ctx, node.right, left, top, width, height, newMin, maxX, newMinY, maxY);
+            }
+        }
+
+        function drawTreeStructure() {
+            const { width, height, ctx } = setupCanvas(treeCanvas);
+            ctx.clearRect(0, 0, width, height);
+            
+            if (!tree) return;
+            
+            const nodeWidth = 80;
+            const nodeHeight = 36;
+            const levelHeight = 50;
+            
+            function drawNode(node, x, y, availableWidth) {
+                const boxX = x - nodeWidth/2;
+                const boxY = y;
+                
+                ctx.fillStyle = node.isLeaf ? (node.prediction === 1 ? '#fef2f2' : '#eff6ff') : '#f0fdf4';
+                ctx.strokeStyle = node.isLeaf ? (node.prediction === 1 ? '#ef4444' : '#3b82f6') : '#22c55e';
+                ctx.lineWidth = 2;
+                
+                ctx.beginPath();
+                ctx.roundRect(boxX, boxY, nodeWidth, nodeHeight, 6);
+                ctx.fill();
+                ctx.stroke();
+                
+                ctx.fillStyle = '#1e293b';
+                ctx.font = '10px -apple-system';
+                ctx.textAlign = 'center';
+                
+                if (node.isLeaf) {
+                    ctx.fillText(node.prediction === 1 ? 'Class 1' : 'Class 0', x, y + 15);
+                    ctx.fillStyle = '#64748b';
+                    ctx.font = '9px -apple-system';
+                    ctx.fillText(`n=${node.samples}`, x, y + 28);
+                } else {
+                    const featureLabel = node.splitFeature === 'x1' ? 'F1' : 'F2';
+                    ctx.fillText(`${featureLabel} ≤ ${node.splitValue.toFixed(2)}?`, x, y + 15);
+                    ctx.fillStyle = '#64748b';
+                    ctx.font = '9px -apple-system';
+                    ctx.fillText(`gini=${node.gini.toFixed(2)}`, x, y + 28);
+                }
+                
+                if (!node.isLeaf && node.left && node.right) {
+                    const childY = y + levelHeight;
+                    const leftX = x - availableWidth/4;
+                    const rightX = x + availableWidth/4;
+                    
+                    ctx.strokeStyle = '#d1d5db';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y + nodeHeight);
+                    ctx.lineTo(leftX, childY);
+                    ctx.moveTo(x, y + nodeHeight);
+                    ctx.lineTo(rightX, childY);
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = '#22c55e';
+                    ctx.font = '9px -apple-system';
+                    ctx.fillText('Yes', leftX + 10, childY - 8);
+                    ctx.fillStyle = '#ef4444';
+                    ctx.fillText('No', rightX - 10, childY - 8);
+                    
+                    if (childY + nodeHeight < height - 10) {
+                        drawNode(node.left, leftX, childY, availableWidth/2);
+                        drawNode(node.right, rightX, childY, availableWidth/2);
+                    }
+                }
+            }
+            
+            drawNode(tree, width/2, 10, width);
+        }
+
+        // ============================================
+        // UI UPDATE
+        // ============================================
+        function updateMetrics() {
+            const trainAcc = calculateAccuracy(trainData);
+            const testAcc = calculateAccuracy(testData);
+            const leaves = tree ? countLeaves(tree) : 0;
+            const actualDepth = tree ? getActualDepth(tree) : 0;
+            
+            document.getElementById('trainAccValue').textContent = (trainAcc * 100).toFixed(1) + '%';
+            document.getElementById('testAccValue').textContent = (testAcc * 100).toFixed(1) + '%';
+            document.getElementById('leavesValue').textContent = leaves;
+            document.getElementById('actualDepthValue').textContent = actualDepth;
+            
+            const testEl = document.getElementById('testAccValue');
+            const gap = trainAcc - testAcc;
+            testEl.className = 'metric-value ' + (gap > 0.15 ? 'bad' : gap > 0.05 ? 'warn' : 'good');
+            
+            // Business insight
+            let insight = '';
+            if (gap > 0.15) {
+                insight = `<strong>Overfitting detected!</strong> Train accuracy (${(trainAcc*100).toFixed(0)}%) is much higher than test (${(testAcc*100).toFixed(0)}%). The tree is memorizing training data. Try reducing max depth or increasing min samples per leaf.`;
+            } else if (testAcc < 0.65) {
+                insight = `<strong>Underfitting.</strong> Test accuracy is only ${(testAcc*100).toFixed(0)}%. The tree is too simple to capture the pattern. Try increasing max depth.`;
+            } else {
+                insight = `<strong>Good balance!</strong> Train (${(trainAcc*100).toFixed(0)}%) and test (${(testAcc*100).toFixed(0)}%) accuracy are close. The tree with ${leaves} leaves generalizes well to new data.`;
+            }
+            document.getElementById('insightText').innerHTML = insight;
+        }
+
+        function drawAll() {
+            tree = buildTree(trainData);
+            drawDataChart(trainCanvas, trainData, 'Training');
+            drawDataChart(testCanvas, testData, 'Test');
+            drawTreeStructure();
+            updateMetrics();
+        }
+
+        // ============================================
+        // EVENTS
+        // ============================================
+        document.getElementById('depthSlider').addEventListener('input', function() {
+            maxDepth = parseInt(this.value);
+            document.getElementById('depthValue').textContent = maxDepth;
+            drawAll();
+        });
+
+        document.getElementById('minSamplesSlider').addEventListener('input', function() {
+            minSamplesLeaf = parseInt(this.value);
+            document.getElementById('minSamplesValue').textContent = minSamplesLeaf;
+            drawAll();
+        });
+
+        document.getElementById('sampleSlider').addEventListener('input', function() {
+            sampleSize = parseInt(this.value);
+            document.getElementById('sampleValue').textContent = sampleSize;
+            splitData();
+            drawAll();
+        });
+
+        document.getElementById('noiseSlider').addEventListener('input', function() {
+            noiseLevel = parseFloat(this.value);
+            document.getElementById('noiseValue').textContent = noiseLevel.toFixed(2);
+            splitData();
+            drawAll();
+        });
+
+        function toggleRegions() {
+            showRegions = !showRegions;
+            document.getElementById('showRegionsToggle').classList.toggle('active', showRegions);
+            drawAll();
+        }
+
+        function toggleGrid() {
+            showGrid = !showGrid;
+            document.getElementById('showGridToggle').classList.toggle('active', showGrid);
+            drawAll();
+        }
+
+        // ============================================
+        // PRESETS
+        // ============================================
+        const presets = {
+            linear: {
+                pattern: 'linear', depth: 2, samples: 200, noise: 0.05, minSamples: 5,
+                hint: "<strong>Linear boundary:</strong> A simple diagonal separates classes. A shallow tree (depth 2) is enough!"
+            },
+            xor: {
+                pattern: 'xor', depth: 3, samples: 200, noise: 0.1, minSamples: 5,
+                hint: "<strong>XOR pattern:</strong> Classes in opposite corners. Needs at least depth 2. This is where trees shine over logistic regression!"
+            },
+            circles: {
+                pattern: 'circles', depth: 5, samples: 300, noise: 0.05, minSamples: 5,
+                hint: "<strong>Circular boundary:</strong> Trees approximate curves with rectangular splits. Needs more depth."
+            },
+            noisy: {
+                pattern: 'noisy', depth: 3, samples: 200, noise: 0.3, minSamples: 10,
+                hint: "<strong>High noise:</strong> 30% of labels are flipped. A deep tree will overfit to noise. Keep it shallow!"
+            },
+            challenge: {
+                pattern: 'xor', depth: 10, samples: 150, noise: 0.15, minSamples: 1,
+                hint: "<strong>Challenge:</strong> Find the max depth that maximizes test accuracy. Too high = overfit, too low = underfit."
+            }
+        };
+
+        function loadPreset(name) {
+            const p = presets[name];
+            
+            dataPattern = p.pattern;
+            maxDepth = p.depth;
+            sampleSize = p.samples;
+            noiseLevel = p.noise;
+            minSamplesLeaf = p.minSamples;
+            
+            document.getElementById('depthSlider').value = maxDepth;
+            document.getElementById('sampleSlider').value = sampleSize;
+            document.getElementById('noiseSlider').value = noiseLevel;
+            document.getElementById('minSamplesSlider').value = minSamplesLeaf;
+            
+            document.getElementById('depthValue').textContent = maxDepth;
+            document.getElementById('sampleValue').textContent = sampleSize;
+            document.getElementById('noiseValue').textContent = noiseLevel.toFixed(2);
+            document.getElementById('minSamplesValue').textContent = minSamplesLeaf;
+            
+            splitData();
+            drawAll();
+            
+            const hint = document.getElementById('scenarioHint');
+            hint.innerHTML = p.hint;
+            hint.classList.add('visible');
+        }
+
+        function resetPlayground() {
+            dataPattern = 'xor';
+            maxDepth = 3;
+            sampleSize = 200;
+            noiseLevel = 0.1;
+            minSamplesLeaf = 5;
+            
+            document.getElementById('depthSlider').value = 3;
+            document.getElementById('sampleSlider').value = 200;
+            document.getElementById('noiseSlider').value = 0.1;
+            document.getElementById('minSamplesSlider').value = 5;
+            
+            document.getElementById('depthValue').textContent = '3';
+            document.getElementById('sampleValue').textContent = '200';
+            document.getElementById('noiseValue').textContent = '0.10';
+            document.getElementById('minSamplesValue').textContent = '5';
+            document.getElementById('scenarioHint').classList.remove('visible');
+            
+            splitData();
+            drawAll();
+        }
+
+        function toggleHelp() {
+            const content = document.getElementById('helpContent');
+            const toggle = document.getElementById('helpToggle');
+            const isVisible = content.classList.toggle('visible');
+            toggle.textContent = isVisible ? 'Hide ▲' : 'Show ▼';
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        window.addEventListener('resize', () => {
+            dprCached = window.devicePixelRatio || 1;
+            drawAll();
+        });
+
+        splitData();
+        drawAll();
+    </script>
+</body>
+</html>

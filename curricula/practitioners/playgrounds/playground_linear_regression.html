@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linear Regression Playground</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .header-subtitle {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .reset-btn {
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .reset-btn:hover {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        /* ===== START HERE BANNER ===== */
+        .start-banner {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border-radius: 16px;
+            padding: 24px 32px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .start-banner-icon {
+            font-size: 2.5rem;
+            flex-shrink: 0;
+        }
+
+        .start-banner-content h2 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .start-banner-content p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 12px;
+        }
+
+        .start-banner-steps {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .start-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .step-num {
+            background: rgba(255,255,255,0.2);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        /* ===== QUICK SCENARIOS ===== */
+        .scenarios-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+        }
+
+        .scenarios-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .scenario-btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .scenario-btn.perfect { background: #dcfce7; color: #166534; }
+        .scenario-btn.perfect:hover { background: #bbf7d0; }
+        .scenario-btn.outlier { background: #fef3c7; color: #92400e; }
+        .scenario-btn.outlier:hover { background: #fde68a; }
+        .scenario-btn.nonlinear { background: #fce7f3; color: #9d174d; }
+        .scenario-btn.nonlinear:hover { background: #fbcfe8; }
+        .scenario-btn.noise { background: #e0e7ff; color: #3730a3; }
+        .scenario-btn.noise:hover { background: #c7d2fe; }
+        .scenario-btn.challenge { background: #6366f1; color: white; }
+        .scenario-btn.challenge:hover { background: #4f46e5; }
+
+        .scenario-hint {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 14px;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #475569;
+            display: none;
+            border-left: 3px solid #6366f1;
+        }
+
+        .scenario-hint.visible {
+            display: block;
+        }
+
+        /* ===== MAIN LAYOUT ===== */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        /* ===== CHARTS ===== */
+        .charts-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 20px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .chart-title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 12px;
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 3px;
+            border-radius: 2px;
+        }
+
+        .legend-dot.data { background: #3b82f6; width: 6px; height: 6px; border-radius: 50%; }
+        .legend-dot.your-line { background: #ef4444; }
+        .legend-dot.true-line { background: #22c55e; }
+        .legend-dot.fitted-line { background: #f59e0b; }
+
+        canvas {
+            display: block;
+            width: 100%;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .sidebar-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        /* Controls */
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #334155;
+            margin-bottom: 8px;
+        }
+
+        .control-value {
+            font-family: 'SF Mono', Monaco, monospace;
+            background: #f1f5f9;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            color: #6366f1;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #6366f1;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+        }
+
+        .toggle-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .toggle-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .toggle-chip:hover {
+            background: #e2e8f0;
+        }
+
+        .toggle-chip input {
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+        }
+
+        .toggle-chip.active {
+            background: #6366f1;
+            color: white;
+        }
+
+        .fit-btn {
+            width: 100%;
+            padding: 10px;
+            background: #6366f1;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .fit-btn:hover {
+            background: #4f46e5;
+        }
+
+        .fit-btn.fitted {
+            background: #22c55e;
+        }
+
+        /* Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .metric-box {
+            text-align: center;
+            padding: 12px 8px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .metric-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+            font-family: 'SF Mono', Monaco, monospace;
+            margin: 4px 0;
+        }
+
+        .metric-help {
+            font-size: 0.65rem;
+            color: #94a3b8;
+        }
+
+        /* Prediction */
+        .prediction-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .prediction-input label {
+            font-size: 0.85rem;
+            color: #475569;
+        }
+
+        .prediction-input input {
+            width: 80px;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .prediction-result {
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+            border-radius: 8px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .prediction-amount {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #166534;
+        }
+
+        .prediction-range {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        /* ===== BUSINESS INSIGHT ===== */
+        .insight-bar {
+            background: linear-gradient(135deg, #fefce8, #fef9c3);
+            border: 1px solid #fde047;
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .insight-icon {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .insight-content {
+            flex: 1;
+        }
+
+        .insight-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #a16207;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .insight-text {
+            font-size: 0.9rem;
+            color: #854d0e;
+        }
+
+        /* ===== HELP PANEL (Collapsible) ===== */
+        .help-panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .help-header {
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background: #f8fafc;
+        }
+
+        .help-header:hover {
+            background: #f1f5f9;
+        }
+
+        .help-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #475569;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .help-toggle {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+
+        .help-content {
+            padding: 16px 20px;
+            display: none;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .help-content.visible {
+            display: block;
+        }
+
+        .help-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .help-item {
+            display: flex;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+
+        .help-item-icon {
+            flex-shrink: 0;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1100px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .sidebar {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .sidebar-card {
+                flex: 1;
+                min-width: 280px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .chart-row {
+                grid-template-columns: 1fr;
+            }
+            .start-banner {
+                flex-direction: column;
+                text-align: center;
+            }
+            .start-banner-steps {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header>
+            <div>
+                <h1>Linear Regression Playground</h1>
+                <span class="header-subtitle">Learn by doing: Predict apartment rent from square footage</span>
+            </div>
+            <button class="reset-btn" onclick="resetPlayground()">↻ Reset</button>
+        </header>
+
+        <!-- START HERE -->
+        <div class="start-banner">
+            <div class="start-banner-icon">🎯</div>
+            <div class="start-banner-content">
+                <h2>Your Goal: Find the Best-Fit Line</h2>
+                <p>Adjust the slope and intercept to predict rent from square footage. Watch how the metrics change!</p>
+                <div class="start-banner-steps">
+                    <div class="start-step"><span class="step-num">1</span> Drag the slope slider</div>
+                    <div class="start-step"><span class="step-num">2</span> Watch the error metrics drop</div>
+                    <div class="start-step"><span class="step-num">3</span> Try a scenario below</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUICK SCENARIOS -->
+        <div class="scenarios-bar">
+            <span class="scenarios-label">Try a scenario:</span>
+            <button class="scenario-btn perfect" onclick="loadPreset('perfect')">✨ Perfect Data</button>
+            <button class="scenario-btn outlier" onclick="loadPreset('outlier')">⚠️ Outliers</button>
+            <button class="scenario-btn nonlinear" onclick="loadPreset('nonlinear')">🔄 Non-Linear</button>
+            <button class="scenario-btn noise" onclick="loadPreset('noise')">📉 High Noise</button>
+            <button class="scenario-btn challenge" onclick="loadPreset('challenge')">🎮 Challenge</button>
+            <div class="scenario-hint" id="scenarioHint"></div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-grid">
+            <!-- CHARTS -->
+            <div class="charts-area">
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span class="chart-title">Scatter Plot: Sqft → Rent</span>
+                            <div class="chart-legend">
+                                <div class="legend-item"><span class="legend-dot data"></span> Data</div>
+                                <div class="legend-item"><span class="legend-dot your-line"></span> Your Line</div>
+                                <div class="legend-item" id="trueLegend" style="display:none"><span class="legend-dot true-line"></span> True</div>
+                                <div class="legend-item" id="fittedLegend" style="display:none"><span class="legend-dot fitted-line"></span> Best Fit</div>
+                            </div>
+                        </div>
+                        <canvas id="scatterChart" height="320"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span class="chart-title">Residuals (Errors) vs Sqft</span>
+                        </div>
+                        <canvas id="residualChart" height="320"></canvas>
+                    </div>
+                </div>
+
+                <!-- BUSINESS INSIGHT -->
+                <div class="insight-bar">
+                    <div class="insight-icon">💼</div>
+                    <div class="insight-content">
+                        <div class="insight-title">What to tell stakeholders</div>
+                        <div class="insight-text" id="insightText">Loading...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SIDEBAR -->
+            <div class="sidebar">
+                <!-- CONTROLS -->
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Adjust Your Model</div>
+                    
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Slope <span style="color:#94a3b8">($ per sqft)</span></span>
+                            <span class="control-value" id="slopeValue">1.50</span>
+                        </div>
+                        <input type="range" id="slopeSlider" min="0" max="4" step="0.05" value="1.5">
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Intercept <span style="color:#94a3b8">(base $)</span></span>
+                            <span class="control-value" id="interceptValue">500</span>
+                        </div>
+                        <input type="range" id="interceptSlider" min="0" max="1500" step="10" value="500">
+                    </div>
+
+                    <div class="control-group">
+                        <div class="toggle-row">
+                            <label class="toggle-chip">
+                                <input type="checkbox" id="showResiduals" checked> Residual lines
+                            </label>
+                            <label class="toggle-chip">
+                                <input type="checkbox" id="showTrueLine"> True line
+                            </label>
+                            <label class="toggle-chip">
+                                <input type="checkbox" id="showFittedLine"> Best fit
+                            </label>
+                        </div>
+                    </div>
+
+                    <button class="fit-btn" id="fitBtn" onclick="fitBestLine()">⚡ Auto-fit Best Line</button>
+                </div>
+
+                <!-- METRICS -->
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Model Performance</div>
+                    <div class="metrics-grid">
+                        <div class="metric-box">
+                            <div class="metric-label">MAE</div>
+                            <div class="metric-value">$<span id="maeValue">--</span></div>
+                            <div class="metric-help">Avg miss</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">RMSE</div>
+                            <div class="metric-value">$<span id="rmseValue">--</span></div>
+                            <div class="metric-help">Big misses hurt</div>
+                        </div>
+                        <div class="metric-box" style="grid-column: span 2;">
+                            <div class="metric-label">R² (Variance Explained)</div>
+                            <div class="metric-value" id="r2Value">--</div>
+                            <div class="metric-help">1.0 = perfect, 0 = no better than average</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PREDICTION -->
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Make a Prediction</div>
+                    <div class="prediction-input">
+                        <label>Sqft:</label>
+                        <input type="number" id="predictionInput" value="1000" min="400" max="2500" step="50">
+                    </div>
+                    <div class="prediction-result">
+                        <div class="prediction-amount">$<span id="predictionValue">--</span>/mo</div>
+                        <div class="prediction-range">± $<span id="predictionMAE">--</span> typical error</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- HELP PANEL -->
+        <div class="help-panel">
+            <div class="help-header" onclick="toggleHelp()">
+                <span class="help-title">📖 How to Read This</span>
+                <span class="help-toggle" id="helpToggle">Show ▼</span>
+            </div>
+            <div class="help-content" id="helpContent">
+                <div class="help-grid">
+                    <div class="help-item">
+                        <span class="help-item-icon">📍</span>
+                        <span><strong>Blue dots</strong> = apartments (x=sqft, y=rent)</span>
+                    </div>
+                    <div class="help-item">
+                        <span class="help-item-icon">📏</span>
+                        <span><strong>Red line</strong> = your model's prediction</span>
+                    </div>
+                    <div class="help-item">
+                        <span class="help-item-icon">📊</span>
+                        <span><strong>Residual plot</strong> = errors. Random scatter = good. Patterns = bad.</span>
+                    </div>
+                    <div class="help-item">
+                        <span class="help-item-icon">🎯</span>
+                        <span><strong>Lower MAE/RMSE</strong> = better predictions</span>
+                    </div>
+                    <div class="help-item">
+                        <span class="help-item-icon">📈</span>
+                        <span><strong>R² closer to 1</strong> = more variance explained</span>
+                    </div>
+                    <div class="help-item">
+                        <span class="help-item-icon">💡</span>
+                        <span><strong>Green dashed</strong> = true underlying pattern (toggle on)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // STATE
+        // ============================================
+        let data = [];
+        let sampleSize = 50;
+        let trueSlope = 2.0;
+        let trueIntercept = 400;
+        let noiseLevel = 1;
+        let currentPreset = null;
+        let fittedSlope = null;
+        let fittedIntercept = null;
+        let dprCached = window.devicePixelRatio || 1;
+
+        const noiseMultipliers = [50, 150, 350];
+
+        // ============================================
+        // DOM
+        // ============================================
+        const scatterCanvas = document.getElementById('scatterChart');
+        const residualCanvas = document.getElementById('residualChart');
+        const scatterCtx = scatterCanvas.getContext('2d');
+        const residualCtx = residualCanvas.getContext('2d');
+
+        const slopeSlider = document.getElementById('slopeSlider');
+        const interceptSlider = document.getElementById('interceptSlider');
+        const showResidualsCheckbox = document.getElementById('showResiduals');
+        const showTrueLineCheckbox = document.getElementById('showTrueLine');
+        const showFittedLineCheckbox = document.getElementById('showFittedLine');
+        const predictionInput = document.getElementById('predictionInput');
+
+        // ============================================
+        // CANVAS SETUP
+        // ============================================
+        function setupCanvas(canvas) {
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dprCached;
+            canvas.height = rect.height * dprCached;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dprCached, dprCached);
+            return { width: rect.width, height: rect.height, ctx };
+        }
+
+        // ============================================
+        // DATA
+        // ============================================
+        function generateData() {
+            data = [];
+            const noise = noiseMultipliers[noiseLevel];
+            
+            for (let i = 0; i < sampleSize; i++) {
+                const x = Math.random() * 2000 + 400;
+                let y;
+                
+                if (currentPreset === 'nonlinear') {
+                    y = 200 + 0.0005 * x * x + (Math.random() - 0.5) * 100;
+                } else if (currentPreset === 'outlier' && i >= sampleSize - 3) {
+                    y = trueIntercept + trueSlope * x + (Math.random() > 0.5 ? 1 : -1) * 900;
+                } else {
+                    y = trueIntercept + trueSlope * x + (Math.random() - 0.5) * noise * 2;
+                }
+                
+                data.push({ x, y: Math.max(300, y) });
+            }
+            
+            data.sort((a, b) => a.x - b.x);
+            updateFittedLine();
+        }
+
+        // ============================================
+        // OLS
+        // ============================================
+        function fitLine(points = data) {
+            const n = points.length;
+            if (n === 0) return { slope: 0, intercept: 0 };
+            
+            const sumX = points.reduce((s, p) => s + p.x, 0);
+            const sumY = points.reduce((s, p) => s + p.y, 0);
+            const sumXY = points.reduce((s, p) => s + p.x * p.y, 0);
+            const sumX2 = points.reduce((s, p) => s + p.x * p.x, 0);
+            
+            const denom = n * sumX2 - sumX * sumX;
+            if (Math.abs(denom) < 0.0001) return { slope: 0, intercept: sumY / n };
+            
+            const slope = (n * sumXY - sumX * sumY) / denom;
+            const intercept = (sumY - slope * sumX) / n;
+            
+            return { slope, intercept };
+        }
+
+        function updateFittedLine() {
+            const fit = fitLine();
+            fittedSlope = fit.slope;
+            fittedIntercept = fit.intercept;
+        }
+
+        function fitBestLine() {
+            updateFittedLine();
+            slopeSlider.value = fittedSlope;
+            interceptSlider.value = fittedIntercept;
+            document.getElementById('slopeValue').textContent = fittedSlope.toFixed(2);
+            document.getElementById('interceptValue').textContent = Math.round(fittedIntercept);
+            document.getElementById('fitBtn').textContent = '✓ Done!';
+            document.getElementById('fitBtn').classList.add('fitted');
+            setTimeout(() => {
+                document.getElementById('fitBtn').textContent = '⚡ Auto-fit Best Line';
+                document.getElementById('fitBtn').classList.remove('fitted');
+            }, 1200);
+            drawAll();
+        }
+
+        // ============================================
+        // METRICS
+        // ============================================
+        function calculateMetrics(slope, intercept) {
+            const predictions = data.map(p => slope * p.x + intercept);
+            const residuals = data.map((p, i) => p.y - predictions[i]);
+            
+            const mae = residuals.reduce((s, r) => s + Math.abs(r), 0) / data.length;
+            const mse = residuals.reduce((s, r) => s + r * r, 0) / data.length;
+            const rmse = Math.sqrt(mse);
+            
+            const meanY = data.reduce((s, p) => s + p.y, 0) / data.length;
+            const ssTotal = data.reduce((s, p) => s + Math.pow(p.y - meanY, 2), 0);
+            const sse = residuals.reduce((s, r) => s + r * r, 0);
+            const r2 = ssTotal > 0 ? 1 - (sse / ssTotal) : 0;
+            
+            return { mae, rmse, r2, residuals, predictions };
+        }
+
+        function updateUI(slope, intercept, metrics) {
+            // Metrics
+            document.getElementById('maeValue').textContent = Math.round(metrics.mae);
+            document.getElementById('rmseValue').textContent = Math.round(metrics.rmse);
+            document.getElementById('r2Value').textContent = metrics.r2.toFixed(3);
+            
+            // Prediction
+            const x = parseFloat(predictionInput.value) || 1000;
+            const predicted = slope * x + intercept;
+            document.getElementById('predictionValue').textContent = Math.round(predicted);
+            document.getElementById('predictionMAE').textContent = Math.round(metrics.mae);
+            
+            // Business insight
+            const r2Pct = (metrics.r2 * 100).toFixed(0);
+            const quality = r2Pct > 70 ? 'strong' : r2Pct > 40 ? 'moderate' : 'weak';
+            document.getElementById('insightText').innerHTML = 
+                `Each extra sqft adds <strong>$${slope.toFixed(2)}</strong> to rent. ` +
+                `Model explains <strong>${r2Pct}%</strong> of price variation (${quality} signal). ` +
+                `Predictions typically off by <strong>±$${Math.round(metrics.mae)}</strong>.`;
+        }
+
+        // ============================================
+        // DRAWING
+        // ============================================
+        function drawScatter() {
+            const { width, height, ctx } = setupCanvas(scatterCanvas);
+            const pad = { top: 15, right: 20, bottom: 40, left: 55 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const slope = parseFloat(slopeSlider.value);
+            const intercept = parseFloat(interceptSlider.value);
+
+            const xMin = 300, xMax = 2600;
+            const yMin = 0, yMax = Math.max(5500, ...data.map(p => p.y)) * 1.05;
+
+            const sx = x => pad.left + (x - xMin) / (xMax - xMin) * plotW;
+            const sy = y => pad.top + plotH - (y - yMin) / (yMax - yMin) * plotH;
+
+            // Grid
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            for (let x = 500; x <= 2500; x += 500) {
+                ctx.beginPath(); ctx.moveTo(sx(x), pad.top); ctx.lineTo(sx(x), height - pad.bottom); ctx.stroke();
+            }
+            for (let y = 1000; y <= yMax; y += 1000) {
+                ctx.beginPath(); ctx.moveTo(pad.left, sy(y)); ctx.lineTo(width - pad.right, sy(y)); ctx.stroke();
+            }
+
+            // Axes
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(pad.left, pad.top);
+            ctx.lineTo(pad.left, height - pad.bottom);
+            ctx.lineTo(width - pad.right, height - pad.bottom);
+            ctx.stroke();
+
+            // Labels
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '10px -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            for (let x = 500; x <= 2500; x += 500) {
+                ctx.fillText(x, sx(x), height - pad.bottom + 16);
+            }
+            ctx.textAlign = 'right';
+            for (let y = 0; y <= yMax; y += 1000) {
+                ctx.fillText('$' + (y/1000) + 'k', pad.left - 6, sy(y) + 3);
+            }
+
+            // Axis titles
+            ctx.fillStyle = '#64748b';
+            ctx.font = '11px -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Square Feet', pad.left + plotW/2, height - 6);
+            ctx.save();
+            ctx.translate(12, pad.top + plotH/2);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText('Rent ($/mo)', 0, 0);
+            ctx.restore();
+
+            const metrics = calculateMetrics(slope, intercept);
+            updateUI(slope, intercept, metrics);
+
+            // Residual lines
+            if (showResidualsCheckbox.checked) {
+                data.forEach((p, i) => {
+                    const pred = slope * p.x + intercept;
+                    ctx.strokeStyle = p.y > pred ? 'rgba(239,68,68,0.3)' : 'rgba(59,130,246,0.3)';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([3, 3]);
+                    ctx.beginPath();
+                    ctx.moveTo(sx(p.x), sy(p.y));
+                    ctx.lineTo(sx(p.x), sy(pred));
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                });
+            }
+
+            // True line
+            if (showTrueLineCheckbox.checked) {
+                ctx.strokeStyle = '#22c55e';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([6, 4]);
+                ctx.beginPath();
+                ctx.moveTo(sx(xMin), sy(trueIntercept + trueSlope * xMin));
+                ctx.lineTo(sx(xMax), sy(trueIntercept + trueSlope * xMax));
+                ctx.stroke();
+                ctx.setLineDash([]);
+                document.getElementById('trueLegend').style.display = 'flex';
+            } else {
+                document.getElementById('trueLegend').style.display = 'none';
+            }
+
+            // Fitted line
+            if (showFittedLineCheckbox.checked && fittedSlope !== null) {
+                ctx.strokeStyle = '#f59e0b';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(sx(xMin), sy(fittedIntercept + fittedSlope * xMin));
+                ctx.lineTo(sx(xMax), sy(fittedIntercept + fittedSlope * xMax));
+                ctx.stroke();
+                document.getElementById('fittedLegend').style.display = 'flex';
+            } else {
+                document.getElementById('fittedLegend').style.display = 'none';
+            }
+
+            // Your line
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(sx(xMin), sy(intercept + slope * xMin));
+            ctx.lineTo(sx(xMax), sy(intercept + slope * xMax));
+            ctx.stroke();
+
+            // Points
+            data.forEach(p => {
+                ctx.fillStyle = '#3b82f6';
+                ctx.beginPath();
+                ctx.arc(sx(p.x), sy(p.y), 4, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            drawResiduals(metrics.residuals);
+        }
+
+        function drawResiduals(residuals) {
+            const { width, height, ctx } = setupCanvas(residualCanvas);
+            const pad = { top: 15, right: 20, bottom: 40, left: 55 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const maxR = Math.max(...residuals.map(Math.abs), 200);
+            const xMin = 300, xMax = 2600;
+
+            const sx = x => pad.left + (x - xMin) / (xMax - xMin) * plotW;
+            const sy = r => pad.top + plotH/2 - (r / maxR) * (plotH/2 - 10);
+
+            // Grid
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            for (let x = 500; x <= 2500; x += 500) {
+                ctx.beginPath(); ctx.moveTo(sx(x), pad.top); ctx.lineTo(sx(x), height - pad.bottom); ctx.stroke();
+            }
+
+            // Zero line
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(pad.left, sy(0));
+            ctx.lineTo(width - pad.right, sy(0));
+            ctx.stroke();
+
+            // Y axis
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.beginPath();
+            ctx.moveTo(pad.left, pad.top);
+            ctx.lineTo(pad.left, height - pad.bottom);
+            ctx.stroke();
+
+            // Labels
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '10px -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            for (let x = 500; x <= 2500; x += 500) {
+                ctx.fillText(x, sx(x), height - pad.bottom + 16);
+            }
+            ctx.textAlign = 'right';
+            [-maxR, 0, maxR].forEach(v => {
+                ctx.fillText((v >= 0 ? '+' : '') + Math.round(v), pad.left - 6, sy(v) + 3);
+            });
+
+            // Axis titles
+            ctx.fillStyle = '#64748b';
+            ctx.font = '11px -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Square Feet', pad.left + plotW/2, height - 6);
+            ctx.save();
+            ctx.translate(12, pad.top + plotH/2);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText('Residual ($)', 0, 0);
+            ctx.restore();
+
+            // Pattern warning
+            if (currentPreset === 'nonlinear') {
+                ctx.fillStyle = '#dc2626';
+                ctx.font = 'bold 10px -apple-system, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('⚠ Pattern detected — model is systematically wrong', pad.left + plotW/2, pad.top + 12);
+            }
+
+            // Points
+            residuals.forEach((r, i) => {
+                const x = sx(data[i].x);
+                const y = sy(r);
+                const y0 = sy(0);
+                
+                ctx.fillStyle = r > 0 ? 'rgba(239,68,68,0.25)' : 'rgba(59,130,246,0.25)';
+                ctx.fillRect(x - 2, Math.min(y, y0), 4, Math.abs(y - y0));
+                
+                ctx.fillStyle = r > 0 ? '#ef4444' : '#3b82f6';
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        }
+
+        function drawAll() {
+            drawScatter();
+        }
+
+        // ============================================
+        // EVENTS
+        // ============================================
+        slopeSlider.addEventListener('input', () => {
+            document.getElementById('slopeValue').textContent = parseFloat(slopeSlider.value).toFixed(2);
+            drawAll();
+        });
+
+        interceptSlider.addEventListener('input', () => {
+            document.getElementById('interceptValue').textContent = Math.round(interceptSlider.value);
+            drawAll();
+        });
+
+        showResidualsCheckbox.addEventListener('change', drawAll);
+        showTrueLineCheckbox.addEventListener('change', drawAll);
+        showFittedLineCheckbox.addEventListener('change', drawAll);
+        
+        predictionInput.addEventListener('input', () => {
+            const slope = parseFloat(slopeSlider.value);
+            const intercept = parseFloat(interceptSlider.value);
+            const metrics = calculateMetrics(slope, intercept);
+            updateUI(slope, intercept, metrics);
+        });
+
+        // ============================================
+        // PRESETS
+        // ============================================
+        const presets = {
+            perfect: {
+                noise: 0, hint: "<strong>Perfect data:</strong> R² near 1.0, tiny residuals. Real data is never this clean!"
+            },
+            outlier: {
+                noise: 0, hint: "<strong>Outliers:</strong> Notice how RMSE jumps more than MAE? Big errors dominate RMSE."
+            },
+            nonlinear: {
+                noise: 0, hint: "<strong>Non-linear:</strong> See the U-shape in residuals? A straight line can't fit curved data."
+            },
+            noise: {
+                noise: 2, hint: "<strong>High noise:</strong> R² drops but the trend is still visible. Residuals are random (good!)."
+            },
+            challenge: {
+                noise: 1, startSlope: 0.5, startIntercept: 1000, 
+                hint: "<strong>Challenge:</strong> Manually adjust slope & intercept to minimize MAE. You're doing gradient descent!"
+            }
+        };
+
+        function loadPreset(name) {
+            currentPreset = name;
+            const p = presets[name];
+            
+            noiseLevel = p.noise;
+            trueSlope = 2.0;
+            trueIntercept = 400;
+            
+            if (p.startSlope !== undefined) {
+                slopeSlider.value = p.startSlope;
+                interceptSlider.value = p.startIntercept;
+                document.getElementById('slopeValue').textContent = p.startSlope.toFixed(2);
+                document.getElementById('interceptValue').textContent = p.startIntercept;
+            } else {
+                slopeSlider.value = trueSlope;
+                interceptSlider.value = trueIntercept;
+                document.getElementById('slopeValue').textContent = trueSlope.toFixed(2);
+                document.getElementById('interceptValue').textContent = trueIntercept;
+            }
+            
+            if (name === 'challenge') {
+                showFittedLineCheckbox.checked = false;
+                showTrueLineCheckbox.checked = false;
+            }
+            
+            generateData();
+            drawAll();
+            
+            const hint = document.getElementById('scenarioHint');
+            hint.innerHTML = p.hint;
+            hint.classList.add('visible');
+        }
+
+        function resetPlayground() {
+            currentPreset = null;
+            sampleSize = 50;
+            noiseLevel = 1;
+            trueSlope = 2.0;
+            trueIntercept = 400;
+            
+            slopeSlider.value = 1.5;
+            interceptSlider.value = 500;
+            document.getElementById('slopeValue').textContent = '1.50';
+            document.getElementById('interceptValue').textContent = '500';
+            
+            showResidualsCheckbox.checked = true;
+            showTrueLineCheckbox.checked = false;
+            showFittedLineCheckbox.checked = false;
+            
+            document.getElementById('scenarioHint').classList.remove('visible');
+            
+            generateData();
+            drawAll();
+        }
+
+        function toggleHelp() {
+            const content = document.getElementById('helpContent');
+            const toggle = document.getElementById('helpToggle');
+            const isVisible = content.classList.toggle('visible');
+            toggle.textContent = isVisible ? 'Hide ▲' : 'Show ▼';
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                dprCached = window.devicePixelRatio || 1;
+                drawAll();
+            }, 100);
+        });
+
+        generateData();
+        drawAll();
+    </script>
+</body>
+</html>

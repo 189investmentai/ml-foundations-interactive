@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Memory Playground</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        h1 { font-size: 1.4rem; color: #0f172a; margin-bottom: 4px; }
+        .header-subtitle { font-size: 0.85rem; color: #64748b; }
+
+        .reset-btn {
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .reset-btn:hover { background: #f1f5f9; }
+
+        .start-banner {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border-radius: 14px;
+            padding: 20px 28px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .start-banner-icon { font-size: 2.2rem; }
+        .start-banner-content h2 { font-size: 1rem; margin-bottom: 6px; }
+        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; }
+
+        .presets-bar {
+            background: white;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+        }
+        .presets-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        .preset-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .preset-btn:hover { background: #fde68a; }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .panel-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .panel-badge {
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .chat-container {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #f8fafc;
+        }
+
+        .chat-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            text-align: center;
+            gap: 8px;
+        }
+        .chat-empty-icon { font-size: 1.8rem; opacity: 0.5; }
+
+        .message {
+            margin-bottom: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            animation: msgFadeIn 0.3s ease-out;
+        }
+        @keyframes msgFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .message.user {
+            background: #dbeafe;
+            margin-left: 20%;
+        }
+        .message.assistant {
+            background: white;
+            border: 1px solid #e2e8f0;
+            margin-right: 20%;
+        }
+        .message.system {
+            background: #fef3c7;
+            border: 1px dashed #fcd34d;
+            margin: 8px 10%;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #92400e;
+        }
+        .message-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+        .typing-indicator span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background: #94a3b8;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typingBounce 1s infinite;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.15s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes typingBounce {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+        }
+        .input-row input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+        .input-row input:focus {
+            outline: none;
+            border-color: #f59e0b;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #f59e0b;
+            color: white;
+        }
+        .btn-primary:hover { background: #d97706; }
+        .btn-primary:disabled { background: #fcd34d; cursor: not-allowed; }
+
+        .memory-section {
+            margin-bottom: 12px;
+        }
+        .memory-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .memory-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 0.8rem;
+            font-family: 'SF Mono', Monaco, monospace;
+            max-height: 120px;
+            overflow-y: auto;
+            transition: background 0.3s, border-color 0.3s;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .memory-box.warning {
+            background: #fef3c7;
+            border-color: #fcd34d;
+        }
+        .memory-box.flash {
+            background: #fef9c3;
+            border-color: #facc15;
+        }
+
+        .context-meter {
+            margin-bottom: 16px;
+        }
+        .meter-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+        .meter-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .meter-fill {
+            height: 100%;
+            background: #10b981;
+            transition: width 0.3s;
+        }
+        .meter-fill.warning { background: #f59e0b; }
+        .meter-fill.danger { background: #ef4444; }
+
+        .entity-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #dbeafe;
+            color: #1e40af;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            margin: 2px;
+            animation: tagPop 0.3s ease-out;
+        }
+        @keyframes tagPop {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .plan-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 6px;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+        .plan-step.complete { background: #f0fdf4; border-color: #86efac; }
+        .plan-step.active { background: #fef3c7; border-color: #fcd34d; }
+        .step-num {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            flex-shrink: 0;
+            transition: background 0.3s;
+        }
+        .plan-step.complete .step-num { background: #10b981; color: white; }
+        .plan-step.active .step-num { background: #f59e0b; color: white; }
+
+        .insight-bar {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border: 1px solid #fcd34d;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-top: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .insight-icon { font-size: 1.2rem; }
+        .insight-content { flex: 1; }
+        .insight-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #92400e;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .insight-text { font-size: 0.85rem; color: #78350f; }
+
+        @media (max-width: 1000px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Agent Memory Playground</h1>
+                <span class="header-subtitle">See how agents remember context and plan tasks</span>
+            </div>
+            <button class="reset-btn" onclick="resetPlayground()">↻ Reset</button>
+        </header>
+
+        <div class="start-banner">
+            <div class="start-banner-icon">🧠</div>
+            <div class="start-banner-content">
+                <h2>Memory & Planning Lab</h2>
+                <p>Watch how the agent maintains context, extracts entities, and plans complex tasks. Try the suggested messages or type your own.</p>
+            </div>
+        </div>
+
+        <div class="presets-bar">
+            <span class="presets-label">Try:</span>
+            <button class="preset-btn" onclick="sendPreset('What is the status of order ORD-12345?')">📦 Check Order</button>
+            <button class="preset-btn" onclick="sendPreset('I want to return order ORD-12345')">↩️ Start Return</button>
+            <button class="preset-btn" onclick="sendPreset('Can you track my package?')">🚚 Track Package</button>
+            <button class="preset-btn" onclick="sendPreset('I also have a question about order ORD-67890')">📦 Second Order</button>
+            <button class="preset-btn" onclick="sendPreset('Help me plan a refund for a damaged item')">📋 Complex Task</button>
+        </div>
+
+        <div class="main-grid">
+            <div class="panel">
+                <div class="panel-title">
+                    <span>Conversation</span>
+                    <span class="panel-badge" id="msgCount">0 messages</span>
+                </div>
+                
+                <div class="chat-container" id="chatContainer">
+                    <div class="chat-empty" id="chatEmpty">
+                        <div class="chat-empty-icon">💬</div>
+                        <div>Send a message or click a suggested prompt above to start.</div>
+                    </div>
+                </div>
+                
+                <div class="input-row">
+                    <input type="text" id="userInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter')sendMessage()">
+                    <button class="btn btn-primary" id="sendBtn" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">
+                    <span>Memory State</span>
+                    <span class="panel-badge">Live</span>
+                </div>
+                
+                <div class="context-meter">
+                    <div class="meter-label">
+                        <span>Context Window</span>
+                        <span id="contextUsage">0 / 4,000 tokens</span>
+                    </div>
+                    <div class="meter-bar">
+                        <div class="meter-fill" id="contextMeter" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="memory-section">
+                    <div class="memory-title">Extracted Entities</div>
+                    <div class="memory-box" id="entitiesBox">No entities yet...</div>
+                </div>
+                
+                <div class="memory-section">
+                    <div class="memory-title">Session State</div>
+                    <div class="memory-box" id="sessionBox">{}</div>
+                </div>
+                
+                <div class="memory-section">
+                    <div class="memory-title">Conversation Summary</div>
+                    <div class="memory-box" id="summaryBox">No summary yet...</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">
+                    <span>Task Planning</span>
+                    <span class="panel-badge" id="planStatus">Idle</span>
+                </div>
+                
+                <div id="planContainer">
+                    <p style="font-size: 0.85rem; color: #64748b; padding: 20px; text-align: center;">
+                        Ask for a complex task to see planning in action.<br><br>
+                        Try: "I want to return order ORD-12345"
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="insight-bar">
+            <div class="insight-icon">💡</div>
+            <div class="insight-content">
+                <div class="insight-title">Memory Insight</div>
+                <div class="insight-text" id="insightText">The agent extracts entities (like order IDs) and maintains session state to remember context across messages. Try sending a few messages to see memory build up.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let messages = [];
+        let entities = { orders: [], products: [], dates: [] };
+        let sessionState = {};
+        let contextTokens = 0;
+        let isSending = false;
+        let hasSummarized = false;
+        let currentPlan = null;
+        const MAX_TOKENS = 4000;
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        const responses = {
+            order: (id) => `I found your order ${id}. It was shipped yesterday and should arrive in 2-3 business days. Would you like the tracking number?`,
+            return: (id) => `I can help you return order ${id}. Let me check the items... This order is eligible for return. Would you like me to start the return process?`,
+            returnReason: (id) => `Got it. I'll process the return for ${id}. Let me generate a return label and confirm your refund method.`,
+            returnComplete: (id) => `Your return for ${id} has been processed! A return label has been sent to your email. Refund will appear in 5-7 business days.`,
+            tracking: () => `Your tracking number is 1Z999AA10123456784. The package is currently in transit via UPS.`,
+            help: () => `I'd be happy to help! I can look up orders, process returns, or track packages. What do you need?`,
+            damaged: () => `I'm sorry to hear about the damage. I'll start a return process for you. Could you provide the order number?`,
+            default: () => `I understand. Is there anything else I can help you with?`
+        };
+
+        function countTokens(text) {
+            return Math.ceil(text.length / 4);
+        }
+
+        function extractEntities(text) {
+            const orderIds = text.match(/ORD-\d+/gi) || [];
+            const products = text.match(/product\s+\w+/gi) || [];
+            const dates = text.match(/\b(today|tomorrow|yesterday|next week)\b/gi) || [];
+            
+            orderIds.forEach(id => {
+                if (!entities.orders.includes(id.toUpperCase())) {
+                    entities.orders.push(id.toUpperCase());
+                }
+            });
+            products.forEach(p => {
+                if (!entities.products.includes(p)) {
+                    entities.products.push(p);
+                }
+            });
+            dates.forEach(d => {
+                if (!entities.dates.includes(d.toLowerCase())) {
+                    entities.dates.push(d.toLowerCase());
+                }
+            });
+        }
+
+        function updateSessionState(text) {
+            const lowered = text.toLowerCase();
+            
+            if (lowered.includes('order') && entities.orders.length > 0) {
+                sessionState.currentOrder = entities.orders[entities.orders.length - 1];
+            }
+            if (lowered.includes('return') || lowered.includes('refund')) {
+                sessionState.intent = 'return';
+            } else if (lowered.includes('track')) {
+                sessionState.intent = 'tracking';
+            } else if (lowered.includes('damage') || lowered.includes('broken')) {
+                sessionState.intent = 'damage_report';
+            }
+            sessionState.messageCount = messages.length;
+        }
+
+        function generateResponse(text) {
+            const lowered = text.toLowerCase();
+            
+            const orderMatch = text.match(/ORD-\d+/i);
+            if (orderMatch) {
+                if (lowered.includes('return') || lowered.includes('refund')) {
+                    return responses.return(orderMatch[0].toUpperCase());
+                }
+                return responses.order(orderMatch[0].toUpperCase());
+            }
+            
+            if (sessionState.currentOrder) {
+                if (lowered.includes('track')) {
+                    return responses.tracking();
+                }
+                if (lowered.includes('return') || lowered.includes('refund')) {
+                    return responses.return(sessionState.currentOrder);
+                }
+                if (lowered.includes('yes') && sessionState.intent === 'return' && currentPlan) {
+                    const activeIdx = currentPlan.findIndex(s => s.status === 'active');
+                    if (activeIdx >= 0 && currentPlan[activeIdx].action.includes('return reason')) {
+                        return responses.returnReason(sessionState.currentOrder);
+                    }
+                    if (activeIdx >= 0 && currentPlan[activeIdx].action.includes('refund method')) {
+                        return responses.returnComplete(sessionState.currentOrder);
+                    }
+                }
+                if (lowered.includes('yes') && sessionState.intent === 'tracking') {
+                    return responses.tracking();
+                }
+            }
+            
+            if (lowered.includes('damage') || lowered.includes('broken')) {
+                return responses.damaged();
+            }
+            
+            if (lowered.includes('help') || lowered.includes('hi') || lowered.includes('hello')) {
+                return responses.help();
+            }
+            
+            return responses.default();
+        }
+
+        function generatePlan(text) {
+            const lowered = text.toLowerCase();
+            
+            if (lowered.includes('return') || lowered.includes('refund')) {
+                if (currentPlan && currentPlan[0].action === 'Verify order eligibility') {
+                    return advancePlan();
+                }
+                return [
+                    { step: 1, action: 'Verify order eligibility', status: 'complete' },
+                    { step: 2, action: 'Check return window (30 days)', status: 'complete' },
+                    { step: 3, action: 'Get return reason', status: 'active' },
+                    { step: 4, action: 'Generate return label', status: 'pending' },
+                    { step: 5, action: 'Confirm refund method', status: 'pending' }
+                ];
+            }
+            
+            if (lowered.includes('damage') || lowered.includes('broken')) {
+                return [
+                    { step: 1, action: 'Document damage report', status: 'complete' },
+                    { step: 2, action: 'Locate order', status: 'active' },
+                    { step: 3, action: 'Process replacement/return', status: 'pending' },
+                    { step: 4, action: 'Confirm resolution', status: 'pending' }
+                ];
+            }
+
+            if (currentPlan) {
+                if (lowered.includes('yes') || lowered.includes('ok') || lowered.includes('sure') || lowered.includes('please')) {
+                    return advancePlan();
+                }
+            }
+            
+            if (lowered.includes('plan') || lowered.includes('help me')) {
+                return [
+                    { step: 1, action: 'Understand request', status: 'complete' },
+                    { step: 2, action: 'Gather information', status: 'active' },
+                    { step: 3, action: 'Execute task', status: 'pending' },
+                    { step: 4, action: 'Confirm completion', status: 'pending' }
+                ];
+            }
+            
+            return currentPlan;
+        }
+
+        function advancePlan() {
+            if (!currentPlan) return null;
+            const plan = currentPlan.map(s => ({...s}));
+            const activeIdx = plan.findIndex(s => s.status === 'active');
+            if (activeIdx < 0) return plan;
+            plan[activeIdx].status = 'complete';
+            if (activeIdx + 1 < plan.length) {
+                plan[activeIdx + 1].status = 'active';
+            }
+            return plan;
+        }
+
+        function isPlanComplete(plan) {
+            return plan && plan.every(s => s.status === 'complete');
+        }
+
+        function generateSummary() {
+            if (messages.length === 0) return "No summary yet...";
+            if (messages.length < 4) return "Conversation just started...";
+            
+            let parts = [];
+            if (entities.orders.length > 0) {
+                parts.push(`Discussed order(s): ${entities.orders.join(', ')}`);
+            }
+            if (sessionState.intent === 'return') {
+                parts.push("Intent: return/refund");
+            } else if (sessionState.intent === 'tracking') {
+                parts.push("Intent: package tracking");
+            } else if (sessionState.intent === 'damage_report') {
+                parts.push("Intent: damage report");
+            }
+            if (entities.dates.length > 0) {
+                parts.push(`Dates mentioned: ${entities.dates.join(', ')}`);
+            }
+            parts.push(`${messages.length} messages (${contextTokens} tokens used)`);
+            return parts.join('. ') + '.';
+        }
+
+        function flashElement(id) {
+            const el = document.getElementById(id);
+            el.classList.add('flash');
+            setTimeout(() => el.classList.remove('flash'), 600);
+        }
+
+        function performSummarization() {
+            if (hasSummarized) return;
+            hasSummarized = true;
+
+            const kept = messages.slice(-6);
+            const droppedCount = messages.length - kept.length;
+            const droppedTokens = messages.slice(0, droppedCount).reduce((sum, m) => sum + countTokens(m.content), 0);
+            messages = kept;
+            contextTokens = Math.max(0, contextTokens - droppedTokens);
+
+            sessionState.summarizedMessages = droppedCount;
+            sessionState.summaryNote = 'Older messages compressed into summary to free context space';
+
+            const chat = document.getElementById('chatContainer');
+            const systemMsg = document.createElement('div');
+            systemMsg.className = 'message system';
+            systemMsg.textContent = `Context limit approaching — ${droppedCount} older messages summarized to free ${droppedTokens} tokens.`;
+
+            const firstChild = chat.querySelector('.message');
+            if (firstChild) {
+                chat.insertBefore(systemMsg, firstChild);
+            } else {
+                chat.appendChild(systemMsg);
+            }
+
+            document.getElementById('insightText').innerHTML =
+                '<strong>Summarization triggered!</strong> When the context window fills up, agents compress older messages into a summary. This preserves key facts while freeing token budget for new turns.';
+            document.getElementById('summaryBox').classList.add('warning');
+        }
+
+        function updateUI() {
+            document.getElementById('msgCount').textContent = `${messages.length} messages`;
+            
+            const pct = Math.min((contextTokens / MAX_TOKENS) * 100, 100);
+            const meter = document.getElementById('contextMeter');
+            meter.style.width = pct + '%';
+            meter.className = 'meter-fill' + (pct > 80 ? ' danger' : pct > 50 ? ' warning' : '');
+            document.getElementById('contextUsage').textContent = 
+                `${contextTokens.toLocaleString()} / ${MAX_TOKENS.toLocaleString()} tokens`;
+            
+            let entitiesHtml = '';
+            if (entities.orders.length) {
+                entitiesHtml += entities.orders.map(e => `<span class="entity-tag">📦 ${escapeHtml(e)}</span>`).join('');
+            }
+            if (entities.products.length) {
+                entitiesHtml += entities.products.map(e => `<span class="entity-tag">🏷️ ${escapeHtml(e)}</span>`).join('');
+            }
+            if (entities.dates.length) {
+                entitiesHtml += entities.dates.map(e => `<span class="entity-tag">📅 ${escapeHtml(e)}</span>`).join('');
+            }
+            document.getElementById('entitiesBox').innerHTML = entitiesHtml || 'No entities yet...';
+            
+            document.getElementById('sessionBox').textContent = JSON.stringify(sessionState, null, 2);
+            document.getElementById('summaryBox').textContent = generateSummary();
+        }
+
+        function renderPlan(plan) {
+            if (!plan) return;
+            currentPlan = plan;
+            const allDone = isPlanComplete(plan);
+            document.getElementById('planStatus').textContent = allDone ? 'Complete' : 'Active';
+            document.getElementById('planStatus').style.background = allDone ? '#dcfce7' : '#fef3c7';
+            document.getElementById('planStatus').style.color = allDone ? '#166534' : '#92400e';
+
+            let planHtml = '';
+            plan.forEach(p => {
+                const icon = p.status === 'complete' ? '✓' : p.step;
+                planHtml += `
+                    <div class="plan-step ${p.status}">
+                        <div class="step-num">${icon}</div>
+                        <span>${escapeHtml(p.action)}</span>
+                    </div>
+                `;
+            });
+            document.getElementById('planContainer').innerHTML = planHtml;
+        }
+
+        function addChatMessage(role, content) {
+            const chat = document.getElementById('chatContainer');
+            const empty = document.getElementById('chatEmpty');
+            if (empty) empty.remove();
+
+            const div = document.createElement('div');
+            div.className = `message ${role}`;
+
+            const label = document.createElement('div');
+            label.className = 'message-label';
+            label.textContent = role === 'user' ? 'You' : 'Agent';
+            div.appendChild(label);
+
+            const body = document.createTextNode(content);
+            div.appendChild(body);
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const chat = document.getElementById('chatContainer');
+            const div = document.createElement('div');
+            div.className = 'message assistant';
+            div.id = 'typingMsg';
+            div.innerHTML = '<div class="message-label">Agent</div><div class="typing-indicator"><span></span><span></span><span></span></div>';
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const el = document.getElementById('typingMsg');
+            if (el) el.remove();
+        }
+
+        function sendPreset(text) {
+            document.getElementById('userInput').value = text;
+            sendMessage();
+        }
+
+        function sendMessage() {
+            if (isSending) return;
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            isSending = true;
+            document.getElementById('sendBtn').disabled = true;
+            input.value = '';
+            
+            messages.push({ role: 'user', content: text });
+            contextTokens += countTokens(text);
+            
+            extractEntities(text);
+            updateSessionState(text);
+            addChatMessage('user', text);
+            
+            flashElement('entitiesBox');
+            flashElement('sessionBox');
+            updateUI();
+
+            showTypingIndicator();
+            
+            const delay = 400 + Math.random() * 600;
+            setTimeout(() => {
+                removeTypingIndicator();
+
+                const response = generateResponse(text);
+                messages.push({ role: 'assistant', content: response });
+                contextTokens += countTokens(response);
+                
+                extractEntities(response);
+                addChatMessage('assistant', response);
+                
+                const plan = generatePlan(text);
+                if (plan) {
+                    renderPlan(plan);
+                    
+                    if (isPlanComplete(plan)) {
+                        document.getElementById('insightText').innerHTML =
+                            '<strong>Plan complete!</strong> All steps finished. The agent tracked progress across multiple turns — this is how multi-step tool-calling agents work in production.';
+                    } else if (!currentPlan || plan !== currentPlan) {
+                        document.getElementById('insightText').textContent =
+                            'Complex task detected! The agent breaks it into steps and tracks progress. Continue the conversation to see steps advance.';
+                    } else {
+                        document.getElementById('insightText').textContent =
+                            'Plan step advanced! The agent updated its progress based on your response. Each turn can move the plan forward.';
+                    }
+                }
+                
+                if (contextTokens > MAX_TOKENS * 0.8 && !hasSummarized) {
+                    performSummarization();
+                }
+                
+                updateUI();
+                input.focus();
+                isSending = false;
+                document.getElementById('sendBtn').disabled = false;
+            }, delay);
+        }
+
+        function resetPlayground() {
+            messages = [];
+            entities = { orders: [], products: [], dates: [] };
+            sessionState = {};
+            contextTokens = 0;
+            isSending = false;
+            hasSummarized = false;
+            currentPlan = null;
+            
+            document.getElementById('chatContainer').innerHTML = `
+                <div class="chat-empty" id="chatEmpty">
+                    <div class="chat-empty-icon">💬</div>
+                    <div>Send a message or click a suggested prompt above to start.</div>
+                </div>
+            `;
+            document.getElementById('planContainer').innerHTML = `
+                <p style="font-size: 0.85rem; color: #64748b; padding: 20px; text-align: center;">
+                    Ask for a complex task to see planning in action.<br><br>
+                    Try: "I want to return order ORD-12345"
+                </p>
+            `;
+            document.getElementById('planStatus').textContent = 'Idle';
+            document.getElementById('planStatus').style.background = '#fef3c7';
+            document.getElementById('planStatus').style.color = '#92400e';
+            document.getElementById('summaryBox').classList.remove('warning');
+            document.getElementById('sendBtn').disabled = false;
+            document.getElementById('insightText').innerHTML = 
+                'The agent extracts entities (like order IDs) and maintains session state to remember context across messages. Try sending a few messages to see memory build up.';
+            
+            updateUI();
+            document.getElementById('userInput').focus();
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>

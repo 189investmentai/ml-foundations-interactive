@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gradient Descent Playground</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        h1 { font-size: 1.4rem; color: #0f172a; margin-bottom: 4px; }
+        .header-subtitle { font-size: 0.85rem; color: #64748b; }
+
+        .reset-btn {
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .reset-btn:hover { background: #f1f5f9; }
+
+        .start-banner {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            border-radius: 14px;
+            padding: 20px 28px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .start-banner-icon { font-size: 2.2rem; }
+        .start-banner-content h2 { font-size: 1rem; margin-bottom: 6px; }
+        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; }
+        .start-banner-steps { display: flex; gap: 20px; margin-top: 10px; flex-wrap: wrap; }
+        .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
+        .step-num {
+            background: rgba(255,255,255,0.2);
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 0.7rem;
+        }
+
+        .scenarios-bar {
+            background: white;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+        }
+        .scenarios-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        .scenario-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .scenario-btn.converge { background: #dcfce7; color: #166534; }
+        .scenario-btn.diverge { background: #fee2e2; color: #991b1b; }
+        .scenario-btn.stuck { background: #fef3c7; color: #92400e; }
+        .scenario-btn.compare { background: #f97316; color: white; }
+        .scenario-hint {
+            flex: 1;
+            min-width: 180px;
+            padding: 8px 12px;
+            background: #f8fafc;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: #475569;
+            display: none;
+            border-left: 3px solid #f97316;
+        }
+        .scenario-hint.visible { display: block; }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .charts-area { display: flex; flex-direction: column; gap: 12px; }
+
+        .chart-card {
+            background: white;
+            border-radius: 10px;
+            padding: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .chart-title { font-size: 0.75rem; font-weight: 600; color: #475569; }
+        .chart-badge {
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        canvas { display: block; width: 100%; }
+
+        .controls-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .play-btn {
+            flex: 1;
+            padding: 12px;
+            background: #f97316;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .play-btn:hover { background: #ea580c; }
+        .play-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+        .step-btn {
+            padding: 12px 20px;
+            background: white;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .step-btn:hover { background: #f1f5f9; }
+
+        .sidebar { display: flex; flex-direction: column; gap: 12px; }
+
+        .sidebar-card {
+            background: white;
+            border-radius: 10px;
+            padding: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .sidebar-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .control-group { margin-bottom: 12px; }
+        .control-group:last-child { margin-bottom: 0; }
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        .control-value {
+            font-family: 'SF Mono', Monaco, monospace;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: #f97316;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 5px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: #f97316;
+            cursor: pointer;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #334155;
+            background: white;
+            cursor: pointer;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+        .metric-box {
+            text-align: center;
+            padding: 8px 6px;
+            background: #f8fafc;
+            border-radius: 6px;
+        }
+        .metric-label {
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+        .metric-value {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1e293b;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+        .metric-value.good { color: #16a34a; }
+        .metric-value.warn { color: #d97706; }
+        .metric-value.bad { color: #dc2626; }
+
+        .optimizer-card {
+            padding: 10px;
+            background: #fff7ed;
+            border-radius: 8px;
+            border: 1px solid #fed7aa;
+            margin-bottom: 8px;
+        }
+        .optimizer-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #c2410c;
+            margin-bottom: 4px;
+        }
+        .optimizer-desc {
+            font-size: 0.75rem;
+            color: #9a3412;
+            line-height: 1.4;
+        }
+
+        .insight-bar {
+            background: linear-gradient(135deg, #fff7ed, #ffedd5);
+            border: 1px solid #fed7aa;
+            border-radius: 10px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .insight-icon { font-size: 1.2rem; }
+        .insight-content { flex: 1; }
+        .insight-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #c2410c;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .insight-text { font-size: 0.85rem; color: #9a3412; }
+
+        .help-panel {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .help-header {
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            cursor: pointer;
+            background: #f8fafc;
+        }
+        .help-title { font-size: 0.8rem; font-weight: 600; color: #475569; }
+        .help-toggle { font-size: 0.7rem; color: #64748b; }
+        .help-content {
+            padding: 14px;
+            display: none;
+            border-top: 1px solid #e2e8f0;
+        }
+        .help-content.visible { display: block; }
+        .help-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+        }
+        .help-item {
+            display: flex;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: #475569;
+        }
+
+        .legend {
+            display: flex;
+            gap: 16px;
+            font-size: 0.7rem;
+            color: #64748b;
+            margin-top: 8px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        @media (max-width: 1000px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .sidebar { flex-direction: row; flex-wrap: wrap; }
+            .sidebar-card { flex: 1; min-width: 240px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Gradient Descent Playground</h1>
+                <span class="header-subtitle">Watch optimizers find the minimum on different loss surfaces</span>
+            </div>
+            <button class="reset-btn" onclick="resetPlayground()">↻ Reset</button>
+        </header>
+
+        <div class="start-banner">
+            <div class="start-banner-icon">⛰️</div>
+            <div class="start-banner-content">
+                <h2>The Hiker's Descent: Finding the Lowest Valley Blindfolded</h2>
+                <p>Gradient descent is like walking downhill with only your feet to guide you. Learning rate = step size.</p>
+                <div class="start-banner-steps">
+                    <div class="start-step"><span class="step-num">1</span> Try different learning rates</div>
+                    <div class="start-step"><span class="step-num">2</span> Watch optimizers converge (or explode!)</div>
+                    <div class="start-step"><span class="step-num">3</span> Compare SGD vs Adam</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="scenarios-bar">
+            <span class="scenarios-label">Try:</span>
+            <button class="scenario-btn converge" onclick="loadPreset('converge')">✅ Clean Convergence</button>
+            <button class="scenario-btn diverge" onclick="loadPreset('diverge')">💥 Exploding LR</button>
+            <button class="scenario-btn stuck" onclick="loadPreset('stuck')">🐌 Too Slow</button>
+            <button class="scenario-btn stuck" onclick="loadPreset('saddle')">🪑 Saddle Point</button>
+            <button class="scenario-btn compare" onclick="loadPreset('ravine')">🏔️ The Ravine Problem</button>
+            <div class="scenario-hint" id="scenarioHint"></div>
+        </div>
+
+        <div class="main-grid">
+            <div class="charts-area">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <span class="chart-title">Loss Surface (Contour Plot)</span>
+                        <span class="chart-badge" id="surfaceBadge">quadratic bowl</span>
+                    </div>
+                    <canvas id="lossChart" height="400"></canvas>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background: #f97316;"></div>
+                            <span>Current position</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background: #22c55e;"></div>
+                            <span>Global minimum</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background: rgba(249,115,22,0.3);"></div>
+                            <span>Path taken</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls-row">
+                    <button class="play-btn" id="playBtn" onclick="togglePlay()">▶ Start Descent</button>
+                    <button class="step-btn" onclick="stepOnce()">Step Once</button>
+                    <button class="step-btn" onclick="resetPath()">Clear Path</button>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <span class="chart-title">Loss Over Time</span>
+                        <span class="chart-badge" id="stepsBadge">0 steps</span>
+                    </div>
+                    <canvas id="lossHistoryChart" height="150"></canvas>
+                </div>
+
+                <div class="insight-bar">
+                    <div class="insight-icon">💡</div>
+                    <div class="insight-content">
+                        <div class="insight-title">Optimization Insight</div>
+                        <div class="insight-text" id="insightText">Press "Start Descent" to watch the optimizer find the minimum.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Optimizer</div>
+                    <div class="control-group">
+                        <select id="optimizerSelect" onchange="changeOptimizer()">
+                            <option value="sgd">SGD (Vanilla)</option>
+                            <option value="momentum">SGD + Momentum</option>
+                            <option value="rmsprop">RMSProp</option>
+                            <option value="adam" selected>Adam</option>
+                        </select>
+                    </div>
+                    <div class="optimizer-card" id="optimizerInfo">
+                        <div class="optimizer-name">Adam</div>
+                        <div class="optimizer-desc">Combines momentum and adaptive learning rates. The default choice for deep learning.</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Hyperparameters</div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Learning Rate</span>
+                            <span class="control-value" id="lrValue">0.05</span>
+                        </div>
+                        <input type="range" id="lrSlider" min="-3" max="0" step="0.1" value="-1.3">
+                    </div>
+                    <div class="control-group" id="momentumControl">
+                        <div class="control-label">
+                            <span>Momentum (β)</span>
+                            <span class="control-value" id="momentumValue">0.9</span>
+                        </div>
+                        <input type="range" id="momentumSlider" min="0" max="0.99" step="0.01" value="0.9">
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Loss Surface</div>
+                    <div class="control-group">
+                        <select id="surfaceSelect" onchange="changeSurface()">
+                            <option value="bowl" selected>Quadratic Bowl (Easy)</option>
+                            <option value="ravine">Narrow Ravine (Hard)</option>
+                            <option value="saddle">Saddle Point</option>
+                            <option value="multimodal">Multiple Minima</option>
+                            <option value="rosenbrock">Rosenbrock (Banana)</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Start Position</span>
+                        </div>
+                        <select id="startSelect" onchange="changeStart()">
+                            <option value="random">Random</option>
+                            <option value="topleft">Top-Left</option>
+                            <option value="bottomright">Bottom-Right</option>
+                            <option value="near">Near Minimum</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Current State</div>
+                    <div class="metrics-grid">
+                        <div class="metric-box">
+                            <div class="metric-label">Loss</div>
+                            <div class="metric-value" id="currentLoss">--</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Steps</div>
+                            <div class="metric-value" id="currentSteps">0</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Position X</div>
+                            <div class="metric-value" id="currentX">--</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="metric-label">Position Y</div>
+                            <div class="metric-value" id="currentY">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="help-panel">
+            <div class="help-header" onclick="toggleHelp()">
+                <span class="help-title">📖 Optimizer Reference</span>
+                <span class="help-toggle" id="helpToggle">Show ▼</span>
+            </div>
+            <div class="help-content" id="helpContent">
+                <div class="help-grid">
+                    <div class="help-item">
+                        <span>🚶</span>
+                        <span><strong>SGD:</strong> Follow gradient directly. Simple but can be slow.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>🏃</span>
+                        <span><strong>Momentum:</strong> Add velocity from past steps. Accelerates convergence.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>📏</span>
+                        <span><strong>RMSProp:</strong> Adapt LR per dimension. Good for different scales.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>⭐</span>
+                        <span><strong>Adam:</strong> Momentum + RMSProp. The default choice.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>📈</span>
+                        <span><strong>High LR:</strong> Large steps. Fast but can overshoot/diverge.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>📉</span>
+                        <span><strong>Low LR:</strong> Small steps. Stable but slow convergence.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>🏔️</span>
+                        <span><strong>Ravine:</strong> Different scales in dimensions. Momentum helps.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>🪑</span>
+                        <span><strong>Saddle point:</strong> Flat area with slope only in some directions.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // STATE
+        // ============================================
+        let pos = { x: -2, y: 2 };
+        let velocity = { x: 0, y: 0 };
+        let adamM = { x: 0, y: 0 };
+        let adamV = { x: 0, y: 0 };
+        let rmspropCache = { x: 0, y: 0 };
+        let path = [];
+        let lossHistory = [];
+        let isRunning = false;
+        let animationId = null;
+        let stepCount = 0;
+
+        let lr = 0.05;
+        let momentum = 0.9;
+        let optimizer = 'adam';
+        let surface = 'bowl';
+        
+        const dpr = window.devicePixelRatio || 1;
+        const epsilon = 1e-8;
+        const beta1 = 0.9;
+        const beta2 = 0.999;
+
+        // ============================================
+        // LOSS SURFACES
+        // ============================================
+        const surfaces = {
+            bowl: {
+                fn: (x, y) => x * x + y * y,
+                grad: (x, y) => ({ x: 2 * x, y: 2 * y }),
+                min: { x: 0, y: 0 },
+                name: 'quadratic bowl'
+            },
+            ravine: {
+                fn: (x, y) => 0.5 * x * x + 10 * y * y,
+                grad: (x, y) => ({ x: x, y: 20 * y }),
+                min: { x: 0, y: 0 },
+                name: 'narrow ravine'
+            },
+            saddle: {
+                fn: (x, y) => x * x - y * y,
+                grad: (x, y) => ({ x: 2 * x, y: -2 * y }),
+                min: { x: 0, y: 0 },
+                name: 'saddle point'
+            },
+            multimodal: {
+                fn: (x, y) => {
+                    const local1 = Math.exp(-((x - 1) ** 2 + (y - 1) ** 2));
+                    const local2 = Math.exp(-((x + 1) ** 2 + (y + 1) ** 2) * 0.5);
+                    const global = Math.exp(-((x) ** 2 + (y) ** 2) * 2);
+                    return -global - 0.5 * local1 - 0.3 * local2 + 2;
+                },
+                grad: (x, y) => {
+                    const h = 0.001;
+                    const f = surfaces.multimodal.fn;
+                    return {
+                        x: (f(x + h, y) - f(x - h, y)) / (2 * h),
+                        y: (f(x, y + h) - f(x, y - h)) / (2 * h)
+                    };
+                },
+                min: { x: 0, y: 0 },
+                name: 'multiple minima'
+            },
+            rosenbrock: {
+                fn: (x, y) => (1 - x) ** 2 + 100 * (y - x * x) ** 2,
+                grad: (x, y) => ({
+                    x: -2 * (1 - x) - 400 * x * (y - x * x),
+                    y: 200 * (y - x * x)
+                }),
+                min: { x: 1, y: 1 },
+                name: 'Rosenbrock banana'
+            }
+        };
+
+        // ============================================
+        // OPTIMIZERS
+        // ============================================
+        function step() {
+            const s = surfaces[surface];
+            const grad = s.grad(pos.x, pos.y);
+            
+            switch (optimizer) {
+                case 'sgd':
+                    pos.x -= lr * grad.x;
+                    pos.y -= lr * grad.y;
+                    break;
+                    
+                case 'momentum':
+                    velocity.x = momentum * velocity.x - lr * grad.x;
+                    velocity.y = momentum * velocity.y - lr * grad.y;
+                    pos.x += velocity.x;
+                    pos.y += velocity.y;
+                    break;
+                    
+                case 'rmsprop':
+                    rmspropCache.x = 0.9 * rmspropCache.x + 0.1 * grad.x * grad.x;
+                    rmspropCache.y = 0.9 * rmspropCache.y + 0.1 * grad.y * grad.y;
+                    pos.x -= lr * grad.x / (Math.sqrt(rmspropCache.x) + epsilon);
+                    pos.y -= lr * grad.y / (Math.sqrt(rmspropCache.y) + epsilon);
+                    break;
+                    
+                case 'adam':
+                    const t = stepCount + 1;
+                    adamM.x = beta1 * adamM.x + (1 - beta1) * grad.x;
+                    adamM.y = beta1 * adamM.y + (1 - beta1) * grad.y;
+                    adamV.x = beta2 * adamV.x + (1 - beta2) * grad.x * grad.x;
+                    adamV.y = beta2 * adamV.y + (1 - beta2) * grad.y * grad.y;
+                    
+                    const mHatX = adamM.x / (1 - Math.pow(beta1, t));
+                    const mHatY = adamM.y / (1 - Math.pow(beta1, t));
+                    const vHatX = adamV.x / (1 - Math.pow(beta2, t));
+                    const vHatY = adamV.y / (1 - Math.pow(beta2, t));
+                    
+                    pos.x -= lr * mHatX / (Math.sqrt(vHatX) + epsilon);
+                    pos.y -= lr * mHatY / (Math.sqrt(vHatY) + epsilon);
+                    break;
+            }
+            
+            // Clamp to bounds
+            pos.x = Math.max(-3, Math.min(3, pos.x));
+            pos.y = Math.max(-3, Math.min(3, pos.y));
+            
+            stepCount++;
+            path.push({ x: pos.x, y: pos.y });
+            lossHistory.push(s.fn(pos.x, pos.y));
+        }
+
+        // ============================================
+        // CANVAS DRAWING
+        // ============================================
+        function setupCanvas(canvas) {
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+            return { width: rect.width, height: rect.height, ctx };
+        }
+
+        function drawLossSurface() {
+            const canvas = document.getElementById('lossChart');
+            const { width, height, ctx } = setupCanvas(canvas);
+            const pad = { top: 20, right: 20, bottom: 30, left: 30 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const s = surfaces[surface];
+            const res = 60;
+            const cellW = plotW / res;
+            const cellH = plotH / res;
+            
+            // Compute loss values for color scaling
+            const values = [];
+            for (let i = 0; i < res; i++) {
+                for (let j = 0; j < res; j++) {
+                    const x = (i / res) * 6 - 3;
+                    const y = 3 - (j / res) * 6;
+                    values.push(s.fn(x, y));
+                }
+            }
+            
+            // Use log scale for better visualization
+            const minVal = Math.min(...values);
+            const maxVal = Math.max(...values);
+            const range = maxVal - minVal;
+            
+            // Draw contour
+            for (let i = 0; i < res; i++) {
+                for (let j = 0; j < res; j++) {
+                    const x = (i / res) * 6 - 3;
+                    const y = 3 - (j / res) * 6;
+                    const loss = s.fn(x, y);
+                    
+                    // Normalize and apply log scale
+                    let norm = (loss - minVal) / (range || 1);
+                    norm = Math.pow(norm, 0.3); // Gamma correction for better contrast
+                    
+                    // Color from blue (low) to red (high)
+                    const r = Math.floor(255 * norm);
+                    const g = Math.floor(100 * (1 - norm));
+                    const b = Math.floor(255 * (1 - norm));
+                    
+                    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+                    ctx.fillRect(pad.left + i * cellW, pad.top + j * cellH, cellW + 1, cellH + 1);
+                }
+            }
+            
+            // Draw contour lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 0.5;
+            const nContours = 10;
+            for (let c = 0; c < nContours; c++) {
+                const level = minVal + (range * c / nContours);
+                drawContourLine(ctx, s.fn, level, pad, plotW, plotH, res);
+            }
+            
+            // Coordinate transform
+            const sx = x => pad.left + ((x + 3) / 6) * plotW;
+            const sy = y => pad.top + ((3 - y) / 6) * plotH;
+            
+            // Draw minimum marker
+            ctx.fillStyle = '#22c55e';
+            ctx.beginPath();
+            ctx.arc(sx(s.min.x), sy(s.min.y), 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Draw path
+            if (path.length > 1) {
+                ctx.strokeStyle = 'rgba(249, 115, 22, 0.6)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(sx(path[0].x), sy(path[0].y));
+                for (let i = 1; i < path.length; i++) {
+                    ctx.lineTo(sx(path[i].x), sy(path[i].y));
+                }
+                ctx.stroke();
+                
+                // Draw path dots
+                path.forEach((p, i) => {
+                    if (i % 5 === 0 || i === path.length - 1) {
+                        ctx.fillStyle = `rgba(249, 115, 22, ${0.3 + 0.7 * (i / path.length)})`;
+                        ctx.beginPath();
+                        ctx.arc(sx(p.x), sy(p.y), 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+            }
+            
+            // Draw current position
+            ctx.fillStyle = '#f97316';
+            ctx.beginPath();
+            ctx.arc(sx(pos.x), sy(pos.y), 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // Draw gradient arrow
+            const grad = s.grad(pos.x, pos.y);
+            const gradMag = Math.sqrt(grad.x * grad.x + grad.y * grad.y);
+            if (gradMag > 0.01) {
+                const arrowLen = Math.min(30, gradMag * 5);
+                const nx = -grad.x / gradMag;
+                const ny = -grad.y / gradMag;
+                
+                ctx.strokeStyle = '#fbbf24';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(sx(pos.x), sy(pos.y));
+                ctx.lineTo(sx(pos.x) + nx * arrowLen, sy(pos.y) - ny * arrowLen);
+                ctx.stroke();
+            }
+            
+            // Axes labels
+            ctx.fillStyle = '#64748b';
+            ctx.font = '11px -apple-system';
+            ctx.textAlign = 'center';
+            ctx.fillText('θ₁', width / 2, height - 5);
+            ctx.save();
+            ctx.translate(10, height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('θ₂', 0, 0);
+            ctx.restore();
+        }
+
+        function drawContourLine(ctx, fn, level, pad, plotW, plotH, res) {
+            // Simple marching squares for contour
+            const step = 6 / res;
+            for (let i = 0; i < res - 1; i++) {
+                for (let j = 0; j < res - 1; j++) {
+                    const x0 = (i / res) * 6 - 3;
+                    const y0 = 3 - (j / res) * 6;
+                    const x1 = ((i + 1) / res) * 6 - 3;
+                    const y1 = 3 - ((j + 1) / res) * 6;
+                    
+                    const v00 = fn(x0, y0) - level;
+                    const v10 = fn(x1, y0) - level;
+                    const v01 = fn(x0, y1) - level;
+                    const v11 = fn(x1, y1) - level;
+                    
+                    const code = (v00 > 0 ? 8 : 0) + (v10 > 0 ? 4 : 0) + (v11 > 0 ? 2 : 0) + (v01 > 0 ? 1 : 0);
+                    
+                    if (code !== 0 && code !== 15) {
+                        const px0 = pad.left + i * (plotW / res);
+                        const py0 = pad.top + j * (plotH / res);
+                        const pw = plotW / res;
+                        const ph = plotH / res;
+                        
+                        ctx.beginPath();
+                        ctx.arc(px0 + pw / 2, py0 + ph / 2, 0.5, 0, Math.PI * 2);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function drawLossHistory() {
+            const canvas = document.getElementById('lossHistoryChart');
+            const { width, height, ctx } = setupCanvas(canvas);
+            const pad = { top: 10, right: 20, bottom: 25, left: 50 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            if (lossHistory.length < 2) {
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '12px -apple-system';
+                ctx.textAlign = 'center';
+                ctx.fillText('Loss history will appear here', width / 2, height / 2);
+                return;
+            }
+            
+            const minLoss = Math.min(...lossHistory);
+            const maxLoss = Math.max(...lossHistory);
+            const range = maxLoss - minLoss || 1;
+            
+            const sx = i => pad.left + (i / (lossHistory.length - 1)) * plotW;
+            const sy = v => pad.top + (1 - (v - minLoss) / range) * plotH;
+            
+            // Grid
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const y = pad.top + (i / 4) * plotH;
+                ctx.beginPath();
+                ctx.moveTo(pad.left, y);
+                ctx.lineTo(width - pad.right, y);
+                ctx.stroke();
+            }
+            
+            // Loss curve
+            ctx.strokeStyle = '#f97316';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(sx(0), sy(lossHistory[0]));
+            for (let i = 1; i < lossHistory.length; i++) {
+                ctx.lineTo(sx(i), sy(lossHistory[i]));
+            }
+            ctx.stroke();
+            
+            // Labels
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px -apple-system';
+            ctx.textAlign = 'right';
+            ctx.fillText(maxLoss.toFixed(2), pad.left - 5, pad.top + 10);
+            ctx.fillText(minLoss.toFixed(2), pad.left - 5, height - pad.bottom);
+            
+            ctx.textAlign = 'center';
+            ctx.fillText('0', pad.left, height - 5);
+            ctx.fillText(lossHistory.length - 1, width - pad.right, height - 5);
+            ctx.fillText('Step', width / 2, height - 5);
+        }
+
+        // ============================================
+        // UI UPDATES
+        // ============================================
+        function updateUI() {
+            const s = surfaces[surface];
+            const loss = s.fn(pos.x, pos.y);
+            
+            document.getElementById('currentLoss').textContent = loss.toFixed(4);
+            document.getElementById('currentSteps').textContent = stepCount;
+            document.getElementById('currentX').textContent = pos.x.toFixed(3);
+            document.getElementById('currentY').textContent = pos.y.toFixed(3);
+            document.getElementById('stepsBadge').textContent = `${stepCount} steps`;
+            
+            // Color code loss
+            const lossEl = document.getElementById('currentLoss');
+            lossEl.classList.remove('good', 'warn', 'bad');
+            if (loss < 0.01) {
+                lossEl.classList.add('good');
+            } else if (loss < 1) {
+                lossEl.classList.add('warn');
+            } else {
+                lossEl.classList.add('bad');
+            }
+            
+            // Update insight
+            updateInsight(loss);
+        }
+
+        function updateInsight(loss) {
+            const s = surfaces[surface];
+            const distToMin = Math.sqrt((pos.x - s.min.x) ** 2 + (pos.y - s.min.y) ** 2);
+            let insight = '';
+            
+            if (loss > 1000 || isNaN(loss)) {
+                insight = '<strong>Diverging!</strong> Learning rate too high. The optimizer is overshooting the minimum. Try reducing LR.';
+            } else if (stepCount > 0 && loss < 0.01 && distToMin < 0.1) {
+                insight = `<strong>Converged!</strong> Reached the minimum in ${stepCount} steps. Loss: ${loss.toFixed(6)}`;
+            } else if (stepCount > 200 && loss > 0.1) {
+                insight = '<strong>Slow progress.</strong> Try increasing learning rate or switching to Adam for adaptive step sizes.';
+            } else if (stepCount > 50 && lossHistory.length > 10) {
+                const recentChange = Math.abs(lossHistory[lossHistory.length - 1] - lossHistory[lossHistory.length - 10]);
+                if (recentChange < 0.001) {
+                    insight = '<strong>Plateau detected.</strong> Loss barely changing. Could be stuck at a saddle point or local minimum.';
+                } else {
+                    insight = `<strong>Descending...</strong> Current loss: ${loss.toFixed(4)}. ${optimizer === 'sgd' ? 'Try momentum for faster convergence.' : ''}`;
+                }
+            } else if (stepCount > 0) {
+                insight = `<strong>Step ${stepCount}:</strong> Loss = ${loss.toFixed(4)}. Distance to minimum: ${distToMin.toFixed(3)}`;
+            } else {
+                insight = 'Press "Start Descent" to watch the optimizer find the minimum.';
+            }
+            
+            document.getElementById('insightText').innerHTML = insight;
+        }
+
+        function updateOptimizerInfo() {
+            const info = {
+                sgd: { name: 'SGD (Vanilla)', desc: 'Directly follows the negative gradient. Simple but can be slow and sensitive to learning rate.' },
+                momentum: { name: 'SGD + Momentum', desc: 'Accumulates velocity from past gradients. Accelerates through ravines and smooths oscillations.' },
+                rmsprop: { name: 'RMSProp', desc: 'Adapts learning rate per parameter based on recent gradient magnitudes. Good for different scales.' },
+                adam: { name: 'Adam', desc: 'Combines momentum and adaptive learning rates. The default choice for deep learning.' }
+            };
+            
+            const opt = info[optimizer];
+            document.getElementById('optimizerInfo').innerHTML = `
+                <div class="optimizer-name">${opt.name}</div>
+                <div class="optimizer-desc">${opt.desc}</div>
+            `;
+            
+            // Show/hide momentum control
+            document.getElementById('momentumControl').style.display = 
+                (optimizer === 'momentum') ? 'block' : 'none';
+        }
+
+        // ============================================
+        // ANIMATION
+        // ============================================
+        function animate() {
+            if (!isRunning) return;
+            
+            const s = surfaces[surface];
+            const prevLoss = s.fn(pos.x, pos.y);
+            
+            step();
+            
+            const newLoss = s.fn(pos.x, pos.y);
+            
+            // Check for divergence
+            if (isNaN(newLoss) || newLoss > 1e6) {
+                stopAnimation();
+                updateInsight(newLoss);
+            }
+            
+            // Check for convergence
+            const distToMin = Math.sqrt((pos.x - s.min.x) ** 2 + (pos.y - s.min.y) ** 2);
+            if (newLoss < 0.0001 && distToMin < 0.01) {
+                stopAnimation();
+            }
+            
+            // Max steps
+            if (stepCount >= 500) {
+                stopAnimation();
+            }
+            
+            drawLossSurface();
+            drawLossHistory();
+            updateUI();
+            
+            if (isRunning) {
+                animationId = setTimeout(animate, 50);
+            }
+        }
+
+        function togglePlay() {
+            if (isRunning) {
+                stopAnimation();
+            } else {
+                startAnimation();
+            }
+        }
+
+        function startAnimation() {
+            isRunning = true;
+            document.getElementById('playBtn').textContent = '⏸ Pause';
+            animate();
+        }
+
+        function stopAnimation() {
+            isRunning = false;
+            if (animationId) {
+                clearTimeout(animationId);
+                animationId = null;
+            }
+            document.getElementById('playBtn').textContent = '▶ Continue';
+        }
+
+        function stepOnce() {
+            stopAnimation();
+            step();
+            drawLossSurface();
+            drawLossHistory();
+            updateUI();
+        }
+
+        function resetPath() {
+            stopAnimation();
+            resetOptimizer();
+            path = [{ x: pos.x, y: pos.y }];
+            lossHistory = [surfaces[surface].fn(pos.x, pos.y)];
+            stepCount = 0;
+            drawLossSurface();
+            drawLossHistory();
+            updateUI();
+            document.getElementById('playBtn').textContent = '▶ Start Descent';
+        }
+
+        function resetOptimizer() {
+            velocity = { x: 0, y: 0 };
+            adamM = { x: 0, y: 0 };
+            adamV = { x: 0, y: 0 };
+            rmspropCache = { x: 0, y: 0 };
+        }
+
+        // ============================================
+        // CONTROLS
+        // ============================================
+        function changeOptimizer() {
+            optimizer = document.getElementById('optimizerSelect').value;
+            resetOptimizer();
+            updateOptimizerInfo();
+        }
+
+        function changeSurface() {
+            surface = document.getElementById('surfaceSelect').value;
+            document.getElementById('surfaceBadge').textContent = surfaces[surface].name;
+            setStartPosition();
+            resetPath();
+        }
+
+        function changeStart() {
+            setStartPosition();
+            resetPath();
+        }
+
+        function setStartPosition() {
+            const start = document.getElementById('startSelect').value;
+            const s = surfaces[surface];
+            
+            switch (start) {
+                case 'random':
+                    pos.x = (Math.random() - 0.5) * 4;
+                    pos.y = (Math.random() - 0.5) * 4;
+                    break;
+                case 'topleft':
+                    pos.x = -2.5;
+                    pos.y = 2.5;
+                    break;
+                case 'bottomright':
+                    pos.x = 2.5;
+                    pos.y = -2.5;
+                    break;
+                case 'near':
+                    pos.x = s.min.x + 0.5;
+                    pos.y = s.min.y + 0.5;
+                    break;
+            }
+        }
+
+        document.getElementById('lrSlider').addEventListener('input', function() {
+            lr = Math.pow(10, parseFloat(this.value));
+            document.getElementById('lrValue').textContent = lr.toFixed(4);
+        });
+
+        document.getElementById('momentumSlider').addEventListener('input', function() {
+            momentum = parseFloat(this.value);
+            document.getElementById('momentumValue').textContent = momentum.toFixed(2);
+        });
+
+        // ============================================
+        // PRESETS
+        // ============================================
+        const presets = {
+            converge: {
+                surface: 'bowl', optimizer: 'adam', lr: -1.3, start: 'topleft',
+                hint: '<strong>Clean convergence:</strong> Adam on a simple bowl. Watch it find the minimum efficiently.'
+            },
+            diverge: {
+                surface: 'bowl', optimizer: 'sgd', lr: 0, start: 'topleft',
+                hint: '<strong>Exploding gradients!</strong> Learning rate = 1.0 is way too high. Watch it overshoot and diverge.'
+            },
+            stuck: {
+                surface: 'bowl', optimizer: 'sgd', lr: -3, start: 'topleft',
+                hint: '<strong>Too slow:</strong> Learning rate = 0.001 takes forever. Try increasing it.'
+            },
+            saddle: {
+                surface: 'saddle', optimizer: 'sgd', lr: -1.5, start: 'topleft',
+                hint: '<strong>Saddle point:</strong> SGD can get stuck here. Try Adam which handles saddles better.'
+            },
+            ravine: {
+                surface: 'ravine', optimizer: 'sgd', lr: -1, start: 'topleft',
+                hint: '<strong>The ravine problem:</strong> SGD oscillates. Try momentum to smooth the path.'
+            }
+        };
+
+        function loadPreset(name) {
+            stopAnimation();
+            const p = presets[name];
+            
+            document.getElementById('surfaceSelect').value = p.surface;
+            document.getElementById('optimizerSelect').value = p.optimizer;
+            document.getElementById('lrSlider').value = p.lr;
+            document.getElementById('startSelect').value = p.start;
+            
+            surface = p.surface;
+            optimizer = p.optimizer;
+            lr = Math.pow(10, p.lr);
+            
+            document.getElementById('lrValue').textContent = lr.toFixed(4);
+            document.getElementById('surfaceBadge').textContent = surfaces[surface].name;
+            
+            updateOptimizerInfo();
+            setStartPosition();
+            resetPath();
+            
+            document.getElementById('scenarioHint').innerHTML = p.hint;
+            document.getElementById('scenarioHint').classList.add('visible');
+        }
+
+        function resetPlayground() {
+            stopAnimation();
+            
+            surface = 'bowl';
+            optimizer = 'adam';
+            lr = 0.05;
+            momentum = 0.9;
+            
+            document.getElementById('surfaceSelect').value = 'bowl';
+            document.getElementById('optimizerSelect').value = 'adam';
+            document.getElementById('lrSlider').value = -1.3;
+            document.getElementById('startSelect').value = 'random';
+            document.getElementById('momentumSlider').value = 0.9;
+            
+            document.getElementById('lrValue').textContent = '0.0500';
+            document.getElementById('momentumValue').textContent = '0.90';
+            document.getElementById('surfaceBadge').textContent = surfaces[surface].name;
+            document.getElementById('scenarioHint').classList.remove('visible');
+            
+            updateOptimizerInfo();
+            setStartPosition();
+            resetPath();
+            document.getElementById('playBtn').textContent = '▶ Start Descent';
+        }
+
+        function toggleHelp() {
+            const content = document.getElementById('helpContent');
+            const toggle = document.getElementById('helpToggle');
+            const isVisible = content.classList.toggle('visible');
+            toggle.textContent = isVisible ? 'Hide ▲' : 'Show ▼';
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        window.addEventListener('resize', () => {
+            drawLossSurface();
+            drawLossHistory();
+        });
+
+        updateOptimizerInfo();
+        setStartPosition();
+        path = [{ x: pos.x, y: pos.y }];
+        lossHistory = [surfaces[surface].fn(pos.x, pos.y)];
+        drawLossSurface();
+        drawLossHistory();
+        updateUI();
+    </script>
+</body>
+</html>

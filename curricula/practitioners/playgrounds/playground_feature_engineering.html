@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feature Engineering Playground</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        h1 { font-size: 1.4rem; color: #0f172a; margin-bottom: 4px; }
+        .header-subtitle { font-size: 0.85rem; color: #64748b; }
+
+        .reset-btn {
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .reset-btn:hover { background: #f1f5f9; }
+
+        .start-banner {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            border-radius: 14px;
+            padding: 20px 28px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .start-banner-icon { font-size: 2.2rem; }
+        .start-banner-content h2 { font-size: 1rem; margin-bottom: 6px; }
+        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; }
+        .start-banner-steps { display: flex; gap: 20px; margin-top: 10px; flex-wrap: wrap; }
+        .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
+        .step-num {
+            background: rgba(255,255,255,0.2);
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 0.7rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: white;
+            padding: 6px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .tab {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+        .tab.active {
+            background: #8b5cf6;
+            color: white;
+        }
+        .tab:hover:not(.active) { background: #f1f5f9; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 16px;
+        }
+
+        .charts-area { display: flex; flex-direction: column; gap: 12px; }
+
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 10px;
+            padding: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .chart-title { font-size: 0.75rem; font-weight: 600; color: #475569; }
+        .chart-badge {
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        canvas { display: block; width: 100%; }
+
+        .sidebar { display: flex; flex-direction: column; gap: 12px; }
+
+        .sidebar-card {
+            background: white;
+            border-radius: 10px;
+            padding: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .sidebar-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .control-group { margin-bottom: 12px; }
+        .control-group:last-child { margin-bottom: 0; }
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        .control-value {
+            font-family: 'SF Mono', Monaco, monospace;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: #8b5cf6;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            background: white;
+            color: #334155;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 5px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: #8b5cf6;
+            cursor: pointer;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .stat-item {
+            padding: 8px;
+            background: #f8fafc;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .stat-name {
+            font-size: 0.65rem;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        .stat-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1e293b;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .insight-bar {
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            border: 1px solid #c4b5fd;
+            border-radius: 10px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .insight-icon { font-size: 1.2rem; }
+        .insight-content { flex: 1; }
+        .insight-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #6d28d9;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .insight-text { font-size: 0.85rem; color: #5b21b6; }
+
+        .leakage-warning {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+            display: none;
+        }
+        .leakage-warning.visible { display: flex; gap: 10px; }
+        .leakage-warning-icon { font-size: 1.2rem; }
+        .leakage-warning-text { font-size: 0.85rem; color: #991b1b; }
+
+        @media (max-width: 1000px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .chart-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Feature Engineering Playground</h1>
+                <span class="header-subtitle">Transform data and see how it affects distributions and model performance</span>
+            </div>
+            <button class="reset-btn" onclick="resetPlayground()">↻ Reset</button>
+        </header>
+
+        <div class="start-banner">
+            <div class="start-banner-icon">🔧</div>
+            <div class="start-banner-content">
+                <h2>Raw Data → Features → Model</h2>
+                <p>See how transformations change data distributions and impact predictions.</p>
+                <div class="start-banner-steps">
+                    <div class="start-step"><span class="step-num">1</span> Try log on skewed data</div>
+                    <div class="start-step"><span class="step-num">2</span> Compare scaled vs raw</div>
+                    <div class="start-step"><span class="step-num">3</span> See what leakage does</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('transforms', this)">Transformations</button>
+            <button class="tab" onclick="showTab('encoding', this)">Encoding</button>
+            <button class="tab" onclick="showTab('leakage', this)">Leakage Demo</button>
+        </div>
+
+        <div id="tab-transforms" class="tab-content active">
+            <div class="main-grid">
+                <div class="charts-area">
+                    <div class="chart-row">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <span class="chart-title">Original Distribution</span>
+                                <span class="chart-badge" id="origStats">--</span>
+                            </div>
+                            <canvas id="origChart" height="200"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <span class="chart-title">Transformed Distribution</span>
+                                <span class="chart-badge" id="transStats">--</span>
+                            </div>
+                            <canvas id="transChart" height="200"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-row">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <span class="chart-title">Feature vs Target (Original)</span>
+                            </div>
+                            <canvas id="scatterOrig" height="200"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <span class="chart-title">Feature vs Target (Transformed)</span>
+                            </div>
+                            <canvas id="scatterTrans" height="200"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="insight-bar">
+                        <div class="insight-icon">💡</div>
+                        <div class="insight-content">
+                            <div class="insight-title">Transformation Insight</div>
+                            <div class="insight-text" id="transformInsight">Select a transformation to see its effect.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar">
+                    <div class="sidebar-card">
+                        <div class="sidebar-title">Data Distribution</div>
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span>Distribution Type</span>
+                            </div>
+                            <select id="distType" onchange="updateTransforms()">
+                                <option value="normal">Normal (Gaussian)</option>
+                                <option value="skewed" selected>Right-Skewed (Income-like)</option>
+                                <option value="bimodal">Bimodal</option>
+                                <option value="uniform">Uniform</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span>Sample Size</span>
+                                <span class="control-value" id="nSamplesValue">500</span>
+                            </div>
+                            <input type="range" id="nSamplesSlider" min="100" max="1000" step="100" value="500" oninput="updateTransforms()">
+                        </div>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <div class="sidebar-title">Transformation</div>
+                        <div class="control-group">
+                            <div class="control-label">
+                                <span>Transform Type</span>
+                            </div>
+                            <select id="transformType" onchange="updateTransforms()">
+                                <option value="none">None (Original)</option>
+                                <option value="standardize">Standardization (Z-score)</option>
+                                <option value="minmax">Min-Max Scaling</option>
+                                <option value="log">Log Transform</option>
+                                <option value="sqrt">Square Root</option>
+                                <option value="boxcox">Box-Cox</option>
+                                <option value="quantile">Quantile (Normal)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <div class="sidebar-title">Statistics</div>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-name">Skewness</div>
+                                <div class="stat-value" id="skewValue">--</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-name">Kurtosis</div>
+                                <div class="stat-value" id="kurtValue">--</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-name">Min</div>
+                                <div class="stat-value" id="minValue">--</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-name">Max</div>
+                                <div class="stat-value" id="maxValue">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-encoding" class="tab-content">
+            <div class="main-grid">
+                <div class="charts-area">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span class="chart-title">Category Impact on Target</span>
+                        </div>
+                        <canvas id="encodingChart" height="300"></canvas>
+                    </div>
+
+                    <div class="insight-bar">
+                        <div class="insight-icon">💡</div>
+                        <div class="insight-content">
+                            <div class="insight-title">Encoding Insight</div>
+                            <div class="insight-text" id="encodingInsight">Different encoding methods capture different information about categories.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar">
+                    <div class="sidebar-card">
+                        <div class="sidebar-title">Encoding Method</div>
+                        <div class="control-group">
+                            <select id="encodingType" onchange="updateEncoding()">
+                                <option value="onehot">One-Hot Encoding</option>
+                                <option value="ordinal">Ordinal Encoding</option>
+                                <option value="target">Target Encoding</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <div class="sidebar-title">Category Info</div>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-name">Categories</div>
+                                <div class="stat-value" id="nCats">5</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-name">Columns</div>
+                                <div class="stat-value" id="nCols">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-leakage" class="tab-content">
+            <div class="main-grid">
+                <div class="charts-area">
+                    <div class="chart-row">
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <span class="chart-title">Model Performance (Train)</span>
+                            </div>
+                            <canvas id="leakTrainChart" height="200"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-header">
+                                <span class="chart-title">Model Performance (Test)</span>
+                            </div>
+                            <canvas id="leakTestChart" height="200"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="leakage-warning" id="leakageWarning">
+                        <div class="leakage-warning-icon">⚠️</div>
+                        <div class="leakage-warning-text">
+                            <strong>Data Leakage Detected!</strong> The "leaky" feature contains future information. 
+                            Notice how train AUC is nearly perfect but test AUC drops — the model learned a shortcut that doesn't generalize.
+                        </div>
+                    </div>
+
+                    <div class="insight-bar">
+                        <div class="insight-icon">💡</div>
+                        <div class="insight-content">
+                            <div class="insight-title">Leakage Insight</div>
+                            <div class="insight-text" id="leakageInsight">Toggle the leaky feature to see how it inflates training metrics.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar">
+                    <div class="sidebar-card">
+                        <div class="sidebar-title">Features</div>
+                        <div class="control-group">
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer;">
+                                <input type="checkbox" id="feat1" checked onchange="updateLeakage()">
+                                <span>tenure_months (valid)</span>
+                            </label>
+                        </div>
+                        <div class="control-group">
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer;">
+                                <input type="checkbox" id="feat2" checked onchange="updateLeakage()">
+                                <span>support_tickets (valid)</span>
+                            </label>
+                        </div>
+                        <div class="control-group">
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; color: #dc2626;">
+                                <input type="checkbox" id="leakyFeat" onchange="updateLeakage()">
+                                <span>future_activity (LEAKY!)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <div class="sidebar-title">Results</div>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-name">Train AUC</div>
+                                <div class="stat-value" id="trainAuc">--</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-name">Test AUC</div>
+                                <div class="stat-value" id="testAuc">--</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-name">Gap</div>
+                                <div class="stat-value" id="aucGap">--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dpr = window.devicePixelRatio || 1;
+        let origData = [];
+        let transData = [];
+        let targetData = [];
+
+        function setupCanvas(canvas) {
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+            return { width: rect.width, height: rect.height, ctx };
+        }
+
+        // Statistics functions
+        function mean(arr) { return arr.reduce((a, b) => a + b, 0) / arr.length; }
+        function std(arr) {
+            const m = mean(arr);
+            return Math.sqrt(arr.reduce((acc, v) => acc + (v - m) ** 2, 0) / arr.length);
+        }
+        function skewness(arr) {
+            const m = mean(arr);
+            const s = std(arr);
+            if (s === 0) return 0;
+            return arr.reduce((acc, v) => acc + ((v - m) / s) ** 3, 0) / arr.length;
+        }
+        function kurtosis(arr) {
+            const m = mean(arr);
+            const s = std(arr);
+            if (s === 0) return 0;
+            return arr.reduce((acc, v) => acc + ((v - m) / s) ** 4, 0) / arr.length - 3;
+        }
+
+        // Data generation
+        function generateData(type, n) {
+            const data = [];
+            for (let i = 0; i < n; i++) {
+                if (type === 'normal') {
+                    data.push(gaussianRandom() * 20 + 50);
+                } else if (type === 'skewed') {
+                    data.push(Math.exp(gaussianRandom() * 1 + 3));
+                } else if (type === 'bimodal') {
+                    data.push(Math.random() > 0.5 ? gaussianRandom() * 10 + 30 : gaussianRandom() * 10 + 70);
+                } else {
+                    data.push(Math.random() * 100);
+                }
+            }
+            return data;
+        }
+
+        function gaussianRandom() {
+            let u = 0, v = 0;
+            while (u === 0) u = Math.random();
+            while (v === 0) v = Math.random();
+            return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        }
+
+        function probit(p) {
+            if (p <= 0.0001) return -3.7;
+            if (p >= 0.9999) return 3.7;
+            if (p < 0.5) return -probit(1 - p);
+            const t = Math.sqrt(-2 * Math.log(1 - p));
+            return t - (2.515517 + 0.802853 * t + 0.010328 * t * t) /
+                       (1 + 1.432788 * t + 0.189269 * t * t + 0.001308 * t * t * t);
+        }
+
+        function transform(data, type) {
+            if (type === 'none') return [...data];
+
+            if (type === 'quantile') {
+                const indexed = data.map((v, i) => ({ v, i }));
+                indexed.sort((a, b) => a.v - b.v);
+                const result = new Array(data.length);
+                indexed.forEach((item, rank) => {
+                    result[item.i] = probit((rank + 0.5) / data.length);
+                });
+                return result;
+            }
+            
+            const m = mean(data);
+            const s = std(data);
+            const minVal = Math.min(...data);
+            const maxVal = Math.max(...data);
+            
+            return data.map(x => {
+                switch (type) {
+                    case 'standardize':
+                        return s > 0 ? (x - m) / s : 0;
+                    case 'minmax':
+                        return maxVal > minVal ? (x - minVal) / (maxVal - minVal) : 0;
+                    case 'log':
+                        return Math.log(Math.max(x, 0.001) + 1);
+                    case 'sqrt':
+                        return Math.sqrt(Math.max(x, 0));
+                    case 'boxcox': {
+                        const lambda = 0.2;
+                        return x > 0 ? (Math.pow(x, lambda) - 1) / lambda : 0;
+                    }
+                    default:
+                        return x;
+                }
+            });
+        }
+
+        function drawHistogram(canvasId, data, color) {
+            const canvas = document.getElementById(canvasId);
+            const { width, height, ctx } = setupCanvas(canvas);
+            const pad = { top: 15, right: 15, bottom: 25, left: 40 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const nBins = 30;
+            const minVal = Math.min(...data);
+            const maxVal = Math.max(...data);
+            const binWidth = (maxVal - minVal) / nBins || 1;
+            const bins = new Array(nBins).fill(0);
+            
+            data.forEach(x => {
+                const idx = Math.min(nBins - 1, Math.floor((x - minVal) / binWidth));
+                if (idx >= 0) bins[idx]++;
+            });
+            
+            const maxCount = Math.max(...bins);
+            const barW = plotW / nBins;
+            
+            ctx.fillStyle = color;
+            bins.forEach((count, i) => {
+                const barH = (count / maxCount) * plotH;
+                ctx.fillRect(pad.left + i * barW, pad.top + plotH - barH, barW - 1, barH);
+            });
+            
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px -apple-system';
+            ctx.textAlign = 'left';
+            ctx.fillText(minVal.toFixed(1), pad.left, height - 5);
+            ctx.textAlign = 'right';
+            ctx.fillText(maxVal.toFixed(1), width - pad.right, height - 5);
+        }
+
+        function drawScatter(canvasId, xData, yData, color) {
+            const canvas = document.getElementById(canvasId);
+            const { width, height, ctx } = setupCanvas(canvas);
+            const pad = { top: 15, right: 15, bottom: 25, left: 40 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const xMin = Math.min(...xData);
+            const xMax = Math.max(...xData);
+            const yMin = Math.min(...yData);
+            const yMax = Math.max(...yData);
+            
+            const sx = x => pad.left + ((x - xMin) / (xMax - xMin || 1)) * plotW;
+            const sy = y => pad.top + (1 - (y - yMin) / (yMax - yMin || 1)) * plotH;
+            
+            ctx.fillStyle = color;
+            for (let i = 0; i < xData.length; i++) {
+                ctx.beginPath();
+                ctx.arc(sx(xData[i]), sy(yData[i]), 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function updateTransforms() {
+            const distType = document.getElementById('distType').value;
+            const transType = document.getElementById('transformType').value;
+            const nSamples = parseInt(document.getElementById('nSamplesSlider').value);
+            
+            document.getElementById('nSamplesValue').textContent = nSamples;
+            
+            origData = generateData(distType, nSamples);
+            targetData = origData.map(x => x * 0.5 + gaussianRandom() * 10 + 20);
+            transData = transform(origData, transType);
+            
+            drawHistogram('origChart', origData, 'rgba(139, 92, 246, 0.6)');
+            drawHistogram('transChart', transData, 'rgba(34, 197, 94, 0.6)');
+            drawScatter('scatterOrig', origData, targetData, 'rgba(139, 92, 246, 0.4)');
+            drawScatter('scatterTrans', transData, targetData, 'rgba(34, 197, 94, 0.4)');
+            
+            const origSkew = skewness(origData);
+            const transSkew = skewness(transData);
+            
+            document.getElementById('origStats').textContent = `skew: ${origSkew.toFixed(2)}`;
+            document.getElementById('transStats').textContent = `skew: ${transSkew.toFixed(2)}`;
+            document.getElementById('skewValue').textContent = transSkew.toFixed(2);
+            document.getElementById('kurtValue').textContent = kurtosis(transData).toFixed(2);
+            document.getElementById('minValue').textContent = Math.min(...transData).toFixed(2);
+            document.getElementById('maxValue').textContent = Math.max(...transData).toFixed(2);
+            
+            updateTransformInsight(distType, transType, origSkew, transSkew);
+        }
+
+        function updateTransformInsight(dist, trans, origSkew, transSkew) {
+            let insight = '';
+            
+            if (trans === 'none') {
+                insight = 'No transformation applied. Try different transformations to see their effects.';
+            } else if (trans === 'log' && dist === 'skewed') {
+                insight = `Log transform reduced skewness from ${origSkew.toFixed(1)} to ${transSkew.toFixed(1)}. Great for right-skewed data like income or counts.`;
+            } else if (trans === 'log') {
+                insight = `Log transform changed skewness from ${origSkew.toFixed(2)} to ${transSkew.toFixed(2)}. Most effective on right-skewed distributions — try "Right-Skewed" to see the big difference.`;
+            } else if (trans === 'standardize') {
+                insight = 'Standardization centers data at mean=0, std=1. Essential for distance-based models (KNN, SVM) and neural networks. Does not change the shape.';
+            } else if (trans === 'minmax') {
+                insight = 'Min-Max scaling puts data in [0,1]. Good for neural networks but a single outlier can compress all other values into a narrow band.';
+            } else if (trans === 'sqrt') {
+                insight = `Square root is a milder variance-stabilizer than log. Skewness went from ${origSkew.toFixed(2)} to ${transSkew.toFixed(2)}. Works well for count data.`;
+            } else if (trans === 'boxcox') {
+                insight = `Box-Cox (lambda=0.2) is a power transform that searches for normality. Skewness: ${origSkew.toFixed(2)} → ${transSkew.toFixed(2)}. Only valid for positive values.`;
+            } else if (trans === 'quantile') {
+                insight = `Quantile transform forces data into a perfect normal shape by mapping ranks to the Gaussian CDF. Skewness: ${origSkew.toFixed(2)} → ${transSkew.toFixed(2)}. Powerful but destroys outlier information.`;
+            } else {
+                insight = `Transformation changed skewness from ${origSkew.toFixed(2)} to ${transSkew.toFixed(2)}.`;
+            }
+            
+            document.getElementById('transformInsight').textContent = insight;
+        }
+
+        function updateEncoding() {
+            const encType = document.getElementById('encodingType').value;
+            const canvas = document.getElementById('encodingChart');
+            const { width, height, ctx } = setupCanvas(canvas);
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const categories = ['A', 'B', 'C', 'D', 'E'];
+            const targetMeans = [0.2, 0.35, 0.5, 0.65, 0.8];
+            
+            const pad = { top: 30, right: 30, bottom: 50, left: 60 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+            const barW = plotW / categories.length;
+            
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '10px -apple-system';
+            ctx.textAlign = 'right';
+            for (let tick = 0; tick <= 1; tick += 0.2) {
+                const y = pad.top + plotH - tick * plotH;
+                ctx.beginPath();
+                ctx.moveTo(pad.left, y);
+                ctx.lineTo(pad.left + plotW, y);
+                ctx.stroke();
+                ctx.fillText(tick.toFixed(1), pad.left - 6, y + 3);
+            }
+
+            ctx.fillStyle = '#334155';
+            ctx.font = '12px -apple-system';
+            ctx.textAlign = 'center';
+            ctx.save();
+            ctx.translate(12, pad.top + plotH / 2);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText('Target Rate', 0, 0);
+            ctx.restore();
+
+            let nCols = 1;
+            
+            if (encType === 'onehot') {
+                nCols = categories.length;
+                categories.forEach((cat, i) => {
+                    ctx.fillStyle = '#8b5cf6';
+                    const barH = targetMeans[i] * plotH;
+                    ctx.fillRect(pad.left + i * barW + 10, pad.top + plotH - barH, barW - 20, barH);
+                    
+                    ctx.fillStyle = '#64748b';
+                    ctx.font = '11px -apple-system';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`[${categories.map((_, j) => i === j ? 1 : 0).join(',')}]`, 
+                        pad.left + i * barW + barW/2, height - 10);
+                    ctx.fillText(cat, pad.left + i * barW + barW/2, height - 30);
+                });
+            } else if (encType === 'ordinal') {
+                nCols = 1;
+                categories.forEach((cat, i) => {
+                    ctx.fillStyle = '#22c55e';
+                    const barH = targetMeans[i] * plotH;
+                    ctx.fillRect(pad.left + i * barW + 10, pad.top + plotH - barH, barW - 20, barH);
+                    
+                    ctx.fillStyle = '#64748b';
+                    ctx.font = '11px -apple-system';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(`${i + 1}`, pad.left + i * barW + barW/2, height - 10);
+                    ctx.fillText(cat, pad.left + i * barW + barW/2, height - 30);
+                });
+            } else {
+                nCols = 1;
+                categories.forEach((cat, i) => {
+                    ctx.fillStyle = '#f97316';
+                    const barH = targetMeans[i] * plotH;
+                    ctx.fillRect(pad.left + i * barW + 10, pad.top + plotH - barH, barW - 20, barH);
+                    
+                    ctx.fillStyle = '#64748b';
+                    ctx.font = '11px -apple-system';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(targetMeans[i].toFixed(2), pad.left + i * barW + barW/2, height - 10);
+                    ctx.fillText(cat, pad.left + i * barW + barW/2, height - 30);
+                });
+            }
+            
+            document.getElementById('nCols').textContent = nCols;
+            
+            const insights = {
+                onehot: 'One-hot creates binary columns for each category. Works well for low cardinality but explodes dimensionality.',
+                ordinal: 'Ordinal encoding assigns integers. Only appropriate when categories have natural order.',
+                target: 'Target encoding replaces categories with their mean target value. Captures signal but risks leakage without CV.'
+            };
+            document.getElementById('encodingInsight').textContent = insights[encType];
+        }
+
+        function updateLeakage() {
+            const feat1 = document.getElementById('feat1').checked;
+            const feat2 = document.getElementById('feat2').checked;
+            const leaky = document.getElementById('leakyFeat').checked;
+            
+            let trainAuc = 0.5;
+            let testAuc = 0.5;
+            
+            if (feat1) { trainAuc += 0.08; testAuc += 0.08; }
+            if (feat2) { trainAuc += 0.07; testAuc += 0.07; }
+            if (leaky) { trainAuc = 0.98; testAuc = 0.55; }
+            
+            trainAuc = Math.min(0.99, trainAuc);
+            testAuc = Math.min(0.99, testAuc);
+            
+            document.getElementById('trainAuc').textContent = trainAuc.toFixed(2);
+            document.getElementById('testAuc').textContent = testAuc.toFixed(2);
+            document.getElementById('aucGap').textContent = (trainAuc - testAuc).toFixed(2);
+            
+            const trainColor = leaky ? '#dc2626' : '#22c55e';
+            const testColor = leaky ? '#dc2626' : '#22c55e';
+            
+            drawGauge('leakTrainChart', trainAuc, trainColor, 'Train AUC');
+            drawGauge('leakTestChart', testAuc, testColor, 'Test AUC');
+            
+            document.getElementById('leakageWarning').classList.toggle('visible', leaky);
+            
+            if (leaky) {
+                document.getElementById('leakageInsight').innerHTML = 
+                    '<strong>Leakage in action!</strong> The leaky feature has future information. Train AUC is 0.98 but test AUC collapses to 0.55.';
+            } else if (!feat1 && !feat2) {
+                document.getElementById('leakageInsight').textContent = 'No features selected. Add features to train a model.';
+            } else {
+                document.getElementById('leakageInsight').textContent = 
+                    'Valid features only. Train and test AUC are similar — the model generalizes well.';
+            }
+        }
+
+        function drawGauge(canvasId, value, color, label) {
+            const canvas = document.getElementById(canvasId);
+            const { width, height, ctx } = setupCanvas(canvas);
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const cx = width / 2;
+            const cy = height - 20;
+            const r = Math.min(width, height) * 0.6;
+            
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 20;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, Math.PI, 0);
+            ctx.stroke();
+            
+            ctx.strokeStyle = color;
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, Math.PI, Math.PI + (value - 0.5) * 2 * Math.PI);
+            ctx.stroke();
+            
+            ctx.fillStyle = '#1e293b';
+            ctx.font = 'bold 24px -apple-system';
+            ctx.textAlign = 'center';
+            ctx.fillText(value.toFixed(2), cx, cy - 20);
+            
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px -apple-system';
+            ctx.fillText('0.5', cx - r - 10, cy + 15);
+            ctx.fillText('1.0', cx + r + 10, cy + 15);
+        }
+
+        function showTab(tabName, btn) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            
+            btn.classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+            
+            if (tabName === 'transforms') updateTransforms();
+            if (tabName === 'encoding') updateEncoding();
+            if (tabName === 'leakage') updateLeakage();
+        }
+
+        function resetPlayground() {
+            document.getElementById('distType').value = 'skewed';
+            document.getElementById('transformType').value = 'none';
+            document.getElementById('nSamplesSlider').value = 500;
+            document.getElementById('encodingType').value = 'onehot';
+            document.getElementById('feat1').checked = true;
+            document.getElementById('feat2').checked = true;
+            document.getElementById('leakyFeat').checked = false;
+            
+            updateTransforms();
+            updateEncoding();
+            updateLeakage();
+        }
+
+        window.addEventListener('resize', () => {
+            const active = document.querySelector('.tab-content.active');
+            if (active && active.id === 'tab-transforms') updateTransforms();
+            else if (active && active.id === 'tab-encoding') updateEncoding();
+            else if (active && active.id === 'tab-leakage') updateLeakage();
+        });
+
+        updateTransforms();
+    </script>
+</body>
+</html>

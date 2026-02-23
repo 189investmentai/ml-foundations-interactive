@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embeddings Playground</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        h1 { font-size: 1.4rem; color: #0f172a; margin-bottom: 4px; }
+        .header-subtitle { font-size: 0.85rem; color: #64748b; }
+
+        .reset-btn {
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .reset-btn:hover { background: #f1f5f9; }
+
+        .start-banner {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            border-radius: 14px;
+            padding: 20px 28px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .start-banner-icon { font-size: 2.2rem; }
+        .start-banner-content h2 { font-size: 1rem; margin-bottom: 6px; }
+        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; }
+        .start-banner-steps { display: flex; gap: 20px; margin-top: 10px; flex-wrap: wrap; }
+        .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
+        .step-num {
+            background: rgba(255,255,255,0.2);
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 0.7rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .charts-area { display: flex; flex-direction: column; gap: 12px; }
+
+        .chart-card {
+            background: white;
+            border-radius: 10px;
+            padding: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .chart-title { font-size: 0.75rem; font-weight: 600; color: #475569; }
+        .chart-badge {
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        canvas { display: block; width: 100%; }
+
+        .sidebar { display: flex; flex-direction: column; gap: 12px; }
+
+        .sidebar-card {
+            background: white;
+            border-radius: 10px;
+            padding: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .sidebar-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .control-group { margin-bottom: 12px; }
+        .control-group:last-child { margin-bottom: 0; }
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        .control-value {
+            font-family: 'SF Mono', Monaco, monospace;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: #6366f1;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 5px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: #6366f1;
+            cursor: pointer;
+        }
+
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-family: inherit;
+            background: white;
+        }
+        textarea { min-height: 80px; resize: vertical; }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #6366f1;
+            color: white;
+        }
+        .btn-primary:hover { background: #4f46e5; }
+
+        .results-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .result-item {
+            padding: 8px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .result-item:hover { background: #f8fafc; }
+        .result-item.active { background: #eef2ff; }
+        .result-item.empty {
+            cursor: default;
+            color: #64748b;
+            font-style: italic;
+        }
+        .result-item.empty:hover { background: transparent; }
+        .result-item:last-child { border-bottom: none; }
+        .result-label {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .result-score {
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        .result-score.high { background: #dcfce7; color: #166534; }
+        .result-score.medium { background: #fef3c7; color: #92400e; }
+        .result-score.low { background: #f1f5f9; color: #64748b; }
+
+        .text-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .text-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            background: #f8fafc;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+        .text-item.active {
+            border-color: #c7d2fe;
+            background: #eef2ff;
+        }
+        .text-item.empty {
+            color: #64748b;
+            font-style: italic;
+            cursor: default;
+        }
+        .text-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        .text-content {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .insight-bar {
+            background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+            border: 1px solid #a5b4fc;
+            border-radius: 10px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .insight-icon { font-size: 1.2rem; }
+        .insight-content { flex: 1; }
+        .insight-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #3730a3;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .insight-text { font-size: 0.85rem; color: #4338ca; }
+        .input-hint {
+            margin-top: 6px;
+            font-size: 0.72rem;
+            color: #64748b;
+        }
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82rem;
+            color: #334155;
+            cursor: pointer;
+        }
+        .toggle-label input[type="checkbox"] {
+            accent-color: #6366f1;
+        }
+        .lens-section { margin-bottom: 12px; }
+        .lens-section:last-child { margin-bottom: 0; }
+        .lens-subtitle {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 8px;
+        }
+        .signal-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .signal-row {
+            display: grid;
+            grid-template-columns: 92px 1fr 34px;
+            gap: 8px;
+            align-items: center;
+            font-size: 0.72rem;
+            color: #334155;
+        }
+        .signal-label {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .signal-bar {
+            height: 8px;
+            border-radius: 999px;
+            background: #e2e8f0;
+            overflow: hidden;
+        }
+        .signal-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #818cf8, #4f46e5);
+            width: 0%;
+            transition: width 0.2s ease;
+        }
+        .signal-value {
+            text-align: right;
+            font-family: 'SF Mono', Monaco, monospace;
+            color: #475569;
+        }
+        .guide-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .guide-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: #475569;
+        }
+        .guide-step.done { color: #166534; }
+        .guide-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.68rem;
+            font-weight: 700;
+            background: #e2e8f0;
+            color: #475569;
+            flex-shrink: 0;
+        }
+        .guide-step.done .guide-dot {
+            background: #bbf7d0;
+            color: #166534;
+        }
+        .guide-message {
+            font-size: 0.78rem;
+            color: #334155;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 10px;
+        }
+        .advanced-panel > summary {
+            list-style: none;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #334155;
+        }
+        .advanced-panel > summary::-webkit-details-marker { display: none; }
+        .advanced-panel > summary::after {
+            content: '▸';
+            float: right;
+            color: #6366f1;
+        }
+        .advanced-panel[open] > summary::after { content: '▾'; }
+        .advanced-content { margin-top: 12px; display: flex; flex-direction: column; gap: 14px; }
+        .advanced-section {
+            border-top: 1px solid #e2e8f0;
+            padding-top: 12px;
+        }
+        .advanced-section:first-child {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        @media (max-width: 1000px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Embeddings Playground</h1>
+                <span class="header-subtitle">See how text becomes coordinates in meaning space</span>
+            </div>
+            <button class="reset-btn" onclick="resetPlayground()">↻ Reset</button>
+        </header>
+
+        <div class="start-banner">
+            <div class="start-banner-icon">🎯</div>
+            <div class="start-banner-content">
+                <h2>Text → Numbers → Similarity</h2>
+                <p>Embeddings capture meaning. Similar text lands nearby in the space.</p>
+                <div class="start-banner-steps">
+                    <div class="start-step"><span class="step-num">1</span> Add texts to see positions</div>
+                    <div class="start-step"><span class="step-num">2</span> Search to find similar items</div>
+                    <div class="start-step"><span class="step-num">3</span> Adjust threshold to filter</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="charts-area">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <span class="chart-title">Embedding Space (2D Projection)</span>
+                        <span class="chart-badge" id="nTexts">0 texts</span>
+                    </div>
+                    <canvas id="embeddingChart" height="400" title="Click points to inspect texts"></canvas>
+                </div>
+
+                <div class="insight-bar">
+                    <div class="insight-icon">💡</div>
+                    <div class="insight-content">
+                        <div class="insight-title">Embedding Insight</div>
+                        <div class="insight-text" id="insightText">Add some texts to see how they cluster by meaning.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Learning Path</div>
+                    <div class="guide-list">
+                        <div class="guide-step" id="guideStep1">
+                            <span class="guide-dot">1</span>
+                            <span>Add at least 4 texts with mixed topics</span>
+                        </div>
+                        <div class="guide-step" id="guideStep2">
+                            <span class="guide-dot">2</span>
+                            <span>Run a search and inspect top matches</span>
+                        </div>
+                        <div class="guide-step" id="guideStep3">
+                            <span class="guide-dot">3</span>
+                            <span>Change threshold and compare results</span>
+                        </div>
+                    </div>
+                    <div class="guide-message" id="guideMessage">Step 1: Add texts first. Start with Support Tickets or Mixed Topics.</div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Add Text</div>
+                    <div class="control-group">
+                        <textarea id="newText" placeholder="Enter text to embed..."></textarea>
+                        <div class="input-hint">Tip: Press Ctrl/Cmd + Enter to add quickly.</div>
+                    </div>
+                    <button class="btn btn-primary" onclick="addText()">Add to Space</button>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Quick Add</div>
+                    <div class="control-group">
+                        <button class="btn btn-primary" onclick="addPreset('support')" style="margin-bottom: 6px;">+ Support Tickets</button>
+                        <button class="btn btn-primary" onclick="addPreset('products')" style="margin-bottom: 6px;">+ Product Descriptions</button>
+                        <button class="btn btn-primary" onclick="addPreset('mixed')">+ Mixed Topics</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Search</div>
+                    <div class="control-group">
+                        <input type="text" id="searchQuery" placeholder="Search query...">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Similarity Threshold</span>
+                            <span class="control-value" id="thresholdValue">0.50</span>
+                        </div>
+                        <input type="range" id="thresholdSlider" min="0" max="1" step="0.05" value="0.5" oninput="updateThreshold()">
+                    </div>
+                    <button class="btn btn-primary" onclick="search()" style="margin-bottom: 10px;">Find Similar</button>
+                    <div class="input-hint" style="margin-top: -2px; margin-bottom: 10px;">Tip: Press Enter to search. Click a result or point to inspect.</div>
+                    <div class="results-list" id="searchResults"></div>
+                </div>
+
+                <details class="sidebar-card advanced-panel" id="advancedPanel">
+                    <summary>Advanced Exploration (Optional)</summary>
+                    <div class="advanced-content">
+                        <div class="advanced-section">
+                            <div class="sidebar-title">Relationship View</div>
+                            <div class="control-group">
+                                <label class="toggle-label">
+                                    <input type="checkbox" id="connectionsToggle" onchange="toggleConnections()">
+                                    <span>Show similarity links in chart</span>
+                                </label>
+                            </div>
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <span>Link Threshold</span>
+                                    <span class="control-value" id="connectionValue">0.65</span>
+                                </div>
+                                <input type="range" id="connectionSlider" min="0.3" max="0.95" step="0.05" value="0.65" oninput="updateConnectionThreshold()">
+                            </div>
+                            <div class="input-hint">Higher threshold shows only stronger semantic relationships.</div>
+                        </div>
+
+                        <div class="advanced-section">
+                            <div class="sidebar-title">Vector Blend Explorer</div>
+                            <div class="control-group">
+                                <div class="control-label"><span>Text A</span></div>
+                                <select id="blendA"></select>
+                            </div>
+                            <div class="control-group">
+                                <div class="control-label"><span>Text B</span></div>
+                                <select id="blendB"></select>
+                            </div>
+                            <div class="control-group">
+                                <div class="control-label">
+                                    <span>Blend Ratio (A → B)</span>
+                                    <span class="control-value" id="blendValue">0.50</span>
+                                </div>
+                                <input type="range" id="blendSlider" min="0" max="1" step="0.05" value="0.5" oninput="updateBlendValue()">
+                            </div>
+                            <button class="btn btn-primary" id="blendRunBtn" onclick="runBlendExplorer()" style="margin-bottom: 10px;">Explore Blend</button>
+                            <div class="input-hint" style="margin-top: -2px; margin-bottom: 10px;">Slide first, then click Explore Blend to compare neighbors.</div>
+                            <div class="results-list" id="blendResults"></div>
+                        </div>
+
+                        <div class="advanced-section">
+                            <div class="sidebar-title">Meaning Lens</div>
+                            <div class="lens-section">
+                                <div class="lens-subtitle" id="selectedLensTitle">Selected Text</div>
+                                <div class="signal-list" id="selectedLensBars"></div>
+                            </div>
+                            <div class="lens-section">
+                                <div class="lens-subtitle" id="probeLensTitle">Current Probe</div>
+                                <div class="signal-list" id="probeLensBars"></div>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Texts in Space</div>
+                    <div class="text-list" id="textList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let texts = [];
+        let embeddings = [];
+        let coords2d = [];
+        let searchHighlight = -1;
+        let renderedPoints = [];
+        let projectionBounds = null;
+        let currentProbe = null;
+        let showConnections = false;
+        let connectionThreshold = 0.65;
+        let hasRunSearch = false;
+        let thresholdDirty = false;
+        let thresholdRefinementDone = false;
+        
+        const colors = [
+            '#ef4444', '#f97316', '#eab308', '#22c55e', '#14b8a6',
+            '#0ea5e9', '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e'
+        ];
+
+        const topicDimensions = [
+            { label: 'Account', dims: [0, 1] },
+            { label: 'Shipping', dims: [2, 3] },
+            { label: 'Refunds', dims: [4, 5] },
+            { label: 'Devices', dims: [6, 7] },
+            { label: 'Speed', dims: [8, 9] }
+        ];
+
+        function isAdvancedOpen() {
+            return document.getElementById('advancedPanel').open;
+        }
+
+        function setInsight(message) {
+            document.getElementById('insightText').textContent = message;
+        }
+
+        function updateLearningPath(extraMessage = '') {
+            const hasEnoughTexts = texts.length >= 4;
+            const step1 = hasEnoughTexts;
+            const step2 = hasRunSearch;
+            const step3 = thresholdRefinementDone;
+            
+            document.getElementById('guideStep1').classList.toggle('done', step1);
+            document.getElementById('guideStep2').classList.toggle('done', step2);
+            document.getElementById('guideStep3').classList.toggle('done', step3);
+            
+            let message = '';
+            if (extraMessage) {
+                message = extraMessage;
+            } else if (!step1) {
+                message = 'Step 1: Add at least 4 texts. Mix two topics so spacing is meaningful.';
+            } else if (!step2) {
+                message = 'Step 2: Type a query and click Find Similar. Focus on top match score and neighbors.';
+            } else if (!step3) {
+                message = 'Step 3: Change threshold, then click Find Similar again. Notice which matches disappear.';
+            } else {
+                message = 'Core intuition complete: distance drives similarity, and threshold controls filtering strictness.';
+            }
+            
+            document.getElementById('guideMessage').textContent = message;
+            setInsight(message);
+        }
+
+        function setupCanvas(canvas) {
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+            return { width: rect.width, height: rect.height, ctx };
+        }
+
+        function clamp(value, min, max) {
+            return Math.min(max, Math.max(min, value));
+        }
+
+        function truncateText(text, limit) {
+            return text.length > limit ? `${text.substring(0, limit)}...` : text;
+        }
+
+        function normalizeText(text) {
+            return text.trim().toLowerCase().replace(/\s+/g, ' ');
+        }
+
+        function textHash(text, seed = 0) {
+            let hash = 2166136261 ^ seed;
+            for (let i = 0; i < text.length; i++) {
+                hash ^= text.charCodeAt(i);
+                hash = Math.imul(hash, 16777619);
+            }
+            return hash >>> 0;
+        }
+
+        function deterministicJitter(text, seed) {
+            const hash = textHash(text, seed);
+            const normalized = (hash % 2000) / 1000 - 1;
+            return normalized * 0.04;
+        }
+
+        // Simple mock embedding function (in reality, use a model)
+        function mockEmbed(text) {
+            const words = text.toLowerCase().split(/\s+/);
+            const dim = 64;
+            const emb = new Array(dim).fill(0);
+            
+            // Simple hash-based embedding for demo
+            for (const word of words) {
+                for (let i = 0; i < word.length; i++) {
+                    const idx = (word.charCodeAt(i) * (i + 1)) % dim;
+                    emb[idx] += 0.1;
+                    emb[(idx + 13) % dim] -= 0.05;
+                }
+            }
+            
+            // Topic-based components
+            if (text.match(/password|login|account|reset/i)) {
+                emb[0] += 1; emb[1] += 0.8;
+            }
+            if (text.match(/order|shipping|delivery|track/i)) {
+                emb[2] += 1; emb[3] += 0.8;
+            }
+            if (text.match(/refund|return|cancel|money/i)) {
+                emb[4] += 1; emb[5] += 0.8;
+            }
+            if (text.match(/phone|laptop|computer|device/i)) {
+                emb[6] += 1; emb[7] += 0.8;
+            }
+            if (text.match(/fast|quick|speed|performance/i)) {
+                emb[8] += 1; emb[9] += 0.8;
+            }
+            
+            // Normalize
+            const norm = Math.sqrt(emb.reduce((s, v) => s + v * v, 0)) || 1;
+            return emb.map(v => v / norm);
+        }
+
+        function cosineSim(a, b) {
+            let dot = 0, normA = 0, normB = 0;
+            for (let i = 0; i < a.length; i++) {
+                dot += a[i] * b[i];
+                normA += a[i] * a[i];
+                normB += b[i] * b[i];
+            }
+            return dot / (Math.sqrt(normA) * Math.sqrt(normB) || 1);
+        }
+
+        function getProjectionBase(embedding) {
+            return {
+                x: embedding[0] + embedding[2] + embedding[4] + embedding[6] + embedding[8] * 0.5,
+                y: embedding[1] + embedding[3] + embedding[5] + embedding[7] + embedding[9] * 0.5
+            };
+        }
+
+        // Lightweight 2D projection from selected embedding dimensions with deterministic jitter.
+        function projectTo2D() {
+            if (embeddings.length === 0) {
+                coords2d = [];
+                projectionBounds = null;
+                return;
+            }
+            
+            const rawCoords = embeddings.map((embedding, idx) => {
+                const base = getProjectionBase(embedding);
+                const jitterX = deterministicJitter(texts[idx], 17);
+                const jitterY = deterministicJitter(texts[idx], 53);
+                return [base.x + jitterX, base.y + jitterY];
+            });
+            
+            const xs = rawCoords.map(c => c[0]);
+            const ys = rawCoords.map(c => c[1]);
+            const minX = Math.min(...xs) - 0.1;
+            const maxX = Math.max(...xs) + 0.1;
+            const minY = Math.min(...ys) - 0.1;
+            const maxY = Math.max(...ys) + 0.1;
+            projectionBounds = { minX, maxX, minY, maxY };
+            
+            coords2d = rawCoords.map(([x, y]) => [
+                (x - minX) / (maxX - minX || 1),
+                (y - minY) / (maxY - minY || 1)
+            ]);
+        }
+
+        function projectEmbeddingTo2D(embedding, seedText) {
+            if (!projectionBounds) {
+                return [0.5, 0.5];
+            }
+            const base = getProjectionBase(embedding);
+            const jitterScale = 0.35;
+            const x = base.x + deterministicJitter(seedText, 17) * jitterScale;
+            const y = base.y + deterministicJitter(seedText, 53) * jitterScale;
+            const normX = (x - projectionBounds.minX) / (projectionBounds.maxX - projectionBounds.minX || 1);
+            const normY = (y - projectionBounds.minY) / (projectionBounds.maxY - projectionBounds.minY || 1);
+            return [clamp(normX, 0, 1), clamp(normY, 0, 1)];
+        }
+
+        function getTopMatchesForEmbedding(embedding, limit = 5, excludeIndex = -1) {
+            if (texts.length === 0) return [];
+            
+            return texts.map((text, idx) => ({
+                text,
+                idx,
+                score: cosineSim(embedding, embeddings[idx])
+            }))
+            .filter(item => item.idx !== excludeIndex)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, limit);
+        }
+
+        function getTopicSignal(embedding, dims) {
+            const raw = (embedding[dims[0]] + embedding[dims[1]]) / 2;
+            return clamp((raw + 0.08) * 3.2, 0, 1);
+        }
+
+        function renderLensPlaceholder(containerId, message) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            const row = document.createElement('div');
+            row.className = 'text-item empty';
+            row.style.fontSize = '0.72rem';
+            row.textContent = message;
+            container.appendChild(row);
+        }
+
+        function renderTopicBars(containerId, embedding) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            topicDimensions.forEach(topic => {
+                const row = document.createElement('div');
+                row.className = 'signal-row';
+                
+                const label = document.createElement('span');
+                label.className = 'signal-label';
+                label.textContent = topic.label;
+                
+                const bar = document.createElement('div');
+                bar.className = 'signal-bar';
+                const fill = document.createElement('div');
+                fill.className = 'signal-fill';
+                const signal = getTopicSignal(embedding, topic.dims);
+                fill.style.width = `${(signal * 100).toFixed(0)}%`;
+                bar.appendChild(fill);
+                
+                const value = document.createElement('span');
+                value.className = 'signal-value';
+                value.textContent = `${(signal * 100).toFixed(0)}%`;
+                
+                row.appendChild(label);
+                row.appendChild(bar);
+                row.appendChild(value);
+                container.appendChild(row);
+            });
+        }
+
+        function updateMeaningLens() {
+            const selectedTitle = document.getElementById('selectedLensTitle');
+            const probeTitle = document.getElementById('probeLensTitle');
+            
+            if (searchHighlight >= 0 && searchHighlight < embeddings.length) {
+                selectedTitle.textContent = `Selected Text #${searchHighlight + 1}`;
+                renderTopicBars('selectedLensBars', embeddings[searchHighlight]);
+            } else {
+                selectedTitle.textContent = 'Selected Text';
+                renderLensPlaceholder('selectedLensBars', 'Select a point to inspect topic signals.');
+            }
+            
+            if (currentProbe && currentProbe.embedding) {
+                probeTitle.textContent = currentProbe.title;
+                renderTopicBars('probeLensBars', currentProbe.embedding);
+            } else {
+                probeTitle.textContent = 'Current Probe';
+                renderLensPlaceholder('probeLensBars', 'Run search or blend exploration to inspect a probe vector.');
+            }
+        }
+
+        function drawConnectionLines(ctx, pad, plotW, plotH) {
+            if (!isAdvancedOpen() || !showConnections || coords2d.length < 2) {
+                return;
+            }
+            
+            for (let i = 0; i < embeddings.length; i++) {
+                for (let j = i + 1; j < embeddings.length; j++) {
+                    const sim = cosineSim(embeddings[i], embeddings[j]);
+                    if (sim < connectionThreshold) continue;
+                    
+                    const strength = clamp(
+                        (sim - connectionThreshold) / (1 - connectionThreshold + 0.0001),
+                        0,
+                        1
+                    );
+                    const x1 = pad.left + coords2d[i][0] * plotW;
+                    const y1 = pad.top + (1 - coords2d[i][1]) * plotH;
+                    const x2 = pad.left + coords2d[j][0] * plotW;
+                    const y2 = pad.top + (1 - coords2d[j][1]) * plotH;
+                    
+                    ctx.strokeStyle = `rgba(99, 102, 241, ${0.08 + strength * 0.35})`;
+                    ctx.lineWidth = 0.8 + strength * 1.6;
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.stroke();
+                }
+            }
+        }
+
+        function drawProbeOverlay(ctx, pad, plotW, plotH) {
+            if (!isAdvancedOpen() || !currentProbe || !projectionBounds || coords2d.length === 0) {
+                return;
+            }
+            
+            const probeCoord = projectEmbeddingTo2D(currentProbe.embedding, currentProbe.seedText);
+            const px = pad.left + probeCoord[0] * plotW;
+            const py = pad.top + (1 - probeCoord[1]) * plotH;
+            const neighbors = getTopMatchesForEmbedding(currentProbe.embedding, 3);
+            
+            ctx.save();
+            ctx.setLineDash([4, 4]);
+            neighbors.forEach(neighbor => {
+                const nx = pad.left + coords2d[neighbor.idx][0] * plotW;
+                const ny = pad.top + (1 - coords2d[neighbor.idx][1]) * plotH;
+                const strength = clamp((neighbor.score + 1) / 2, 0, 1);
+                ctx.strokeStyle = `rgba(15, 23, 42, ${0.18 + strength * 0.22})`;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(px, py);
+                ctx.lineTo(nx, ny);
+                ctx.stroke();
+            });
+            ctx.restore();
+            
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.fillStyle = '#0f172a';
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, -10);
+            ctx.lineTo(10, 0);
+            ctx.lineTo(0, 10);
+            ctx.lineTo(-10, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 9px -apple-system';
+            ctx.textAlign = 'center';
+            ctx.fillText('Q', 0, 3);
+            ctx.restore();
+            
+            ctx.fillStyle = '#334155';
+            ctx.font = '11px -apple-system';
+            ctx.textAlign = 'left';
+            ctx.fillText(
+                currentProbe.source === 'blend' ? 'Blend probe' : 'Search probe',
+                px + 12,
+                py - 10
+            );
+        }
+
+        function drawEmbeddingSpace() {
+            const canvas = document.getElementById('embeddingChart');
+            const { width, height, ctx } = setupCanvas(canvas);
+            const pad = { top: 20, right: 20, bottom: 20, left: 20 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+            renderedPoints = [];
+            
+            document.getElementById('nTexts').textContent = `${texts.length} ${texts.length === 1 ? 'text' : 'texts'}`;
+            ctx.clearRect(0, 0, width, height);
+            
+            // Background grid
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const x = pad.left + (i / 4) * plotW;
+                const y = pad.top + (i / 4) * plotH;
+                ctx.beginPath();
+                ctx.moveTo(x, pad.top);
+                ctx.lineTo(x, height - pad.bottom);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(pad.left, y);
+                ctx.lineTo(width - pad.right, y);
+                ctx.stroke();
+            }
+            
+            if (coords2d.length === 0) {
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '14px -apple-system';
+                ctx.textAlign = 'center';
+                ctx.fillText('Add texts to see their embeddings', width / 2, height / 2);
+                return;
+            }
+            
+            drawConnectionLines(ctx, pad, plotW, plotH);
+            
+            // Draw points
+            coords2d.forEach((coord, idx) => {
+                const x = pad.left + coord[0] * plotW;
+                const y = pad.top + (1 - coord[1]) * plotH;
+                const isHighlighted = idx === searchHighlight;
+                const radius = isHighlighted ? 11 : 8;
+                
+                renderedPoints.push({ idx, x, y, radius: radius + 4 });
+                
+                // Glow for highlighted
+                if (isHighlighted) {
+                    ctx.fillStyle = 'rgba(99, 102, 241, 0.2)';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 18, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                ctx.fillStyle = colors[idx % colors.length];
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Label
+                ctx.fillStyle = '#1e293b';
+                ctx.font = '10px -apple-system';
+                ctx.textAlign = 'center';
+                ctx.fillText((idx + 1).toString(), x, y + radius + 12);
+            });
+            
+            drawProbeOverlay(ctx, pad, plotW, plotH);
+        }
+
+        function getPointAtPosition(x, y) {
+            let selected = null;
+            for (const point of renderedPoints) {
+                const dx = x - point.x;
+                const dy = y - point.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist <= point.radius && (!selected || dist < selected.dist)) {
+                    selected = { idx: point.idx, dist };
+                }
+            }
+            return selected ? selected.idx : -1;
+        }
+
+        function handleChartClick(event) {
+            const canvas = document.getElementById('embeddingChart');
+            const rect = canvas.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const clickY = event.clientY - rect.top;
+            const idx = getPointAtPosition(clickX, clickY);
+            if (idx === -1) return;
+            
+            searchHighlight = idx;
+            drawEmbeddingSpace();
+            updateTextList();
+            updateMeaningLens();
+            updateLearningPath();
+        }
+
+        function handleChartHover(event) {
+            const canvas = document.getElementById('embeddingChart');
+            const rect = canvas.getBoundingClientRect();
+            const hoverX = event.clientX - rect.left;
+            const hoverY = event.clientY - rect.top;
+            canvas.style.cursor = getPointAtPosition(hoverX, hoverY) !== -1 ? 'pointer' : 'default';
+        }
+
+        function updateTextList() {
+            const list = document.getElementById('textList');
+            list.innerHTML = '';
+            
+            if (texts.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'text-item empty';
+                empty.textContent = 'No texts yet. Add one to begin.';
+                list.appendChild(empty);
+                return;
+            }
+            
+            texts.forEach((text, idx) => {
+                const item = document.createElement('div');
+                item.className = 'text-item';
+                if (idx === searchHighlight) {
+                    item.classList.add('active');
+                }
+                
+                const dot = document.createElement('div');
+                dot.className = 'text-color';
+                dot.style.background = colors[idx % colors.length];
+                
+                const content = document.createElement('span');
+                content.className = 'text-content';
+                content.textContent = `${idx + 1}. ${text}`;
+                
+                item.appendChild(dot);
+                item.appendChild(content);
+                item.onclick = () => {
+                    searchHighlight = idx;
+                    drawEmbeddingSpace();
+                    updateTextList();
+                    updateMeaningLens();
+                    updateLearningPath();
+                };
+                list.appendChild(item);
+            });
+        }
+
+        function renderSearchMessage(message) {
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = '';
+            const item = document.createElement('div');
+            item.className = 'result-item empty';
+            item.textContent = message;
+            resultsDiv.appendChild(item);
+        }
+
+        function renderBlendMessage(message) {
+            const resultsDiv = document.getElementById('blendResults');
+            resultsDiv.innerHTML = '';
+            const item = document.createElement('div');
+            item.className = 'result-item empty';
+            item.textContent = message;
+            resultsDiv.appendChild(item);
+        }
+
+        function syncBlendControls() {
+            const selectA = document.getElementById('blendA');
+            const selectB = document.getElementById('blendB');
+            const slider = document.getElementById('blendSlider');
+            const button = document.getElementById('blendRunBtn');
+            
+            const prevA = parseInt(selectA.value, 10);
+            const prevB = parseInt(selectB.value, 10);
+            
+            selectA.innerHTML = '';
+            selectB.innerHTML = '';
+            
+            if (texts.length < 2) {
+                selectA.disabled = true;
+                selectB.disabled = true;
+                slider.disabled = true;
+                button.disabled = true;
+                renderBlendMessage('Add at least 2 texts to blend vectors.');
+                return;
+            }
+            
+            texts.forEach((text, idx) => {
+                const optionA = document.createElement('option');
+                optionA.value = idx.toString();
+                optionA.textContent = `#${idx + 1} ${truncateText(text, 28)}`;
+                selectA.appendChild(optionA);
+                
+                const optionB = document.createElement('option');
+                optionB.value = idx.toString();
+                optionB.textContent = `#${idx + 1} ${truncateText(text, 28)}`;
+                selectB.appendChild(optionB);
+            });
+            
+            let nextA = Number.isInteger(prevA) && prevA >= 0 && prevA < texts.length ? prevA : 0;
+            let nextB = Number.isInteger(prevB) && prevB >= 0 && prevB < texts.length ? prevB : 1;
+            if (nextA === nextB) {
+                nextB = (nextA + 1) % texts.length;
+            }
+            
+            selectA.value = nextA.toString();
+            selectB.value = nextB.toString();
+            selectA.disabled = false;
+            selectB.disabled = false;
+            slider.disabled = false;
+            button.disabled = false;
+        }
+
+        function runAddTexts(newTexts) {
+            const seen = new Set(texts.map(normalizeText));
+            let added = 0;
+            let skipped = 0;
+            
+            newTexts.forEach(rawText => {
+                const text = rawText.trim();
+                if (!text) return;
+                
+                const key = normalizeText(text);
+                if (seen.has(key)) {
+                    skipped++;
+                    return;
+                }
+                seen.add(key);
+                texts.push(text);
+                embeddings.push(mockEmbed(text));
+                added++;
+            });
+            
+            if (added > 0) {
+                searchHighlight = -1;
+                projectTo2D();
+                drawEmbeddingSpace();
+                updateTextList();
+                syncBlendControls();
+                updateMeaningLens();
+                updateLearningPath();
+            }
+            
+            return { added, skipped };
+        }
+
+        function addText() {
+            const input = document.getElementById('newText');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            const { added } = runAddTexts([text]);
+            input.value = '';
+            
+            if (added === 0) {
+                updateLearningPath('That text is already in the space. Try a new phrase or edit wording.');
+            }
+        }
+
+        const presets = {
+            support: [
+                "I can't reset my password",
+                "How do I change my login credentials",
+                "Account access issue",
+                "Where is my order?",
+                "Shipping is taking too long",
+                "Track my delivery",
+                "I want a refund",
+                "Cancel my subscription",
+                "Return this product"
+            ],
+            products: [
+                "Fast laptop for gaming",
+                "High performance computer",
+                "Quick charging phone",
+                "Wireless bluetooth headphones",
+                "Noise cancelling earbuds",
+                "Smart watch fitness tracker",
+                "4K television display",
+                "Home theater speakers"
+            ],
+            mixed: [
+                "Reset my account password",
+                "Machine learning tutorial",
+                "Best restaurants nearby",
+                "Track my package delivery",
+                "Learn programming online",
+                "Weather forecast today"
+            ]
+        };
+
+        function addPreset(name) {
+            if (!presets[name]) return;
+            
+            const { added, skipped } = runAddTexts(presets[name]);
+            if (added === 0) {
+                updateLearningPath('All preset texts are already in the space.');
+                return;
+            }
+            if (skipped > 0) {
+                updateLearningPath(`Added ${added} new texts and skipped ${skipped} duplicates.`);
+            }
+        }
+
+        function search() {
+            const query = document.getElementById('searchQuery').value.trim();
+            const threshold = parseFloat(document.getElementById('thresholdSlider').value);
+            
+            if (texts.length === 0) {
+                renderSearchMessage('Add texts first, then run search.');
+                updateMeaningLens();
+                updateLearningPath('Step 1 first: add texts before searching.');
+                return;
+            }
+            
+            if (!query) {
+                renderSearchMessage('Enter a query to find similar texts.');
+                searchHighlight = -1;
+                drawEmbeddingSpace();
+                updateTextList();
+                updateMeaningLens();
+                updateLearningPath('Type a query, then click Find Similar.');
+                return;
+            }
+            
+            const queryEmb = mockEmbed(query);
+            
+            const results = getTopMatchesForEmbedding(queryEmb, texts.length)
+                .filter(result => result.score >= threshold)
+                .slice(0, 20);
+            
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.innerHTML = '';
+            
+            if (results.length === 0) {
+                renderSearchMessage('No results above threshold. Lower threshold or rephrase query.');
+                searchHighlight = -1;
+            } else {
+                searchHighlight = results[0].idx;
+                
+                results.forEach((result, rank) => {
+                    const scoreClass = result.score >= 0.8 ? 'high' : result.score >= 0.6 ? 'medium' : 'low';
+                    const item = document.createElement('div');
+                    item.className = 'result-item';
+                    if (rank === 0) item.classList.add('active');
+                    
+                    const label = document.createElement('span');
+                    label.className = 'result-label';
+                    label.textContent = `${result.idx + 1}. ${truncateText(result.text, 56)}`;
+                    
+                    const score = document.createElement('span');
+                    score.className = `result-score ${scoreClass}`;
+                    score.textContent = result.score.toFixed(2);
+                    
+                    item.appendChild(label);
+                    item.appendChild(score);
+                    item.onclick = () => {
+                        searchHighlight = result.idx;
+                        drawEmbeddingSpace();
+                        updateTextList();
+                        updateMeaningLens();
+                        Array.from(resultsDiv.children).forEach(element => element.classList.remove('active'));
+                        item.classList.add('active');
+                        updateLearningPath();
+                    };
+                    resultsDiv.appendChild(item);
+                });
+            }
+            
+            hasRunSearch = true;
+            if (thresholdDirty) {
+                thresholdRefinementDone = true;
+                thresholdDirty = false;
+            }
+            
+            drawEmbeddingSpace();
+            updateTextList();
+            updateMeaningLens();
+            updateLearningPath();
+        }
+
+        function updateThreshold() {
+            const val = document.getElementById('thresholdSlider').value;
+            document.getElementById('thresholdValue').textContent = parseFloat(val).toFixed(2);
+            
+            if (hasRunSearch) {
+                thresholdDirty = true;
+                updateLearningPath('Threshold changed. Click Find Similar again to compare filtering.');
+            }
+        }
+
+        function toggleConnections() {
+            showConnections = document.getElementById('connectionsToggle').checked;
+            drawEmbeddingSpace();
+            updateLearningPath();
+        }
+
+        function updateConnectionThreshold() {
+            connectionThreshold = parseFloat(document.getElementById('connectionSlider').value);
+            document.getElementById('connectionValue').textContent = connectionThreshold.toFixed(2);
+            drawEmbeddingSpace();
+            updateLearningPath();
+        }
+
+        function updateBlendValue() {
+            const alpha = parseFloat(document.getElementById('blendSlider').value);
+            document.getElementById('blendValue').textContent = alpha.toFixed(2);
+        }
+
+        function runBlendExplorer(updateMessage = true) {
+            if (texts.length < 2) {
+                renderBlendMessage('Add at least 2 texts to blend vectors.');
+                return;
+            }
+            
+            const idxA = parseInt(document.getElementById('blendA').value, 10);
+            const idxB = parseInt(document.getElementById('blendB').value, 10);
+            const alpha = parseFloat(document.getElementById('blendSlider').value);
+            
+            if (!Number.isInteger(idxA) || !Number.isInteger(idxB) || idxA === idxB) {
+                renderBlendMessage('Choose two different texts for A and B.');
+                return;
+            }
+            
+            const mixed = embeddings[idxA].map((value, i) =>
+                (1 - alpha) * value + alpha * embeddings[idxB][i]
+            );
+            const norm = Math.sqrt(mixed.reduce((sum, value) => sum + value * value, 0)) || 1;
+            const blendEmbedding = mixed.map(value => value / norm);
+            
+            currentProbe = {
+                source: 'blend',
+                title: `Blend Probe #${idxA + 1} -> #${idxB + 1}`,
+                seedText: `blend:${idxA}:${idxB}:${alpha.toFixed(2)}`,
+                embedding: blendEmbedding
+            };
+            
+            const results = getTopMatchesForEmbedding(blendEmbedding, 5);
+            const resultsDiv = document.getElementById('blendResults');
+            resultsDiv.innerHTML = '';
+            
+            if (results.length === 0) {
+                renderBlendMessage('No blend neighbors available yet.');
+                return;
+            }
+            
+            searchHighlight = results[0].idx;
+            results.forEach((result, rank) => {
+                const scoreClass = result.score >= 0.8 ? 'high' : result.score >= 0.6 ? 'medium' : 'low';
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                if (rank === 0) item.classList.add('active');
+                
+                const label = document.createElement('span');
+                label.className = 'result-label';
+                label.textContent = `${result.idx + 1}. ${truncateText(result.text, 56)}`;
+                
+                const score = document.createElement('span');
+                score.className = `result-score ${scoreClass}`;
+                score.textContent = result.score.toFixed(2);
+                
+                item.appendChild(label);
+                item.appendChild(score);
+                item.onclick = () => {
+                    searchHighlight = result.idx;
+                    drawEmbeddingSpace();
+                    updateTextList();
+                    updateMeaningLens();
+                    Array.from(resultsDiv.children).forEach(element => element.classList.remove('active'));
+                    item.classList.add('active');
+                    updateLearningPath();
+                };
+                resultsDiv.appendChild(item);
+            });
+            
+            drawEmbeddingSpace();
+            updateTextList();
+            updateMeaningLens();
+            
+            if (updateMessage) {
+                updateLearningPath('Advanced: Blend explored. Move slider, then click Explore Blend again to compare neighbors.');
+            } else {
+                updateLearningPath();
+            }
+        }
+
+        function resetPlayground() {
+            texts = [];
+            embeddings = [];
+            coords2d = [];
+            searchHighlight = -1;
+            renderedPoints = [];
+            projectionBounds = null;
+            currentProbe = null;
+            showConnections = false;
+            connectionThreshold = 0.65;
+            hasRunSearch = false;
+            thresholdDirty = false;
+            thresholdRefinementDone = false;
+            
+            document.getElementById('newText').value = '';
+            document.getElementById('searchQuery').value = '';
+            document.getElementById('thresholdSlider').value = 0.5;
+            document.getElementById('thresholdValue').textContent = '0.50';
+            document.getElementById('connectionsToggle').checked = false;
+            document.getElementById('connectionSlider').value = '0.65';
+            document.getElementById('connectionValue').textContent = '0.65';
+            document.getElementById('blendSlider').value = 0.5;
+            document.getElementById('blendValue').textContent = '0.50';
+            document.getElementById('advancedPanel').open = false;
+            
+            renderSearchMessage('Search results will appear here.');
+            renderBlendMessage('Blend neighbors will appear here.');
+            drawEmbeddingSpace();
+            updateTextList();
+            syncBlendControls();
+            updateMeaningLens();
+            updateLearningPath();
+        }
+
+        document.getElementById('newText').addEventListener('keydown', event => {
+            if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                event.preventDefault();
+                addText();
+            }
+        });
+
+        document.getElementById('searchQuery').addEventListener('keydown', event => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                search();
+            }
+        });
+
+        document.getElementById('searchQuery').addEventListener('input', () => {
+            if (document.getElementById('searchQuery').value.trim()) {
+                return;
+            }
+            renderSearchMessage('Enter a query to find similar texts.');
+            searchHighlight = -1;
+            drawEmbeddingSpace();
+            updateTextList();
+            updateMeaningLens();
+            updateLearningPath();
+        });
+
+        document.getElementById('advancedPanel').addEventListener('toggle', () => {
+            if (!isAdvancedOpen()) {
+                currentProbe = null;
+            }
+            drawEmbeddingSpace();
+            updateMeaningLens();
+            updateLearningPath();
+        });
+
+        const chartCanvas = document.getElementById('embeddingChart');
+        chartCanvas.addEventListener('click', handleChartClick);
+        chartCanvas.addEventListener('mousemove', handleChartHover);
+        chartCanvas.addEventListener('mouseleave', () => {
+            chartCanvas.style.cursor = 'default';
+        });
+
+        window.addEventListener('resize', drawEmbeddingSpace);
+        drawEmbeddingSpace();
+        updateTextList();
+        syncBlendControls();
+        updateMeaningLens();
+        renderSearchMessage('Search results will appear here.');
+        renderBlendMessage('Blend neighbors will appear here.');
+        updateLearningPath();
+    </script>
+</body>
+</html>

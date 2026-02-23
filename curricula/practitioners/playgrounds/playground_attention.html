@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attention Playground</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        h1 { font-size: 1.4rem; color: #0f172a; margin-bottom: 4px; }
+        .header-subtitle { font-size: 0.85rem; color: #64748b; }
+
+        .reset-btn {
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .reset-btn:hover { background: #f1f5f9; }
+
+        .start-banner {
+            background: linear-gradient(135deg, #ec4899, #db2777);
+            color: white;
+            border-radius: 14px;
+            padding: 20px 28px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .start-banner-icon { font-size: 2.2rem; }
+        .start-banner-content h2 { font-size: 1rem; margin-bottom: 6px; }
+        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; }
+        .start-banner-steps { display: flex; gap: 20px; margin-top: 10px; flex-wrap: wrap; }
+        .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
+        .step-num {
+            background: rgba(255,255,255,0.2);
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 0.7rem;
+        }
+
+        .input-section {
+            background: white;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .input-group {
+            flex: 1;
+        }
+        .input-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #ec4899;
+            color: white;
+        }
+        .btn-primary:hover { background: #db2777; }
+
+        .presets {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .preset-btn {
+            padding: 6px 12px;
+            background: #f1f5f9;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            color: #475569;
+        }
+        .preset-btn:hover { background: #e2e8f0; }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 16px;
+        }
+
+        .viz-area {
+            background: white;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .viz-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+
+        .tokens-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .token {
+            padding: 8px 14px;
+            background: #f1f5f9;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        .token:hover { background: #e2e8f0; }
+        .token.selected {
+            background: #fce7f3;
+            border-color: #ec4899;
+            color: #be185d;
+        }
+
+        .attention-matrix {
+            overflow-x: auto;
+        }
+        .matrix-table {
+            border-collapse: collapse;
+            font-size: 0.75rem;
+        }
+        .matrix-table th, .matrix-table td {
+            padding: 8px 12px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        .matrix-table th {
+            background: #f8fafc;
+            font-weight: 600;
+            color: #64748b;
+        }
+        .matrix-table td {
+            position: relative;
+        }
+        .attention-cell {
+            display: block;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .sidebar-card {
+            background: white;
+            border-radius: 10px;
+            padding: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .sidebar-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .attention-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .attention-bar-label {
+            width: 80px;
+            font-size: 0.75rem;
+            color: #64748b;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .attention-bar-fill {
+            flex: 1;
+            height: 20px;
+            background: #f1f5f9;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .attention-bar-inner {
+            height: 100%;
+            background: linear-gradient(90deg, #ec4899, #f472b6);
+            transition: width 0.3s;
+        }
+        .attention-bar-value {
+            width: 40px;
+            font-size: 0.7rem;
+            font-family: 'SF Mono', Monaco, monospace;
+            color: #64748b;
+            text-align: right;
+        }
+
+        .insight-bar {
+            background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+            border: 1px solid #f9a8d4;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-top: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .insight-icon { font-size: 1.2rem; }
+        .insight-content { flex: 1; }
+        .insight-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #be185d;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .insight-text { font-size: 0.85rem; color: #9d174d; }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            background: white;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Attention Playground</h1>
+                <span class="header-subtitle">See how transformers focus on relevant context</span>
+            </div>
+            <button class="reset-btn" onclick="resetPlayground()">↻ Reset</button>
+        </header>
+
+        <div class="start-banner">
+            <div class="start-banner-icon">👁️</div>
+            <div class="start-banner-content">
+                <h2>Visualize Self-Attention</h2>
+                <p>See how transformers decide which words matter for understanding each word.</p>
+                <div class="start-banner-steps">
+                    <div class="start-step"><span class="step-num">1</span> Enter a sentence or pick a preset</div>
+                    <div class="start-step"><span class="step-num">2</span> Click a token to see its attention</div>
+                    <div class="start-step"><span class="step-num">3</span> Switch heads to compare patterns</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-section">
+            <div class="input-row">
+                <div class="input-group">
+                    <div class="input-label">Input Sentence</div>
+                    <input type="text" id="sentenceInput" value="The cat sat on the mat because it was tired" placeholder="Enter a sentence...">
+                </div>
+                <button class="btn btn-primary" onclick="processInput()">Analyze Attention</button>
+            </div>
+            <div class="presets">
+                <button class="preset-btn" onclick="setPreset('The bank by the river had many fish swimming')">🏦 Bank (ambiguous)</button>
+                <button class="preset-btn" onclick="setPreset('She gave him the book that he wanted')">📚 Pronouns</button>
+                <button class="preset-btn" onclick="setPreset('The movie was not good but the acting was great')">🎬 Negation</button>
+                <button class="preset-btn" onclick="setPreset('Paris is the capital of France and London is the capital of England')">🗺️ Long-range</button>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="viz-area">
+                <div class="viz-title">Tokens (click one to see attention)</div>
+                <div class="tokens-row" id="tokensRow"></div>
+                
+                <div class="viz-title">Attention Matrix</div>
+                <div class="attention-matrix" id="attentionMatrix"></div>
+
+                <div class="insight-bar">
+                    <div class="insight-icon">💡</div>
+                    <div class="insight-content">
+                        <div class="insight-title">Attention Insight</div>
+                        <div class="insight-text" id="insightText">Click a token above to see which other tokens it attends to.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Attention Head</div>
+                    <select id="headSelect" onchange="onHeadChange()">
+                        <option value="0">Head 1: Syntactic</option>
+                        <option value="1">Head 2: Semantic</option>
+                        <option value="2">Head 3: Positional</option>
+                        <option value="3">Head 4: Mixed</option>
+                    </select>
+                    <p style="font-size: 0.75rem; color: #64748b;">Different heads learn different patterns.</p>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Attention Weights</div>
+                    <div id="attentionBars"></div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Selected Token</div>
+                    <div id="selectedInfo" style="font-size: 0.85rem; color: #475569;">
+                        Click a token to see details
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tokens = [];
+        let selectedToken = -1;
+        let attentionWeights = [];
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function processInput() {
+            const sentence = document.getElementById('sentenceInput').value.trim();
+            if (!sentence) return;
+
+            selectedToken = -1;
+
+            tokens = sentence.split(/(\s+|[.,!?;:])/).filter(t => t.trim());
+
+            generateAttentionWeights();
+            renderTokens();
+            updateVisualization();
+            updateAttentionBars();
+            updateSelectedInfo();
+        }
+
+        function onHeadChange() {
+            updateVisualization();
+            updateAttentionBars();
+            updateSelectedInfo();
+        }
+
+        function generateAttentionWeights() {
+            // Generate 4 different attention patterns (simulating 4 heads)
+            attentionWeights = [];
+            
+            for (let head = 0; head < 4; head++) {
+                const weights = [];
+                
+                for (let i = 0; i < tokens.length; i++) {
+                    const row = [];
+                    for (let j = 0; j < tokens.length; j++) {
+                        let w = 0;
+                        
+                        if (head === 0) {
+                            // Syntactic: attend to adjacent tokens
+                            const dist = Math.abs(i - j);
+                            w = Math.exp(-dist * 0.5);
+                        } else if (head === 1) {
+                            // Semantic: attend based on word similarity
+                            w = semanticSimilarity(tokens[i], tokens[j]);
+                        } else if (head === 2) {
+                            // Positional: attend to first few tokens
+                            w = j < 3 ? 0.3 : 0.1;
+                            if (i === j) w = 0.4;
+                        } else {
+                            // Mixed: combination
+                            const dist = Math.abs(i - j);
+                            w = 0.3 * Math.exp(-dist * 0.3) + 0.3 * semanticSimilarity(tokens[i], tokens[j]) + 0.1;
+                        }
+                        
+                        row.push(w);
+                    }
+                    
+                    // Normalize row (softmax-like)
+                    const sum = row.reduce((a, b) => a + b, 0);
+                    weights.push(row.map(w => w / sum));
+                }
+                
+                attentionWeights.push(weights);
+            }
+        }
+
+        function semanticSimilarity(t1, t2) {
+            t1 = t1.toLowerCase();
+            t2 = t2.toLowerCase();
+            
+            if (t1 === t2) return 0.8;
+            
+            // Pronouns attend to nouns
+            const pronouns = ['it', 'he', 'she', 'they', 'him', 'her', 'them'];
+            const nouns = ['cat', 'dog', 'bank', 'river', 'book', 'movie', 'paris', 'london', 'capital', 'mat'];
+            
+            if (pronouns.includes(t1) && nouns.includes(t2)) return 0.6;
+            if (pronouns.includes(t2) && nouns.includes(t1)) return 0.6;
+            
+            // Related words
+            const related = {
+                'bank': ['river', 'fish', 'money'],
+                'cat': ['sat', 'mat', 'tired'],
+                'capital': ['paris', 'london', 'france', 'england'],
+                'movie': ['acting', 'good', 'great'],
+                'book': ['wanted', 'gave']
+            };
+            
+            for (const [key, vals] of Object.entries(related)) {
+                if ((t1 === key && vals.includes(t2)) || (t2 === key && vals.includes(t1))) {
+                    return 0.5;
+                }
+            }
+            
+            return 0.1;
+        }
+
+        function renderTokens() {
+            const container = document.getElementById('tokensRow');
+            container.innerHTML = '';
+            
+            tokens.forEach((token, idx) => {
+                const el = document.createElement('div');
+                el.className = 'token' + (idx === selectedToken ? ' selected' : '');
+                el.textContent = token;
+                el.onclick = () => selectToken(idx);
+                container.appendChild(el);
+            });
+        }
+
+        function selectToken(idx) {
+            selectedToken = idx;
+            renderTokens();
+            updateVisualization();
+            updateAttentionBars();
+            updateSelectedInfo();
+        }
+
+        function updateVisualization() {
+            if (tokens.length === 0) return;
+            
+            const head = parseInt(document.getElementById('headSelect').value);
+            const weights = attentionWeights[head];
+            
+            let html = '<table class="matrix-table"><tr><th></th>';
+            tokens.forEach(t => {
+                html += `<th>${escapeHtml(t.substring(0, 6))}</th>`;
+            });
+            html += '</tr>';
+            
+            for (let i = 0; i < tokens.length; i++) {
+                html += `<tr><th>${escapeHtml(tokens[i].substring(0, 6))}</th>`;
+                for (let j = 0; j < tokens.length; j++) {
+                    const w = weights[i][j];
+                    const alpha = Math.min(w * 3, 1);
+                    const highlight = selectedToken === i;
+                    const bg = highlight 
+                        ? `rgba(236, 72, 153, ${alpha})`
+                        : `rgba(148, 163, 184, ${alpha * 0.5})`;
+                    
+                    html += `<td><span class="attention-cell" style="background: ${bg}">${w.toFixed(2)}</span></td>`;
+                }
+                html += '</tr>';
+            }
+            html += '</table>';
+            
+            document.getElementById('attentionMatrix').innerHTML = html;
+        }
+
+        function updateAttentionBars() {
+            const container = document.getElementById('attentionBars');
+            
+            if (selectedToken < 0 || tokens.length === 0) {
+                container.innerHTML = '<p style="font-size: 0.8rem; color: #94a3b8;">Select a token first</p>';
+                return;
+            }
+            
+            const head = parseInt(document.getElementById('headSelect').value);
+            const weights = attentionWeights[head][selectedToken];
+            
+            // Sort by weight
+            const sorted = tokens.map((t, i) => ({ token: t, weight: weights[i], idx: i }))
+                                  .sort((a, b) => b.weight - a.weight)
+                                  .slice(0, 6);
+            
+            let html = '';
+            sorted.forEach(item => {
+                const pct = item.weight * 100;
+                html += `
+                    <div class="attention-bar">
+                        <div class="attention-bar-label">${escapeHtml(item.token)}</div>
+                        <div class="attention-bar-fill">
+                            <div class="attention-bar-inner" style="width: ${pct}%"></div>
+                        </div>
+                        <div class="attention-bar-value">${item.weight.toFixed(2)}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function updateSelectedInfo() {
+            const container = document.getElementById('selectedInfo');
+            
+            if (selectedToken < 0) {
+                container.innerHTML = 'Click a token to see details';
+                return;
+            }
+            
+            const token = tokens[selectedToken];
+            const head = parseInt(document.getElementById('headSelect').value);
+            const weights = attentionWeights[head][selectedToken];
+            
+            const maxIdx = weights.indexOf(Math.max(...weights));
+            const maxToken = tokens[maxIdx];
+            
+            container.innerHTML = `
+                <p><strong>"${escapeHtml(token)}"</strong></p>
+                <p style="margin-top: 8px; font-size: 0.75rem;">
+                    Position: ${selectedToken + 1} of ${tokens.length}<br>
+                    Strongest attention: "${escapeHtml(maxToken)}"
+                </p>
+            `;
+            
+            // Update insight
+            let insight = '';
+            if (token.toLowerCase() === 'it' || token.toLowerCase() === 'he' || token.toLowerCase() === 'she') {
+                insight = `Pronouns like "${token}" typically attend to nouns they refer to. Look at which noun has highest attention.`;
+            } else if (token.toLowerCase() === 'bank') {
+                insight = `"Bank" is ambiguous. Notice how attention to "river" vs "money" would change meaning.`;
+            } else if (maxIdx === selectedToken) {
+                insight = `"${token}" attends mostly to itself — common for content words.`;
+            } else {
+                insight = `"${token}" attends most strongly to "${maxToken}" — these words are likely related in meaning or structure.`;
+            }
+            
+            document.getElementById('insightText').textContent = insight;
+        }
+
+        function setPreset(text) {
+            document.getElementById('sentenceInput').value = text;
+            processInput();
+        }
+
+        function resetPlayground() {
+            document.getElementById('sentenceInput').value = 'The cat sat on the mat because it was tired';
+            document.getElementById('headSelect').value = '0';
+            tokens = [];
+            selectedToken = -1;
+            attentionWeights = [];
+            document.getElementById('tokensRow').innerHTML = '';
+            document.getElementById('attentionMatrix').innerHTML = '';
+            document.getElementById('attentionBars').innerHTML = '<p style="font-size: 0.8rem; color: #94a3b8;">Select a token first</p>';
+            document.getElementById('selectedInfo').innerHTML = 'Click a token to see details';
+            document.getElementById('insightText').textContent = 'Click a token above to see which other tokens it attends to.';
+        }
+
+        document.getElementById('sentenceInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') processInput();
+        });
+
+        processInput();
+        // Auto-select a pronoun or the first token so the page starts with something interesting
+        const autoIdx = tokens.findIndex(t => ['it', 'he', 'she', 'they'].includes(t.toLowerCase()));
+        selectToken(autoIdx >= 0 ? autoIdx : 0);
+    </script>
+</body>
+</html>

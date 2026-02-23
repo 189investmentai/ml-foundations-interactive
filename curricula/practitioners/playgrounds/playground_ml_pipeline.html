@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Pipeline Playground</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        h1 { font-size: 1.4rem; color: #0f172a; margin-bottom: 4px; }
+        .header-subtitle { font-size: 0.85rem; color: #64748b; }
+
+        .reset-btn {
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+        .reset-btn:hover { background: #f1f5f9; }
+
+        /* Start Banner */
+        .start-banner {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            border-radius: 14px;
+            padding: 20px 28px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .start-banner-icon { font-size: 2.2rem; }
+        .start-banner-content h2 { font-size: 1rem; margin-bottom: 6px; }
+        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; }
+        .start-banner-steps { display: flex; gap: 20px; margin-top: 10px; flex-wrap: wrap; }
+        .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
+        .step-num {
+            background: rgba(255,255,255,0.2);
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 0.7rem;
+        }
+
+        /* Pipeline */
+        .pipeline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 20px;
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        .stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            min-width: 110px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border-radius: 12px;
+            padding: 8px 4px;
+        }
+        .stage:hover { transform: scale(1.05); }
+        .stage:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
+
+        .stage-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .stage.active .stage-icon { box-shadow: 0 0 0 3px #3b82f6; }
+        .stage.error .stage-icon { background: linear-gradient(135deg, #fee2e2, #fecaca); }
+        .stage.success .stage-icon { background: linear-gradient(135deg, #dcfce7, #bbf7d0); }
+        .stage.active.error .stage-icon { box-shadow: 0 0 0 3px #ef4444; }
+        .stage.active.success .stage-icon { box-shadow: 0 0 0 3px #22c55e; }
+
+        .stage-status {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            font-size: 0.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s;
+        }
+        .stage.error .stage-status {
+            background: #ef4444;
+            opacity: 1;
+            transform: scale(1);
+        }
+        .stage.success .stage-status {
+            background: #22c55e;
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .stage-name { font-size: 0.8rem; font-weight: 600; color: #334155; }
+
+        .arrow {
+            font-size: 1.2rem;
+            color: #cbd5e1;
+            flex-shrink: 0;
+            transition: color 0.3s;
+        }
+
+        /* Scenarios Bar */
+        .scenarios-bar {
+            background: white;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+        }
+        .scenarios-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+            white-space: nowrap;
+        }
+        .scenario-btn {
+            padding: 6px 14px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            color: #475569;
+        }
+        .scenario-btn:hover { border-color: #3b82f6; background: #eff6ff; color: #1e40af; }
+        .scenario-btn.active { border-color: #3b82f6; background: #3b82f6; color: white; }
+
+        /* Detail Panel */
+        .detail-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .panel-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: border-color 0.3s;
+            border: 2px solid transparent;
+        }
+        .panel-card.highlight-error { border-color: #fca5a5; }
+        .panel-card.highlight-success { border-color: #86efac; }
+
+        .panel-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .panel-content {
+            font-size: 0.88rem;
+            color: #475569;
+            animation: fadeIn 0.25s ease-out;
+        }
+        .panel-content ul { padding-left: 20px; margin: 12px 0; }
+        .panel-content li { margin-bottom: 8px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .highlight-box {
+            background: #fef3c7;
+            border: 1px solid #fde047;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 16px;
+            font-size: 0.83rem;
+        }
+        .highlight-box.error {
+            background: #fee2e2;
+            border-color: #fca5a5;
+        }
+        .highlight-box.success {
+            background: #dcfce7;
+            border-color: #86efac;
+        }
+
+        .empty-state {
+            color: #94a3b8;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Help */
+        .help-text {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .detail-panel { grid-template-columns: 1fr; }
+            .pipeline { flex-wrap: wrap; gap: 12px; justify-content: center; }
+            .arrow { display: none; }
+            .start-banner { flex-direction: column; text-align: center; }
+            header { flex-direction: column; gap: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>ML Pipeline Playground</h1>
+                <div class="header-subtitle">Explore the standard ML workflow — click stages and scenarios to see what happens and what breaks</div>
+            </div>
+            <button class="reset-btn" onclick="resetAll()">Reset</button>
+        </header>
+
+        <div class="start-banner">
+            <div class="start-banner-icon">🗺️</div>
+            <div class="start-banner-content">
+                <h2>Walk through the ML pipeline, then break it</h2>
+                <p>Most ML bugs happen at the boundaries between stages. Click through to build intuition.</p>
+                <div class="start-banner-steps">
+                    <div class="start-step"><div class="step-num">1</div> Click a pipeline stage</div>
+                    <div class="start-step"><div class="step-num">2</div> Pick a failure scenario</div>
+                    <div class="start-step"><div class="step-num">3</div> Click red stages to see what broke</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pipeline" id="pipeline">
+            <div class="stage active" data-stage="problem" tabindex="0" role="button"
+                 onclick="selectStage('problem')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectStage('problem')}">
+                <div class="stage-icon">🎯<span class="stage-status"></span></div>
+                <div class="stage-name">Problem<br>Framing</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="stage" data-stage="data" tabindex="0" role="button"
+                 onclick="selectStage('data')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectStage('data')}">
+                <div class="stage-icon">📊<span class="stage-status"></span></div>
+                <div class="stage-name">Data<br>Collection</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="stage" data-stage="features" tabindex="0" role="button"
+                 onclick="selectStage('features')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectStage('features')}">
+                <div class="stage-icon">🔧<span class="stage-status"></span></div>
+                <div class="stage-name">Feature<br>Engineering</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="stage" data-stage="split" tabindex="0" role="button"
+                 onclick="selectStage('split')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectStage('split')}">
+                <div class="stage-icon">✂️<span class="stage-status"></span></div>
+                <div class="stage-name">Train/Test<br>Split</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="stage" data-stage="train" tabindex="0" role="button"
+                 onclick="selectStage('train')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectStage('train')}">
+                <div class="stage-icon">🏋️<span class="stage-status"></span></div>
+                <div class="stage-name">Model<br>Training</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="stage" data-stage="evaluate" tabindex="0" role="button"
+                 onclick="selectStage('evaluate')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectStage('evaluate')}">
+                <div class="stage-icon">📈<span class="stage-status"></span></div>
+                <div class="stage-name">Evaluation</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="stage" data-stage="deploy" tabindex="0" role="button"
+                 onclick="selectStage('deploy')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectStage('deploy')}">
+                <div class="stage-icon">🚀<span class="stage-status"></span></div>
+                <div class="stage-name">Deployment</div>
+            </div>
+        </div>
+
+        <div class="scenarios-bar">
+            <span class="scenarios-label">Scenarios</span>
+            <button class="scenario-btn" data-scenario="happy" onclick="loadScenario('happy')">✅ Happy Path</button>
+            <button class="scenario-btn" data-scenario="leakage" onclick="loadScenario('leakage')">🚿 Data Leakage</button>
+            <button class="scenario-btn" data-scenario="wrong_metric" onclick="loadScenario('wrong_metric')">📊 Wrong Metric</button>
+            <button class="scenario-btn" data-scenario="overfit" onclick="loadScenario('overfit')">📈 Overfitting</button>
+            <button class="scenario-btn" data-scenario="drift" onclick="loadScenario('drift')">⏰ Data Drift</button>
+        </div>
+
+        <div class="detail-panel">
+            <div class="panel-card" id="leftPanel">
+                <div class="panel-title" id="panelTitle">🎯 Problem Framing</div>
+                <div class="panel-content" id="panelContent"></div>
+            </div>
+            <div class="panel-card" id="rightPanel">
+                <div class="panel-title" id="failureTitle">⚠️ What Goes Wrong Here</div>
+                <div class="panel-content" id="failureContent">
+                    <p class="empty-state">Pick a failure scenario above to see where things break</p>
+                </div>
+            </div>
+        </div>
+
+        <p class="help-text">Most ML bugs occur at the boundaries between stages. Click through each scenario to build intuition for what breaks and why.</p>
+    </div>
+
+    <script>
+        const stageInfo = {
+            problem: {
+                title: "🎯 Problem Framing",
+                content: `
+                    <p><strong>Question:</strong> What are we actually trying to predict?</p>
+                    <ul>
+                        <li><strong>Target:</strong> Define the exact outcome variable</li>
+                        <li><strong>Timing:</strong> When do you need the prediction?</li>
+                        <li><strong>Granularity:</strong> User-level? Transaction-level? Daily?</li>
+                        <li><strong>Cost of errors:</strong> FP vs FN — which hurts more?</li>
+                    </ul>
+                    <div class="highlight-box">
+                        <strong>Key Question:</strong> "If the model is perfect, what decision would change?"
+                    </div>
+                `
+            },
+            data: {
+                title: "📊 Data Collection",
+                content: `
+                    <p><strong>Question:</strong> Do we have the right data?</p>
+                    <ul>
+                        <li><strong>Features:</strong> What information is available at prediction time?</li>
+                        <li><strong>Labels:</strong> How do we know the ground truth?</li>
+                        <li><strong>Volume:</strong> Enough samples for the pattern?</li>
+                        <li><strong>Quality:</strong> Missing values, outliers, duplicates?</li>
+                    </ul>
+                    <div class="highlight-box">
+                        <strong>Watch out:</strong> Features that weren't available at decision time
+                    </div>
+                `
+            },
+            features: {
+                title: "🔧 Feature Engineering",
+                content: `
+                    <p><strong>Question:</strong> How do we represent the data for the model?</p>
+                    <ul>
+                        <li><strong>Encoding:</strong> Categories → numbers</li>
+                        <li><strong>Aggregations:</strong> Counts, averages, recency</li>
+                        <li><strong>Interactions:</strong> Combinations of features</li>
+                        <li><strong>Time-based:</strong> Lags, rolling windows</li>
+                    </ul>
+                    <div class="highlight-box">
+                        <strong>Leakage risk:</strong> Don't use future data to create features
+                    </div>
+                `
+            },
+            split: {
+                title: "✂️ Train/Test Split",
+                content: `
+                    <p><strong>Question:</strong> How do we simulate production?</p>
+                    <ul>
+                        <li><strong>Random split:</strong> OK for cross-sectional data</li>
+                        <li><strong>Time split:</strong> Required for temporal data</li>
+                        <li><strong>Stratify:</strong> Keep class proportions balanced</li>
+                        <li><strong>No leakage:</strong> Test data must be truly unseen</li>
+                    </ul>
+                    <div class="highlight-box">
+                        <strong>Golden rule:</strong> The test set simulates future data
+                    </div>
+                `
+            },
+            train: {
+                title: "🏋️ Model Training",
+                content: `
+                    <p><strong>Question:</strong> Which algorithm fits our problem?</p>
+                    <ul>
+                        <li><strong>Baseline first:</strong> Heuristic, then simple model</li>
+                        <li><strong>Hyperparameters:</strong> Tune on validation set</li>
+                        <li><strong>Cross-validation:</strong> Get robust estimates</li>
+                        <li><strong>Regularization:</strong> Prevent overfitting</li>
+                    </ul>
+                    <div class="highlight-box">
+                        <strong>Start simple:</strong> Logistic regression before XGBoost
+                    </div>
+                `
+            },
+            evaluate: {
+                title: "📈 Evaluation",
+                content: `
+                    <p><strong>Question:</strong> Is the model good enough?</p>
+                    <ul>
+                        <li><strong>Metric:</strong> Match the business objective</li>
+                        <li><strong>Baseline:</strong> Beat random + heuristic</li>
+                        <li><strong>Slices:</strong> Check performance by segment</li>
+                        <li><strong>Calibration:</strong> Are probabilities meaningful?</li>
+                    </ul>
+                    <div class="highlight-box">
+                        <strong>Don't trust AUC alone:</strong> Check precision@k for targeting
+                    </div>
+                `
+            },
+            deploy: {
+                title: "🚀 Deployment",
+                content: `
+                    <p><strong>Question:</strong> How do we use predictions?</p>
+                    <ul>
+                        <li><strong>Threshold:</strong> What score triggers action?</li>
+                        <li><strong>Latency:</strong> Real-time or batch?</li>
+                        <li><strong>Monitoring:</strong> Track prediction drift</li>
+                        <li><strong>Feedback loop:</strong> Collect outcomes</li>
+                    </ul>
+                    <div class="highlight-box">
+                        <strong>Model decay:</strong> Re-train when metrics drop
+                    </div>
+                `
+            }
+        };
+
+        const scenarios = {
+            happy: {
+                name: "Happy Path",
+                stages: { problem: 'success', data: 'success', features: 'success', split: 'success', train: 'success', evaluate: 'success', deploy: 'success' },
+                overview: `
+                    <p><strong>✅ Everything works!</strong></p>
+                    <p>This is the ideal scenario. All stages are green:</p>
+                    <ul>
+                        <li>Problem is well-defined with clear business value</li>
+                        <li>Data is clean and representative</li>
+                        <li>No leakage in features or splits</li>
+                        <li>Model generalizes to the test set</li>
+                        <li>Metrics match business needs</li>
+                    </ul>
+                    <div class="highlight-box success">
+                        Reality check: This rarely happens on the first try!
+                    </div>
+                `,
+                stageDetail: {
+                    problem: '<p><strong>✅ Well-defined target.</strong> "Will this subscriber churn in the next 30 days?" — clear, actionable, time-bounded. FP/FN costs identified.</p>',
+                    data: '<p><strong>✅ Clean data.</strong> Labels verified against cancellation events. Feature timestamps confirmed available at prediction time. No survivorship bias.</p>',
+                    features: '<p><strong>✅ No leakage.</strong> All features use data strictly before the prediction date. Aggregations use proper lookback windows.</p>',
+                    split: '<p><strong>✅ Time-based split.</strong> Train on months 1–6, validate on month 7, test on month 8. Mirrors production deployment.</p>',
+                    train: '<p><strong>✅ Regularized model.</strong> Started with logistic regression baseline, then LightGBM. Hyperparameters tuned on validation fold.</p>',
+                    evaluate: '<p><strong>✅ Right metrics.</strong> Precision@200 matches the call center capacity. Lift vs. random baseline confirmed. Calibration curve looks reasonable.</p>',
+                    deploy: '<p><strong>✅ Monitoring in place.</strong> Scoring runs nightly. Feature distribution tracked. Alert if precision drops >5% week-over-week.</p>'
+                }
+            },
+            leakage: {
+                name: "Data Leakage",
+                stages: { problem: 'success', data: 'success', features: 'error', split: 'error', train: 'success', evaluate: 'error', deploy: 'error' },
+                overview: `
+                    <p><strong>🚿 Data Leakage</strong></p>
+                    <p>The model saw information it won't have in production:</p>
+                    <ul>
+                        <li><strong>Symptom:</strong> Unrealistically high test accuracy (99%+)</li>
+                        <li><strong>Cause:</strong> Feature uses future data or target-derived info</li>
+                        <li><strong>Example:</strong> Using "days since last order" that includes post-prediction data</li>
+                    </ul>
+                    <div class="highlight-box error">
+                        <strong>Fix:</strong> For each feature, ask: "Would I have this BEFORE making the prediction?"
+                    </div>
+                `,
+                stageDetail: {
+                    problem: '<p>✅ Problem framing is fine here. The target is well-defined — leakage enters downstream.</p>',
+                    data: '<p>✅ Raw data is correct. The issue isn't the data itself — it's how features get computed from it.</p>',
+                    features: '<p><strong>🔴 BUG HERE.</strong> A feature like <code>days_until_cancellation</code> or <code>total_future_orders</code> uses information from after the prediction point. The model effectively "sees the answer" hidden in a feature.</p><div class="highlight-box error">Ask for every feature: "At the moment I make this prediction, would this value be known?"</div>',
+                    split: '<p><strong>🔴 CONTAMINATED.</strong> Even though train/test are separated, the leaked feature exists in both sets. The split can\'t save you — the damage is in the features. Sometimes leakage also comes from fitting scalers on the full dataset before splitting.</p>',
+                    train: '<p>⚠️ Training succeeds — suspiciously well. The model latches onto the leaked feature because it's the strongest predictor. Everything looks perfect on paper.</p>',
+                    evaluate: '<p><strong>🔴 MISLEADING.</strong> Test metrics are 99%+ because the leaked feature is in the test set too. The evaluation gives false confidence. The model hasn't learned real patterns.</p>',
+                    deploy: '<p><strong>🔴 CRASHES IN PRODUCTION.</strong> The leaked feature doesn't exist at prediction time. Model either errors out or performs at random. Stakeholders lose trust.</p>'
+                }
+            },
+            wrong_metric: {
+                name: "Wrong Metric",
+                stages: { problem: 'error', data: 'success', features: 'success', split: 'success', train: 'success', evaluate: 'error', deploy: 'error' },
+                overview: `
+                    <p><strong>📊 Wrong Metric</strong></p>
+                    <p>The model optimizes something different from business value:</p>
+                    <ul>
+                        <li><strong>Symptom:</strong> High accuracy, but business impact is zero</li>
+                        <li><strong>Cause:</strong> Metric doesn't match decision cost structure</li>
+                        <li><strong>Example:</strong> 95% accuracy on churn = just predicting "no churn" for everyone</li>
+                    </ul>
+                    <div class="highlight-box error">
+                        <strong>Fix:</strong> Define metrics from business costs. FN cost ≠ FP cost!
+                    </div>
+                `,
+                stageDetail: {
+                    problem: '<p><strong>🔴 ROOT CAUSE.</strong> The problem was framed as "maximize accuracy" without asking what decisions the model drives. With 5% churn rate, a model that always says "no churn" gets 95% accuracy and is completely useless.</p><div class="highlight-box error">Should have asked: "How many people can we call? What\'s the cost of a missed churner vs. wasted call?"</div>',
+                    data: '<p>✅ Data is fine. The bug isn't in the data — it's in what we're asking the model to optimize.</p>',
+                    features: '<p>✅ Features are valid. No leakage. The features could support a useful model if the objective were right.</p>',
+                    split: '<p>✅ Split is correct. Time-based, no contamination.</p>',
+                    train: '<p>⚠️ Training succeeds, but the model learns to predict the majority class. It minimizes log-loss by outputting low probabilities for everyone, which maps to "no churn" at the default 0.5 threshold.</p>',
+                    evaluate: '<p><strong>🔴 FALSE CONFIDENCE.</strong> Accuracy looks great (95%!). But precision, recall, and lift tell the real story: the model identifies zero actual churners. You needed precision@k or a cost-weighted metric.</p>',
+                    deploy: '<p><strong>🔴 NO BUSINESS IMPACT.</strong> The retention team gets a list of "high risk" customers that are actually random. Campaign ROI is zero. Stakeholders conclude "ML doesn't work for us."</p>'
+                }
+            },
+            overfit: {
+                name: "Overfitting",
+                stages: { problem: 'success', data: 'success', features: 'success', split: 'success', train: 'error', evaluate: 'error', deploy: 'error' },
+                overview: `
+                    <p><strong>📈 Overfitting</strong></p>
+                    <p>Model memorizes training data instead of learning patterns:</p>
+                    <ul>
+                        <li><strong>Symptom:</strong> Train accuracy 98%, test accuracy 72%</li>
+                        <li><strong>Cause:</strong> Model too complex for the data</li>
+                        <li><strong>Example:</strong> Deep tree with one leaf per sample</li>
+                    </ul>
+                    <div class="highlight-box error">
+                        <strong>Fix:</strong> Regularize, reduce complexity, get more data
+                    </div>
+                `,
+                stageDetail: {
+                    problem: '<p>✅ Problem is well-framed. Overfitting is a modeling issue, not a framing issue.</p>',
+                    data: '<p>✅ Data is fine, though having more data would naturally help reduce overfitting.</p>',
+                    features: '<p>⚠️ Features are valid, but too many features relative to sample size can contribute. Consider dimensionality reduction or feature selection.</p>',
+                    split: '<p>✅ Split is correct — and it's the split that reveals the problem. Without a held-out test set, you'd never know the model was overfitting.</p>',
+                    train: '<p><strong>🔴 ROOT CAUSE.</strong> Model is too complex: deep trees with no max_depth, no min_samples_leaf, no regularization. The model memorizes training noise — every quirk, every outlier gets its own decision path.</p><div class="highlight-box error">Train AUC: 0.99, Val AUC: 0.74. That 25-point gap is the red flag.</div>',
+                    evaluate: '<p><strong>🔴 BIG GAP.</strong> Test performance is far below training. The model doesn't generalize. If you only looked at training metrics, you'd think it was working.</p>',
+                    deploy: '<p><strong>🔴 UNRELIABLE.</strong> Production performance matches test (poor), not train. Predictions are noisy and inconsistent. Worse than a simple baseline for many customer segments.</p>'
+                }
+            },
+            drift: {
+                name: "Data Drift",
+                stages: { problem: 'success', data: 'success', features: 'success', split: 'success', train: 'success', evaluate: 'success', deploy: 'error' },
+                overview: `
+                    <p><strong>⏰ Data Drift</strong></p>
+                    <p>The world changed after deployment:</p>
+                    <ul>
+                        <li><strong>Symptom:</strong> Metrics degrade over weeks/months</li>
+                        <li><strong>Cause:</strong> Production data differs from training</li>
+                        <li><strong>Example:</strong> Churn model trained pre-COVID fails post-COVID</li>
+                    </ul>
+                    <div class="highlight-box error">
+                        <strong>Fix:</strong> Monitor prediction distributions, re-train regularly
+                    </div>
+                `,
+                stageDetail: {
+                    problem: '<p>✅ Problem framing was fine at training time. The definition of "churn" hasn't changed — but the underlying behavior has.</p>',
+                    data: '<p>✅ Training data was representative — of the world <em>at that time</em>. It's no longer representative of current customer behavior.</p>',
+                    features: '<p>⚠️ Feature distributions have shifted. Average order frequency dropped 40% after a pricing change. The model's learned thresholds no longer apply.</p>',
+                    split: '<p>✅ Split was correct at training time. But the test set was also from the old distribution, so it couldn't warn about future drift.</p>',
+                    train: '<p>✅ Model was well-trained — for the data it had. It learned real patterns that were valid then.</p>',
+                    evaluate: '<p>✅ Offline evaluation was accurate — for that time window. The danger is trusting those numbers months later.</p>',
+                    deploy: '<p><strong>🔴 SILENT DEGRADATION.</strong> Precision dropped from 0.45 to 0.18 over 3 months. Without monitoring, nobody noticed. The retention team wasted budget on the wrong customers for weeks.</p><div class="highlight-box error">Prevention: Track prediction distribution weekly. Alert when mean score shifts >10%. Schedule re-training quarterly at minimum.</div>'
+                }
+            }
+        };
+
+        let currentStage = 'problem';
+        let currentScenario = null;
+
+        function selectStage(stage) {
+            currentStage = stage;
+
+            document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+            document.querySelector(`[data-stage="${stage}"]`).classList.add('active');
+
+            const info = stageInfo[stage];
+            document.getElementById('panelTitle').innerHTML = info.title;
+            document.getElementById('panelContent').innerHTML = info.content;
+
+            updateFailurePanel();
+        }
+
+        function updateFailurePanel() {
+            const rightPanel = document.getElementById('rightPanel');
+            const failureTitle = document.getElementById('failureTitle');
+            const failureContent = document.getElementById('failureContent');
+
+            rightPanel.classList.remove('highlight-error', 'highlight-success');
+
+            if (!currentScenario) {
+                failureTitle.innerHTML = '⚠️ What Goes Wrong Here';
+                failureContent.innerHTML = '<p class="empty-state">Pick a failure scenario above to see where things break</p>';
+                return;
+            }
+
+            const scenario = scenarios[currentScenario];
+            const stageStatus = scenario.stages[currentStage];
+            const stageDetail = scenario.stageDetail[currentStage];
+
+            if (stageStatus === 'error') {
+                rightPanel.classList.add('highlight-error');
+                failureTitle.innerHTML = `🔴 ${scenario.name} — ${stageInfo[currentStage].title}`;
+            } else if (stageStatus === 'success') {
+                rightPanel.classList.add('highlight-success');
+                failureTitle.innerHTML = `✅ ${scenario.name} — ${stageInfo[currentStage].title}`;
+            }
+
+            failureContent.innerHTML = stageDetail || scenario.overview;
+        }
+
+        function loadScenario(scenarioKey) {
+            if (currentScenario === scenarioKey) {
+                currentScenario = null;
+                document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.stage').forEach(s => {
+                    s.classList.remove('error', 'success');
+                });
+                updateFailurePanel();
+                return;
+            }
+
+            currentScenario = scenarioKey;
+            const scenario = scenarios[scenarioKey];
+
+            document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.scenario-btn[data-scenario="${scenarioKey}"]`).classList.add('active');
+
+            document.querySelectorAll('.stage').forEach(s => {
+                const stage = s.dataset.stage;
+                s.classList.remove('error', 'success');
+                if (scenario.stages[stage]) {
+                    s.classList.add(scenario.stages[stage]);
+                }
+            });
+
+            updateFailurePanel();
+        }
+
+        function resetAll() {
+            currentScenario = null;
+            currentStage = 'problem';
+
+            document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.stage').forEach(s => {
+                s.classList.remove('active', 'error', 'success');
+            });
+
+            selectStage('problem');
+        }
+
+        selectStage('problem');
+    </script>
+</body>
+</html>

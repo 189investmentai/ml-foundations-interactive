@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompting Playground</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        h1 { font-size: 1.4rem; color: #0f172a; margin-bottom: 4px; }
+        .header-subtitle { font-size: 0.85rem; color: #64748b; }
+
+        .reset-btn {
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .reset-btn:hover { background: #f1f5f9; }
+
+        .start-banner {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border-radius: 14px;
+            padding: 20px 28px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .start-banner-icon { font-size: 2.2rem; }
+        .start-banner-content h2 { font-size: 1rem; margin-bottom: 6px; }
+        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .panel-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .panel-badge {
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-family: 'SF Mono', Monaco, monospace;
+            resize: vertical;
+            min-height: 200px;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+        .btn-primary:hover { background: #059669; }
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        .btn-secondary:hover { background: #e2e8f0; }
+
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .templates {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .template-btn {
+            padding: 6px 12px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            color: #475569;
+        }
+        .template-btn:hover { background: #e2e8f0; }
+        .template-btn.active {
+            background: #dcfce7;
+            border-color: #86efac;
+            color: #166534;
+        }
+
+        .output-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px;
+            min-height: 200px;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .comparison-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px;
+        }
+        .comparison-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .comparison-output {
+            font-size: 0.8rem;
+            color: #1e293b;
+        }
+
+        .insight-bar {
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+            border: 1px solid #86efac;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-top: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .insight-icon { font-size: 1.2rem; }
+        .insight-content { flex: 1; }
+        .insight-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #166534;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .insight-text { font-size: 0.85rem; color: #15803d; }
+
+        .context-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .context-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+        .context-box {
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 0.8rem;
+            color: #92400e;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .comparison-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Prompting Playground</h1>
+                <span class="header-subtitle">Experiment with different prompting techniques</span>
+            </div>
+            <button class="reset-btn" onclick="resetPlayground()">↻ Reset</button>
+        </header>
+
+        <div class="start-banner">
+            <div class="start-banner-icon">💬</div>
+            <div class="start-banner-content">
+                <h2>Prompt Engineering Lab</h2>
+                <p>See how prompt structure affects LLM output. Compare zero-shot, few-shot, and RAG approaches.</p>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="panel">
+                <div class="panel-title">
+                    <span>Prompt Builder</span>
+                    <span class="panel-badge" id="promptStyle">Zero-Shot</span>
+                </div>
+                
+                <div class="templates">
+                    <button class="template-btn active" onclick="setTemplate('zeroshot')">Zero-Shot</button>
+                    <button class="template-btn" onclick="setTemplate('fewshot')">Few-Shot</button>
+                    <button class="template-btn" onclick="setTemplate('cot')">Chain-of-Thought</button>
+                    <button class="template-btn" onclick="setTemplate('rag')">With RAG Context</button>
+                </div>
+                
+                <textarea id="promptInput" placeholder="Enter your prompt...">Classify this support ticket as: billing, technical, or general.
+
+Ticket: "I can't log into my account after resetting my password"
+
+Category:</textarea>
+                
+                <div class="btn-row">
+                    <button class="btn btn-primary" onclick="runPrompt()">Generate Response</button>
+                    <button class="btn btn-secondary" onclick="comparePrompts()">Compare All Styles</button>
+                </div>
+                
+                <div class="context-section" id="ragContext" style="display: none;">
+                    <div class="context-label">RAG Retrieved Context</div>
+                    <div class="context-box" id="contextBox">
+                        No context loaded. Click "With RAG Context" to add retrieved information.
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">
+                    <span>Output</span>
+                    <span class="panel-badge" id="outputBadge">Ready</span>
+                </div>
+                
+                <div class="output-box" id="outputBox">
+                    Click "Generate Response" to see simulated LLM output.
+                    
+Try different prompt styles to see how they affect the response.
+                </div>
+                
+                <div class="comparison-grid" id="comparisonGrid" style="display: none;">
+                    <div class="comparison-card">
+                        <div class="comparison-label">Zero-Shot</div>
+                        <div class="comparison-output" id="zeroOutput"></div>
+                    </div>
+                    <div class="comparison-card">
+                        <div class="comparison-label">Few-Shot</div>
+                        <div class="comparison-output" id="fewOutput"></div>
+                    </div>
+                    <div class="comparison-card">
+                        <div class="comparison-label">Chain-of-Thought</div>
+                        <div class="comparison-output" id="cotOutput"></div>
+                    </div>
+                    <div class="comparison-card">
+                        <div class="comparison-label">With RAG</div>
+                        <div class="comparison-output" id="ragOutput"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="insight-bar">
+            <div class="insight-icon">💡</div>
+            <div class="insight-content">
+                <div class="insight-title">Prompting Insight</div>
+                <div class="insight-text" id="insightText">Try different prompt templates to see how structure affects output quality and format.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const templates = {
+            zeroshot: `Classify this support ticket as: billing, technical, or general.
+
+Ticket: "I can't log into my account after resetting my password"
+
+Category:`,
+            
+            fewshot: `Classify support tickets into categories.
+
+Examples:
+Ticket: "Why was I charged twice this month?"
+Category: billing
+
+Ticket: "The app keeps crashing on startup"
+Category: technical
+
+Ticket: "What are your business hours?"
+Category: general
+
+Now classify this ticket:
+Ticket: "I can't log into my account after resetting my password"
+Category:`,
+            
+            cot: `Classify this support ticket. Think step by step about what the customer is asking.
+
+Ticket: "I can't log into my account after resetting my password"
+
+Step 1: Identify the main issue
+Step 2: Consider which category best fits
+Step 3: Provide classification
+
+Analysis:`,
+            
+            rag: `You are a support agent. Use ONLY the information provided below to answer.
+
+RETRIEVED CONTEXT:
+- Password resets are processed within 5 minutes
+- Login issues after password reset usually indicate browser cache problems
+- Users should clear cookies and try incognito mode
+- If issue persists, account may need manual unlock (contact support)
+
+TICKET: "I can't log into my account after resetting my password"
+
+Respond helpfully using the context above:`
+        };
+
+        const ragContext = `RETRIEVED CONTEXT:
+- Password resets are processed within 5 minutes
+- Login issues after password reset usually indicate browser cache problems
+- Users should clear cookies and try incognito mode
+- If issue persists, account may need manual unlock (contact support)`;
+
+        const outputs = {
+            zeroshot: `technical`,
+            
+            fewshot: `technical`,
+            
+            cot: `Step 1: The customer is experiencing difficulty logging in after a password reset.
+
+Step 2: This is related to account access and authentication functionality, not billing or general inquiries.
+
+Step 3: Since it involves a technical function (login/authentication system), this is a technical issue.
+
+Category: technical`,
+            
+            rag: `I understand you're having trouble logging in after resetting your password. Here are some steps that should help:
+
+1. **Clear your browser cache and cookies** - Old session data can sometimes conflict with new passwords
+
+2. **Try incognito/private browsing mode** - This rules out cache issues
+
+3. **Wait 5 minutes** - Password resets typically process within this time
+
+If you've tried these steps and still can't log in, your account may need manual unlocking. Please reply here and I'll escalate this for you.
+
+Is there anything specific that happens when you try to log in?`
+        };
+
+        let currentTemplate = 'zeroshot';
+
+        function setTemplate(type) {
+            currentTemplate = type;
+            document.getElementById('promptInput').value = templates[type];
+            
+            // Update active button
+            document.querySelectorAll('.template-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update badge
+            const labels = {
+                zeroshot: 'Zero-Shot',
+                fewshot: 'Few-Shot',
+                cot: 'Chain-of-Thought',
+                rag: 'RAG Context'
+            };
+            document.getElementById('promptStyle').textContent = labels[type];
+            
+            // Show/hide RAG context
+            document.getElementById('ragContext').style.display = type === 'rag' ? 'block' : 'none';
+            if (type === 'rag') {
+                document.getElementById('contextBox').textContent = ragContext;
+            }
+            
+            // Update insight
+            updateInsight(type);
+            
+            // Hide comparison
+            document.getElementById('comparisonGrid').style.display = 'none';
+            document.getElementById('outputBox').style.display = 'block';
+        }
+
+        function runPrompt() {
+            document.getElementById('outputBadge').textContent = 'Generated';
+            document.getElementById('outputBox').textContent = outputs[currentTemplate];
+            document.getElementById('comparisonGrid').style.display = 'none';
+            document.getElementById('outputBox').style.display = 'block';
+        }
+
+        function comparePrompts() {
+            document.getElementById('outputBadge').textContent = 'Comparison';
+            document.getElementById('outputBox').style.display = 'none';
+            document.getElementById('comparisonGrid').style.display = 'grid';
+            
+            document.getElementById('zeroOutput').textContent = outputs.zeroshot;
+            document.getElementById('fewOutput').textContent = outputs.fewshot;
+            document.getElementById('cotOutput').textContent = outputs.cot.substring(0, 150) + '...';
+            document.getElementById('ragOutput').textContent = outputs.rag.substring(0, 150) + '...';
+            
+            document.getElementById('insightText').textContent = 
+                'Notice how few-shot and zero-shot give terse answers, CoT shows reasoning, and RAG provides actionable help grounded in context.';
+        }
+
+        function updateInsight(type) {
+            const insights = {
+                zeroshot: 'Zero-shot works for simple, well-defined tasks. The model uses its training to infer what you want.',
+                fewshot: 'Few-shot examples establish the pattern. More effective than instructions for format-sensitive tasks.',
+                cot: 'Chain-of-thought makes reasoning explicit. Better for multi-step logic and complex decisions.',
+                rag: 'RAG grounds responses in retrieved facts. Essential for accurate, up-to-date information.'
+            };
+            document.getElementById('insightText').textContent = insights[type];
+        }
+
+        function resetPlayground() {
+            setTemplate('zeroshot');
+            document.getElementById('outputBox').textContent = `Click "Generate Response" to see simulated LLM output.
+                    
+Try different prompt styles to see how they affect the response.`;
+            document.getElementById('outputBadge').textContent = 'Ready';
+            document.getElementById('comparisonGrid').style.display = 'none';
+            document.getElementById('outputBox').style.display = 'block';
+        }
+
+        // Initialize
+        updateInsight('zeroshot');
+    </script>
+</body>
+</html>

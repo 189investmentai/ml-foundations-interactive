@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retrieval Playground</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        h1 { font-size: 1.4rem; color: #0f172a; margin-bottom: 4px; }
+        .header-subtitle { font-size: 0.85rem; color: #64748b; }
+
+        .reset-btn {
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .reset-btn:hover { background: #f1f5f9; }
+
+        .start-banner {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            border-radius: 14px;
+            padding: 20px 28px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .start-banner-icon { font-size: 2.2rem; }
+        .start-banner-content h2 { font-size: 1rem; margin-bottom: 6px; }
+        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .sidebar { display: flex; flex-direction: column; gap: 12px; }
+
+        .sidebar-card {
+            background: white;
+            border-radius: 10px;
+            padding: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .sidebar-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .control-group { margin-bottom: 12px; }
+        .control-group:last-child { margin-bottom: 0; }
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        .control-value {
+            font-family: 'SF Mono', Monaco, monospace;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: #8b5cf6;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-family: inherit;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            background: white;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 5px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: #8b5cf6;
+            cursor: pointer;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #8b5cf6;
+            color: white;
+        }
+        .btn-primary:hover { background: #7c3aed; }
+        .btn-secondary {
+            background: white;
+            color: #7c3aed;
+            border: 1px solid #c4b5fd;
+        }
+        .btn-secondary:hover { background: #f3e8ff; }
+
+        .metrics-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+        .metric-card {
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .metric-card.highlight {
+            background: #f3e8ff;
+            border: 1px solid #c4b5fd;
+        }
+        .metric-name {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        .metric-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #7c3aed;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .results-area {
+            background: white;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .results-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        .results-badge {
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+
+        .result-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 3px solid #c4b5fd;
+        }
+        .result-item.relevant {
+            border-left-color: #22c55e;
+            background: #f0fdf4;
+        }
+        .result-item.irrelevant {
+            border-left-color: #f97316;
+            background: #fff7ed;
+        }
+        .result-rank {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #8b5cf6;
+            margin-bottom: 4px;
+        }
+        .result-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        .result-snippet {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+        .result-scores {
+            display: flex;
+            gap: 12px;
+            font-size: 0.7rem;
+        }
+        .result-scores span {
+            padding: 2px 6px;
+            background: white;
+            border-radius: 4px;
+            color: #64748b;
+        }
+        .result-scores span strong {
+            color: #7c3aed;
+        }
+
+        .insight-bar {
+            background: linear-gradient(135deg, #f3e8ff, #ede9fe);
+            border: 1px solid #c4b5fd;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-top: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .insight-icon { font-size: 1.2rem; }
+        .insight-content { flex: 1; }
+        .insight-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #7c3aed;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .insight-text { font-size: 0.85rem; color: #6b21a8; }
+
+        .docs-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .doc-item {
+            padding: 6px 8px;
+            background: #f8fafc;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            font-size: 0.75rem;
+        }
+        .doc-item.relevant-doc {
+            background: #dcfce7;
+            border-left: 2px solid #22c55e;
+        }
+
+        @media (max-width: 1000px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Retrieval Playground</h1>
+                <span class="header-subtitle">Compare keyword vs semantic search</span>
+            </div>
+            <button class="reset-btn" onclick="resetPlayground()">↻ Reset</button>
+        </header>
+
+        <div class="start-banner">
+            <div class="start-banner-icon">🔍</div>
+            <div class="start-banner-content">
+                <h2>Semantic vs Keyword Search</h2>
+                <p>Enter a query and see how different retrieval methods find relevant documents.</p>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="sidebar">
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Search Query</div>
+                    <div class="control-group">
+                        <input type="text" id="queryInput" placeholder="Enter your search query..." value="how to get my money back" onkeydown="if(event.key==='Enter') search()">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label"><span>Search Method</span></div>
+                        <select id="searchMethod" onchange="search()">
+                            <option value="semantic">Semantic (Embeddings)</option>
+                            <option value="keyword">Keyword (BM25)</option>
+                            <option value="hybrid">Hybrid (BM25 + Semantic)</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Top K Results</span>
+                            <span class="control-value" id="kValue">5</span>
+                        </div>
+                        <input type="range" id="kSlider" min="3" max="10" value="5" oninput="updateK()">
+                    </div>
+                    <button class="btn btn-primary" onclick="search()">Search</button>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Sample Queries</div>
+                    <div class="control-group">
+                        <button class="btn btn-secondary" style="margin-bottom:6px" onclick="setQuery('how to get my money back')">💰 Get money back</button>
+                        <button class="btn btn-secondary" style="margin-bottom:6px" onclick="setQuery('password reset')">🔑 Password reset</button>
+                        <button class="btn btn-secondary" style="margin-bottom:6px" onclick="setQuery('XR-7500 specs')">📱 Product code</button>
+                        <button class="btn btn-secondary" onclick="setQuery('subscription end')">📋 End subscription</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Metrics</div>
+                    <div class="metrics-panel">
+                        <div class="metric-card highlight">
+                            <div class="metric-name">Precision@K</div>
+                            <div class="metric-value" id="precisionValue">--</div>
+                        </div>
+                        <div class="metric-card highlight">
+                            <div class="metric-name">Recall@K</div>
+                            <div class="metric-value" id="recallValue">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-name">MRR</div>
+                            <div class="metric-value" id="mrrValue">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Document Corpus</div>
+                    <div style="font-size:0.7rem; color:#64748b; margin-bottom:6px; display:flex; gap:12px;">
+                        <span style="display:flex; align-items:center; gap:3px;"><span style="width:8px;height:8px;border-radius:2px;background:#22c55e;display:inline-block;"></span> Relevant</span>
+                        <span style="display:flex; align-items:center; gap:3px;"><span style="width:8px;height:8px;border-radius:2px;background:#e2e8f0;display:inline-block;"></span> Other</span>
+                    </div>
+                    <div class="docs-list" id="docsList"></div>
+                </div>
+            </div>
+
+            <div class="results-area">
+                <div class="results-header">
+                    <span class="results-title">Search Results</span>
+                    <span class="results-badge" id="resultsBadge">0 results</span>
+                </div>
+                <div id="resultsContainer">
+                    <p style="color: #94a3b8; text-align: center; padding: 40px;">Enter a query and click Search to see results</p>
+                </div>
+
+                <div class="insight-bar">
+                    <div class="insight-icon">💡</div>
+                    <div class="insight-content">
+                        <div class="insight-title">Retrieval Insight</div>
+                        <div class="insight-text" id="insightText">Try different search methods to see how they handle synonyms and exact matches differently.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample document corpus
+        const documents = [
+            { id: 1, title: "Refund Policy", content: "Learn about our return and refund policy. We offer full refunds within 30 days of purchase.", topics: ["refund", "money"], keywords: ["refund", "return", "money", "policy", "purchase"] },
+            { id: 2, title: "How to Cancel Your Subscription", content: "Step-by-step guide to ending your membership and stopping recurring charges.", topics: ["subscription", "cancel"], keywords: ["cancel", "subscription", "membership", "charges", "recurring"] },
+            { id: 3, title: "Password Reset Instructions", content: "Reset your account password by clicking the 'Forgot Password' link on the login page.", topics: ["password", "login"], keywords: ["password", "reset", "account", "forgot", "login"] },
+            { id: 4, title: "How to Change Your Login Credentials", content: "Update your email address and password in your account settings.", topics: ["password", "login"], keywords: ["login", "credentials", "email", "settings", "update"] },
+            { id: 5, title: "Shipping Information", content: "Track your order and find delivery estimates. Free shipping on orders over $50.", topics: ["shipping"], keywords: ["shipping", "delivery", "track", "order", "free"] },
+            { id: 6, title: "XR-7500 Product Specifications", content: "Technical specifications for the XR-7500 model. 8GB RAM, 256GB storage.", topics: ["product"], keywords: ["XR-7500", "specifications", "specs", "technical", "RAM", "storage"] },
+            { id: 7, title: "Contact Support", content: "Reach our customer service team via email, phone, or live chat.", topics: ["support"], keywords: ["support", "contact", "customer", "service", "help"] },
+            { id: 8, title: "Billing and Payment Methods", content: "Update your payment information and view billing history.", topics: ["billing"], keywords: ["billing", "payment", "credit", "card", "history"] },
+            { id: 9, title: "Return an Item", content: "Start a return request for items purchased within the last 60 days.", topics: ["refund", "money"], keywords: ["return", "item", "purchased", "request", "days"] },
+            { id: 10, title: "Account Security Tips", content: "Protect your account with two-factor authentication and strong passwords.", topics: ["password", "login"], keywords: ["security", "account", "authentication", "password", "protect"] },
+        ];
+
+        // Query to relevant docs mapping (ground truth)
+        const groundTruth = {
+            "how to get my money back": [1, 9],
+            "password reset": [3, 4, 10],
+            "XR-7500 specs": [6],
+            "subscription end": [2],
+            "cancel subscription": [2],
+            "refund policy": [1, 9],
+            "shipping": [5],
+            "login help": [3, 4, 10],
+        };
+
+        // Simple mock embedding function
+        function mockEmbed(text) {
+            const words = text.toLowerCase().split(/\s+/);
+            const dim = 32;
+            const emb = new Array(dim).fill(0);
+            
+            // Topic-based components
+            if (text.match(/refund|money|return|back/i)) { emb[0] += 1; emb[1] += 0.8; }
+            if (text.match(/password|login|credential|reset/i)) { emb[2] += 1; emb[3] += 0.8; }
+            if (text.match(/cancel|subscription|membership|end/i)) { emb[4] += 1; emb[5] += 0.8; }
+            if (text.match(/shipping|delivery|track|order/i)) { emb[6] += 1; emb[7] += 0.8; }
+            if (text.match(/XR-7500|spec|product|technical/i)) { emb[8] += 1; emb[9] += 0.8; }
+            if (text.match(/support|help|contact|service/i)) { emb[10] += 1; emb[11] += 0.8; }
+            if (text.match(/billing|payment|card/i)) { emb[12] += 1; emb[13] += 0.8; }
+            if (text.match(/security|protect|auth/i)) { emb[14] += 1; emb[15] += 0.8; }
+            
+            // Word hashing for variety
+            for (const word of words) {
+                for (let i = 0; i < word.length; i++) {
+                    const idx = 16 + (word.charCodeAt(i) * (i + 1)) % 16;
+                    emb[idx] += 0.05;
+                }
+            }
+            
+            const norm = Math.sqrt(emb.reduce((s, v) => s + v * v, 0)) || 1;
+            return emb.map(v => v / norm);
+        }
+
+        function cosineSim(a, b) {
+            let dot = 0;
+            for (let i = 0; i < a.length; i++) dot += a[i] * b[i];
+            return dot;
+        }
+
+        function bm25Score(query, doc) {
+            const queryTerms = query.toLowerCase().split(/\s+/);
+            let score = 0;
+            for (const term of queryTerms) {
+                if (doc.keywords.some(k => k.toLowerCase().includes(term) || term.includes(k.toLowerCase()))) {
+                    score += 1;
+                }
+                if (doc.title.toLowerCase().includes(term)) {
+                    score += 2;
+                }
+                if (doc.content.toLowerCase().includes(term)) {
+                    score += 0.5;
+                }
+            }
+            return score;
+        }
+
+        const STOPWORDS = new Set([
+            'how', 'to', 'do', 'i', 'my', 'the', 'a', 'an', 'is', 'it',
+            'get', 'can', 'what', 'where', 'when', 'for', 'of', 'in', 'on'
+        ]);
+
+        function contentWords(text) {
+            return text.toLowerCase().split(/\s+/).filter(w => w.length > 0 && !STOPWORDS.has(w));
+        }
+
+        function findRelevantDocs(query) {
+            const qWords = contentWords(query);
+            if (qWords.length === 0) return [];
+
+            let bestIds = [];
+            let bestScore = 0;
+
+            for (const [gtQuery, ids] of Object.entries(groundTruth)) {
+                const gtWords = contentWords(gtQuery);
+                if (gtWords.length === 0) continue;
+
+                let matches = 0;
+                for (const gw of gtWords) {
+                    if (qWords.some(qw => qw.includes(gw) || gw.includes(qw))) {
+                        matches++;
+                    }
+                }
+
+                const score = matches / gtWords.length;
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestIds = [...ids];
+                } else if (score === bestScore && score > 0) {
+                    bestIds = [...new Set([...bestIds, ...ids])];
+                }
+            }
+
+            return bestScore >= 0.5 ? bestIds : [];
+        }
+
+        function search() {
+            const query = document.getElementById('queryInput').value.trim();
+            if (!query) return;
+
+            const method = document.getElementById('searchMethod').value;
+            const k = parseInt(document.getElementById('kSlider').value);
+            
+            const queryEmb = mockEmbed(query + ' ' + query);
+            
+            // Score all documents
+            const results = documents.map(doc => {
+                const docText = doc.title + ' ' + doc.content;
+                const docEmb = mockEmbed(docText);
+                
+                const semanticScore = cosineSim(queryEmb, docEmb);
+                const rawKeyword = bm25Score(query, doc);
+                
+                return { ...doc, semanticScore, rawKeyword, keywordScore: 0, finalScore: 0 };
+            });
+
+            const maxKeyword = Math.max(...results.map(r => r.rawKeyword), 1);
+            results.forEach(r => {
+                r.keywordScore = r.rawKeyword / maxKeyword;
+
+                if (method === 'semantic') {
+                    r.finalScore = r.semanticScore;
+                } else if (method === 'keyword') {
+                    r.finalScore = r.keywordScore;
+                } else {
+                    r.finalScore = 0.4 * r.keywordScore + 0.6 * r.semanticScore;
+                }
+            });
+            
+            // Sort and get top K
+            results.sort((a, b) => b.finalScore - a.finalScore);
+            const topK = results.slice(0, k);
+            
+            const relevant = findRelevantDocs(query);
+            
+            // Calculate metrics
+            const retrievedIds = topK.map(r => r.id);
+            const hits = retrievedIds.filter(id => relevant.includes(id)).length;
+            const precision = hits / k;
+            const recall = relevant.length > 0 ? hits / relevant.length : 0;
+            
+            let mrr = 0;
+            for (let i = 0; i < retrievedIds.length; i++) {
+                if (relevant.includes(retrievedIds[i])) {
+                    mrr = 1 / (i + 1);
+                    break;
+                }
+            }
+            
+            // Update UI
+            document.getElementById('precisionValue').textContent = precision.toFixed(2);
+            document.getElementById('recallValue').textContent = recall.toFixed(2);
+            document.getElementById('mrrValue').textContent = mrr.toFixed(2);
+            document.getElementById('resultsBadge').textContent = `${topK.length} results`;
+            
+            // Render results
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = '';
+            
+            topK.forEach((result, idx) => {
+                const isRelevant = relevant.includes(result.id);
+                const item = document.createElement('div');
+                item.className = `result-item ${isRelevant ? 'relevant' : 'irrelevant'}`;
+                item.innerHTML = `
+                    <div class="result-rank">#${idx + 1} ${isRelevant ? '✓ Relevant' : '○ Not in ground truth'}</div>
+                    <div class="result-title">${result.title}</div>
+                    <div class="result-snippet">${result.content}</div>
+                    <div class="result-scores">
+                        <span>Semantic: <strong>${result.semanticScore.toFixed(3)}</strong></span>
+                        <span>Keyword: <strong>${result.keywordScore.toFixed(3)}</strong></span>
+                        <span>Final: <strong>${result.finalScore.toFixed(3)}</strong></span>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+            
+            // Update insight
+            updateInsight(method, precision, recall, query);
+            
+            // Update docs list
+            updateDocsList(relevant);
+        }
+
+        function updateDocsList(relevant) {
+            const list = document.getElementById('docsList');
+            list.innerHTML = '';
+            
+            documents.forEach(doc => {
+                const item = document.createElement('div');
+                item.className = `doc-item ${relevant.includes(doc.id) ? 'relevant-doc' : ''}`;
+                item.textContent = `${doc.id}. ${doc.title}`;
+                list.appendChild(item);
+            });
+        }
+
+        function updateK() {
+            document.getElementById('kValue').textContent = document.getElementById('kSlider').value;
+        }
+
+        function setQuery(query) {
+            document.getElementById('queryInput').value = query;
+            search();
+        }
+
+        function updateInsight(method, precision, recall, query) {
+            let insight = '';
+            
+            if (method === 'keyword' && precision < 0.5) {
+                insight = `Keyword search may miss synonyms. Try "semantic" to find results based on meaning.`;
+            } else if (method === 'semantic' && query.match(/XR-7500|[A-Z]{2,}-\d+/)) {
+                insight = `Semantic search may struggle with exact product codes. Try "hybrid" for best of both.`;
+            } else if (method === 'hybrid') {
+                insight = `Hybrid search combines keyword precision with semantic understanding. Great for general use.`;
+            } else if (precision >= 0.8) {
+                insight = `Excellent results! High precision means most returned documents are relevant.`;
+            } else if (recall >= 0.8) {
+                insight = `Good recall — most relevant documents were found. Check precision for quality.`;
+            } else {
+                insight = `Try different search methods or adjust K to see how results change.`;
+            }
+            
+            document.getElementById('insightText').textContent = insight;
+        }
+
+        function resetPlayground() {
+            document.getElementById('queryInput').value = 'how to get my money back';
+            document.getElementById('searchMethod').value = 'semantic';
+            document.getElementById('kSlider').value = 5;
+            document.getElementById('kValue').textContent = '5';
+            document.getElementById('resultsContainer').innerHTML = 
+                '<p style="color: #94a3b8; text-align: center; padding: 40px;">Enter a query and click Search to see results</p>';
+            document.getElementById('precisionValue').textContent = '--';
+            document.getElementById('recallValue').textContent = '--';
+            document.getElementById('mrrValue').textContent = '--';
+            document.getElementById('resultsBadge').textContent = '0 results';
+            document.getElementById('insightText').textContent = 'Try different search methods to see how they handle synonyms and exact matches differently.';
+            updateDocsList([]);
+        }
+
+        // Initialize docs list
+        updateDocsList([]);
+    </script>
+</body>
+</html>

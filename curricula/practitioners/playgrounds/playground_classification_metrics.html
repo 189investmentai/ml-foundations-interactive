@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classification Metrics Playground</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        h1 { font-size: 1.4rem; color: #0f172a; margin-bottom: 4px; }
+        .header-subtitle { font-size: 0.85rem; color: #64748b; }
+
+        .reset-btn {
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .reset-btn:hover { background: #f1f5f9; }
+
+        .start-banner {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border-radius: 14px;
+            padding: 20px 28px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .start-banner-icon { font-size: 2.2rem; }
+        .start-banner-content h2 { font-size: 1rem; margin-bottom: 6px; }
+        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; }
+        .start-banner-steps { display: flex; gap: 20px; margin-top: 10px; flex-wrap: wrap; }
+        .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
+        .step-num {
+            background: rgba(255,255,255,0.2);
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 0.7rem;
+        }
+
+        .scenarios-bar {
+            background: white;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+        }
+        .scenarios-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        .scenario-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .scenario-btn.balanced { background: #dcfce7; color: #166534; }
+        .scenario-btn.imbalanced { background: #fee2e2; color: #991b1b; }
+        .scenario-btn.threshold { background: #dbeafe; color: #1e40af; }
+        .scenario-btn.costbased { background: #fef3c7; color: #92400e; }
+        .scenario-btn.calibration { background: #ede9fe; color: #5b21b6; }
+        .scenario-btn.noskill { background: #e2e8f0; color: #334155; }
+        .scenario-hint {
+            flex: 1;
+            min-width: 180px;
+            padding: 8px 12px;
+            background: #f8fafc;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: #475569;
+            display: none;
+            border-left: 3px solid #10b981;
+        }
+        .scenario-hint.visible { display: block; }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .charts-area { display: flex; flex-direction: column; gap: 12px; }
+
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 10px;
+            padding: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .chart-title { font-size: 0.75rem; font-weight: 600; color: #475569; }
+        .chart-badge {
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        canvas { display: block; width: 100%; }
+
+        .sidebar { display: flex; flex-direction: column; gap: 12px; }
+
+        .sidebar-card {
+            background: white;
+            border-radius: 10px;
+            padding: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .sidebar-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .control-group { margin-bottom: 12px; }
+        .control-group:last-child { margin-bottom: 0; }
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        .control-value {
+            font-family: 'SF Mono', Monaco, monospace;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: #10b981;
+        }
+
+        .helper-note {
+            font-size: 0.68rem;
+            color: #64748b;
+            margin-top: 8px;
+        }
+
+        .control-help {
+            font-size: 0.68rem;
+            color: #64748b;
+            margin-top: 6px;
+            line-height: 1.4;
+        }
+
+        .small-btn {
+            width: 100%;
+            background: #ecfdf5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+            padding: 7px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .small-btn:hover {
+            background: #d1fae5;
+        }
+
+        .control-select {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 6px 8px;
+            font-size: 0.78rem;
+            color: #334155;
+            background: white;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 5px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: #10b981;
+            cursor: pointer;
+        }
+
+        .confusion-matrix {
+            display: grid;
+            grid-template-columns: auto 1fr 1fr;
+            gap: 2px;
+            background: #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .cm-cell {
+            background: white;
+            padding: 8px;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+        .cm-cell.header {
+            background: #f8fafc;
+            font-weight: 600;
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+        .cm-cell.tp { background: #dcfce7; }
+        .cm-cell.tn { background: #dbeafe; }
+        .cm-cell.fp { background: #fef3c7; }
+        .cm-cell.fn { background: #fee2e2; }
+        .cm-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: block;
+        }
+        .cm-label {
+            font-size: 0.6rem;
+            color: #64748b;
+        }
+
+        .metrics-panel {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+        .metric-card {
+            padding: 10px 6px;
+            background: #f8fafc;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .metric-card.highlight {
+            background: #d1fae5;
+            border: 1px solid #6ee7b7;
+        }
+        .metric-name {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        .metric-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #065f46;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .threshold-indicator {
+            background: linear-gradient(90deg, #fee2e2 0%, #fef3c7 50%, #dcfce7 100%);
+            height: 8px;
+            border-radius: 4px;
+            position: relative;
+            margin: 10px 0;
+        }
+        .threshold-marker {
+            position: absolute;
+            top: -4px;
+            width: 16px;
+            height: 16px;
+            background: #1e293b;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .insight-bar {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border: 1px solid #6ee7b7;
+            border-radius: 10px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .insight-icon { font-size: 1.2rem; }
+        .insight-content { flex: 1; }
+        .insight-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #047857;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .insight-text { font-size: 0.85rem; color: #065f46; }
+
+        .help-panel {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .help-header {
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            cursor: pointer;
+            background: #f8fafc;
+        }
+        .help-title { font-size: 0.8rem; font-weight: 600; color: #475569; }
+        .help-toggle { font-size: 0.7rem; color: #64748b; }
+        .help-content {
+            padding: 14px;
+            display: none;
+            border-top: 1px solid #e2e8f0;
+        }
+        .help-content.visible { display: block; }
+        .help-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+        }
+        .help-item {
+            display: flex;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: #475569;
+        }
+
+        @media (max-width: 1000px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .sidebar { flex-direction: row; flex-wrap: wrap; }
+            .sidebar-card { flex: 1; min-width: 280px; }
+        }
+        @media (max-width: 650px) {
+            .chart-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Classification Metrics Playground</h1>
+                <span class="header-subtitle">See how simulated model scores translate into precision, recall, and decision tradeoffs</span>
+            </div>
+            <button class="reset-btn" onclick="resetPlayground()">↻ Reset</button>
+        </header>
+
+        <div class="start-banner">
+            <div class="start-banner-icon">⚖️</div>
+            <div class="start-banner-content">
+                <h2>The Precision-Recall Seesaw</h2>
+                <p>You can't have it all. Move the threshold to see the tradeoff in action. This playground simulates probability scores so you can focus on evaluation + thresholding.</p>
+                <div class="start-banner-steps">
+                    <div class="start-step"><span class="step-num">1</span> Lower threshold = more recall</div>
+                    <div class="start-step"><span class="step-num">2</span> Higher threshold = more precision</div>
+                    <div class="start-step"><span class="step-num">3</span> Find your business sweet spot</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="scenarios-bar">
+            <span class="scenarios-label">Try:</span>
+            <button class="scenario-btn balanced" onclick="loadPreset('balanced')">⚖️ Balanced Data</button>
+            <button class="scenario-btn imbalanced" onclick="loadPreset('imbalanced')">📉 Imbalanced (5%)</button>
+            <button class="scenario-btn threshold" onclick="loadPreset('aggressive')">🎯 Aggressive (High Recall)</button>
+            <button class="scenario-btn threshold" onclick="loadPreset('conservative')">🔒 Conservative (High Precision)</button>
+            <button class="scenario-btn costbased" onclick="loadPreset('costbased')">💰 Cost-Based Optimal</button>
+            <button class="scenario-btn calibration" onclick="loadPreset('bad_calibration')">🧪 Bad Calibration</button>
+            <button class="scenario-btn noskill" onclick="loadPreset('noskill')">🎲 No Skill</button>
+            <div class="scenario-hint" id="scenarioHint"></div>
+        </div>
+
+        <div class="main-grid">
+            <div class="charts-area">
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span class="chart-title">Probability Distributions</span>
+                            <span class="chart-badge" id="distScaleBadge">Counts</span>
+                        </div>
+                        <canvas id="distChart" height="200"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span class="chart-title">ROC Curve</span>
+                            <span class="chart-badge" id="aucBadge">AUC = --</span>
+                        </div>
+                        <canvas id="rocChart" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span class="chart-title">Precision-Recall Curve</span>
+                            <span class="chart-badge" id="praucBadge">PR-AUC = --</span>
+                        </div>
+                        <canvas id="prChart" height="200"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span class="chart-title">Metrics vs Threshold</span>
+                        </div>
+                        <canvas id="metricsChart" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div class="insight-bar">
+                    <div class="insight-icon">💡</div>
+                    <div class="insight-content">
+                        <div class="insight-title">Classification Insight</div>
+                        <div class="insight-text" id="insightText">Adjust the threshold slider to see how metrics change.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Classification Threshold</div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Threshold</span>
+                            <span class="control-value" id="thresholdValue">0.50</span>
+                        </div>
+                        <input type="range" id="thresholdSlider" min="0.01" max="0.99" step="0.01" value="0.50">
+                        <div class="threshold-indicator">
+                            <div class="threshold-marker" id="thresholdMarker" style="left: 50%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Cost-Based Thresholding</div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>False Positive Cost</span>
+                            <span class="control-value" id="fpCostValue">$50</span>
+                        </div>
+                        <input type="range" id="fpCostSlider" min="10" max="500" step="10" value="50">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>False Negative Cost</span>
+                            <span class="control-value" id="fnCostValue">$500</span>
+                        </div>
+                        <input type="range" id="fnCostSlider" min="50" max="2000" step="25" value="500">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Recommended Threshold</span>
+                            <span class="control-value" id="recommendedThreshold">--</span>
+                        </div>
+                        <div class="control-label">
+                            <span>Expected Cost</span>
+                            <span class="control-value" id="recommendedCost">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Confusion Matrix</div>
+                    <div class="confusion-matrix">
+                        <div class="cm-cell header"></div>
+                        <div class="cm-cell header">Pred +</div>
+                        <div class="cm-cell header">Pred -</div>
+                        <div class="cm-cell header">Actual +</div>
+                        <div class="cm-cell tp">
+                            <span class="cm-value" id="tpValue">--</span>
+                            <span class="cm-label">TP</span>
+                        </div>
+                        <div class="cm-cell fn">
+                            <span class="cm-value" id="fnValue">--</span>
+                            <span class="cm-label">FN</span>
+                        </div>
+                        <div class="cm-cell header">Actual -</div>
+                        <div class="cm-cell fp">
+                            <span class="cm-value" id="fpValue">--</span>
+                            <span class="cm-label">FP</span>
+                        </div>
+                        <div class="cm-cell tn">
+                            <span class="cm-value" id="tnValue">--</span>
+                            <span class="cm-label">TN</span>
+                        </div>
+                    </div>
+                    <div class="helper-note">Rows = Actual, Columns = Predicted</div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Metrics at Threshold</div>
+                    <div class="metrics-panel">
+                        <div class="metric-card highlight">
+                            <div class="metric-name">Precision</div>
+                            <div class="metric-value" id="precisionValue">--</div>
+                        </div>
+                        <div class="metric-card highlight">
+                            <div class="metric-name">Recall</div>
+                            <div class="metric-value" id="recallValue">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-name">F1</div>
+                            <div class="metric-value" id="f1Value">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-name">Accuracy</div>
+                            <div class="metric-value" id="accuracyValue">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-name">Specificity</div>
+                            <div class="metric-value" id="specificityValue">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-name">FPR</div>
+                            <div class="metric-value" id="fprValue">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Data Settings</div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Positive Rate (Imbalance)</span>
+                            <span class="control-value" id="posRateValue">30%</span>
+                        </div>
+                        <input type="range" id="posRateSlider" min="2" max="50" step="1" value="30">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Signal Strength (Score Separation)</span>
+                            <span class="control-value" id="separationValue">1.5</span>
+                        </div>
+                        <input type="range" id="separationSlider" min="0.5" max="3" step="0.1" value="1.5">
+                        <div class="control-help">Higher values make positive and negative scores easier to separate.</div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Sample Size</span>
+                            <span class="control-value" id="sampleValue">500</span>
+                        </div>
+                        <input type="range" id="sampleSlider" min="100" max="1000" step="100" value="500">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Distribution Scale</span>
+                        </div>
+                        <select id="distModeSelect" class="control-select">
+                            <option value="counts">Counts</option>
+                            <option value="density">Density (per class)</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Dataset Seed</span>
+                            <span class="control-value" id="seedValue">12345</span>
+                        </div>
+                        <button class="small-btn" onclick="regenerateDataWithNewSeed()">🔄 Regenerate Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="help-panel">
+            <div class="help-header" onclick="toggleHelp()">
+                <span class="help-title">📖 Metric Reference</span>
+                <span class="help-toggle" id="helpToggle">Show ▼</span>
+            </div>
+            <div class="help-content" id="helpContent">
+                <div class="help-grid">
+                    <div class="help-item">
+                        <span>✅</span>
+                        <span><strong>Precision:</strong> Of predicted positives, how many are real? TP/(TP+FP)</span>
+                    </div>
+                    <div class="help-item">
+                        <span>🎯</span>
+                        <span><strong>Recall:</strong> Of all positives, how many caught? TP/(TP+FN)</span>
+                    </div>
+                    <div class="help-item">
+                        <span>⚖️</span>
+                        <span><strong>F1:</strong> Harmonic mean of precision and recall</span>
+                    </div>
+                    <div class="help-item">
+                        <span>📊</span>
+                        <span><strong>ROC-AUC:</strong> Area under TPR vs FPR curve. Higher = better ranking.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>📈</span>
+                        <span><strong>PR-AUC:</strong> Area under Precision-Recall curve. Better for imbalanced data.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>⚠️</span>
+                        <span><strong>Accuracy trap:</strong> High accuracy can mean nothing on imbalanced data!</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // STATE
+        // ============================================
+        let threshold = 0.5;
+        let posRate = 30;
+        let separation = 1.5;
+        let nSamples = 500;
+        let fpCost = 50;
+        let fnCost = 500;
+        let distMode = 'counts';
+        let dataMode = 'default';
+        let dataSeed = 12345;
+
+        let labels = [];
+        let probabilities = [];
+
+        let dprCached = window.devicePixelRatio || 1;
+
+        // ============================================
+        // HELPERS
+        // ============================================
+        function clamp(value, min, max) {
+            return Math.max(min, Math.min(max, value));
+        }
+
+        function createSeededRng(seed) {
+            let t = seed >>> 0;
+            return function rng() {
+                t += 0x6D2B79F5;
+                let r = Math.imul(t ^ (t >>> 15), 1 | t);
+                r ^= r + Math.imul(r ^ (r >>> 7), 61 | r);
+                return ((r ^ (r >>> 14)) >>> 0) / 4294967296;
+            };
+        }
+
+        function updateSeedDisplay() {
+            document.getElementById('seedValue').textContent = String(dataSeed >>> 0);
+        }
+
+        function getObservedPosRate() {
+            if (labels.length === 0) return 0;
+            const positives = labels.reduce((sum, label) => sum + label, 0);
+            return positives / labels.length;
+        }
+
+        function getSweepThresholds(includeExtremes = false) {
+            const unique = [...new Set(probabilities.map(p => Number(p.toFixed(6))))].sort((a, b) => b - a);
+            if (includeExtremes) {
+                return [1.01, ...unique, -0.01];
+            }
+
+            const bounded = unique.filter(t => t >= 0.01 && t <= 0.99);
+            return [...new Set([0.99, ...bounded, 0.01])].sort((a, b) => b - a);
+        }
+
+        function drawPointLabel(ctx, text, x, y, pad, width, height) {
+            ctx.font = '10px -apple-system';
+            const textWidth = ctx.measureText(text).width;
+            const boxW = textWidth + 8;
+            const boxH = 16;
+
+            const boxX = clamp(x + 8, pad.left, width - pad.right - boxW);
+            const boxY = clamp(y - boxH - 6, pad.top, height - pad.bottom - boxH);
+
+            ctx.fillStyle = 'rgba(255,255,255,0.92)';
+            ctx.fillRect(boxX, boxY, boxW, boxH);
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+            ctx.fillStyle = '#1e293b';
+            ctx.textAlign = 'left';
+            ctx.fillText(text, boxX + 4, boxY + 11);
+        }
+
+        // ============================================
+        // DATA GENERATION
+        // ============================================
+        function generateData() {
+            labels = [];
+            probabilities = [];
+
+            const rng = createSeededRng(dataSeed);
+            const nPos = Math.floor(nSamples * posRate / 100);
+            const nNeg = nSamples - nPos;
+
+            function pushSample(label, probability) {
+                let p = clamp(probability, 0.01, 0.99);
+
+                // Monotonic distortion keeps ranking mostly intact but harms calibration.
+                if (dataMode === 'bad_calibration') {
+                    p = clamp(Math.pow(p, 0.45), 0.01, 0.99);
+                }
+
+                labels.push(label);
+                probabilities.push(p);
+            }
+
+            if (dataMode === 'noskill') {
+                for (let i = 0; i < nPos; i++) pushSample(1, rng());
+                for (let i = 0; i < nNeg; i++) pushSample(0, rng());
+                return;
+            }
+
+            for (let i = 0; i < nPos; i++) {
+                let p = rng();
+                p = Math.pow(p, 1 / separation);
+                p = p * 0.7 + 0.25;
+                pushSample(1, p);
+            }
+
+            for (let i = 0; i < nNeg; i++) {
+                let p = rng();
+                p = Math.pow(p, separation);
+                p = p * 0.7 + 0.05;
+                pushSample(0, p);
+            }
+        }
+
+        function regenerateData() {
+            generateData();
+            redrawAll();
+        }
+
+        function regenerateDataWithNewSeed() {
+            dataSeed = Math.floor(Math.random() * 2147483647);
+            updateSeedDisplay();
+            regenerateData();
+        }
+
+        // ============================================
+        // METRICS
+        // ============================================
+        function calcConfusion(thresh) {
+            let tp = 0, fp = 0, tn = 0, fn = 0;
+
+            for (let i = 0; i < labels.length; i++) {
+                const pred = probabilities[i] >= thresh ? 1 : 0;
+                if (labels[i] === 1 && pred === 1) tp++;
+                else if (labels[i] === 0 && pred === 1) fp++;
+                else if (labels[i] === 0 && pred === 0) tn++;
+                else fn++;
+            }
+
+            return { tp, fp, tn, fn };
+        }
+
+        function calcMetrics(cm) {
+            const { tp, fp, tn, fn } = cm;
+            const total = tp + fp + tn + fn;
+
+            const precision = tp + fp > 0 ? tp / (tp + fp) : 0;
+            const recall = tp + fn > 0 ? tp / (tp + fn) : 0;
+            const specificity = tn + fp > 0 ? tn / (tn + fp) : 0;
+            const accuracy = total > 0 ? (tp + tn) / total : 0;
+            const f1 = precision + recall > 0 ? 2 * precision * recall / (precision + recall) : 0;
+            const fpr = fp + tn > 0 ? fp / (fp + tn) : 0;
+
+            return { precision, recall, specificity, accuracy, f1, fpr };
+        }
+
+        function calcROCPoints() {
+            const thresholds = getSweepThresholds(true);
+            return thresholds.map(t => {
+                const m = calcMetrics(calcConfusion(t));
+                return { fpr: m.fpr, tpr: m.recall, thresh: t };
+            });
+        }
+
+        function calcPRPoints() {
+            const thresholds = getSweepThresholds(true);
+            return thresholds.map(t => {
+                const cm = calcConfusion(t);
+                const m = calcMetrics(cm);
+                const precisionForCurve = (cm.tp + cm.fp) > 0 ? m.precision : 1;
+                return { precision: precisionForCurve, recall: m.recall, thresh: t };
+            });
+        }
+
+        function calcAUC(rocPoints) {
+            let auc = 0;
+            const sorted = [...rocPoints].sort((a, b) => a.fpr - b.fpr);
+            for (let i = 1; i < sorted.length; i++) {
+                const w = sorted[i].fpr - sorted[i - 1].fpr;
+                const h = (sorted[i].tpr + sorted[i - 1].tpr) / 2;
+                auc += w * h;
+            }
+            return clamp(auc, 0, 1);
+        }
+
+        function calcPRAUC(prPoints) {
+            let auc = 0;
+            const sorted = [...prPoints].sort((a, b) => a.recall - b.recall);
+            for (let i = 1; i < sorted.length; i++) {
+                const w = sorted[i].recall - sorted[i - 1].recall;
+                const h = (sorted[i].precision + sorted[i - 1].precision) / 2;
+                auc += w * h;
+            }
+            return clamp(auc, 0, 1);
+        }
+
+        function findCostOptimalThreshold() {
+            const thresholds = getSweepThresholds(false);
+            let bestThreshold = threshold;
+            let bestCost = Infinity;
+            let bestCm = calcConfusion(threshold);
+
+            thresholds.forEach(t => {
+                const cm = calcConfusion(t);
+                const cost = cm.fp * fpCost + cm.fn * fnCost;
+                if (cost < bestCost) {
+                    bestCost = cost;
+                    bestThreshold = t;
+                    bestCm = cm;
+                }
+            });
+
+            return {
+                threshold: clamp(bestThreshold, 0.01, 0.99),
+                cost: bestCost,
+                cm: bestCm
+            };
+        }
+
+        // ============================================
+        // CANVAS
+        // ============================================
+        function setupCanvas(canvas) {
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dprCached;
+            canvas.height = rect.height * dprCached;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dprCached, dprCached);
+            return { width: rect.width, height: rect.height, ctx };
+        }
+
+        function drawDistributions() {
+            const canvas = document.getElementById('distChart');
+            const { width, height, ctx } = setupCanvas(canvas);
+            const pad = { top: 15, right: 15, bottom: 30, left: 40 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const nBins = 30;
+            const posBins = new Array(nBins).fill(0);
+            const negBins = new Array(nBins).fill(0);
+
+            for (let i = 0; i < labels.length; i++) {
+                const bin = Math.min(nBins - 1, Math.floor(probabilities[i] * nBins));
+                if (labels[i] === 1) posBins[bin]++;
+                else negBins[bin]++;
+            }
+
+            const posTotal = posBins.reduce((s, v) => s + v, 0);
+            const negTotal = negBins.reduce((s, v) => s + v, 0);
+            const posValues = distMode === 'density' ? posBins.map(c => c / Math.max(posTotal, 1)) : posBins;
+            const negValues = distMode === 'density' ? negBins.map(c => c / Math.max(negTotal, 1)) : negBins;
+
+            const maxValue = Math.max(...posValues, ...negValues, 0.0001);
+            const barW = plotW / nBins;
+
+            document.getElementById('distScaleBadge').textContent = distMode === 'density' ? 'Density' : 'Counts';
+
+            ctx.fillStyle = 'rgba(59, 130, 246, 0.5)';
+            for (let i = 0; i < nBins; i++) {
+                const barH = (negValues[i] / maxValue) * plotH;
+                ctx.fillRect(pad.left + i * barW, pad.top + plotH - barH, barW - 1, barH);
+            }
+
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.5)';
+            for (let i = 0; i < nBins; i++) {
+                const barH = (posValues[i] / maxValue) * plotH;
+                ctx.fillRect(pad.left + i * barW, pad.top + plotH - barH, barW - 1, barH);
+            }
+
+            const threshX = pad.left + threshold * plotW;
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(threshX, pad.top);
+            ctx.lineTo(threshX, height - pad.bottom);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#1e293b';
+            ctx.font = 'bold 10px -apple-system';
+            ctx.textAlign = 'center';
+            ctx.fillText(`t=${threshold.toFixed(2)}`, threshX, pad.top - 3);
+
+            ctx.font = '10px -apple-system';
+            ctx.fillStyle = '#3b82f6';
+            ctx.textAlign = 'left';
+            ctx.fillText('■ Negative', pad.left, height - 5);
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText('■ Positive', pad.left + 70, height - 5);
+
+            ctx.fillStyle = '#64748b';
+            ctx.textAlign = 'center';
+            ctx.fillText('Probability', width / 2, height - 5);
+        }
+
+        function drawROC() {
+            const canvas = document.getElementById('rocChart');
+            const { width, height, ctx } = setupCanvas(canvas);
+            const pad = { top: 15, right: 15, bottom: 30, left: 40 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const points = calcROCPoints();
+            const auc = calcAUC(points);
+
+            const sx = v => pad.left + v * plotW;
+            const sy = v => pad.top + (1 - v) * plotH;
+
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            [0, 0.5, 1].forEach(v => {
+                ctx.beginPath();
+                ctx.moveTo(pad.left, sy(v));
+                ctx.lineTo(width - pad.right, sy(v));
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(sx(v), pad.top);
+                ctx.lineTo(sx(v), height - pad.bottom);
+                ctx.stroke();
+            });
+
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(pad.left, height - pad.bottom);
+            ctx.lineTo(width - pad.right, pad.top);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            const sorted = [...points].sort((a, b) => a.fpr - b.fpr);
+            sorted.forEach((pt, i) => {
+                const x = sx(pt.fpr);
+                const y = sy(pt.tpr);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            const m = calcMetrics(calcConfusion(threshold));
+            const px = sx(m.fpr);
+            const py = sy(m.recall);
+
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.arc(px, py, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            drawPointLabel(
+                ctx,
+                `t=${threshold.toFixed(2)} | TPR=${m.recall.toFixed(2)} | FPR=${m.fpr.toFixed(2)}`,
+                px,
+                py,
+                pad,
+                width,
+                height
+            );
+
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px -apple-system';
+            ctx.textAlign = 'center';
+            ctx.fillText('False Positive Rate', width / 2, height - 5);
+            ctx.save();
+            ctx.translate(12, height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('True Positive Rate', 0, 0);
+            ctx.restore();
+
+            ctx.textAlign = 'right';
+            ctx.fillText('1.0', pad.left - 5, sy(1) + 3);
+            ctx.fillText('0.5', pad.left - 5, sy(0.5) + 3);
+            ctx.fillText('0.0', pad.left - 5, sy(0) + 3);
+            ctx.textAlign = 'center';
+            ctx.fillText('0.0', sx(0), height - pad.bottom + 12);
+            ctx.fillText('0.5', sx(0.5), height - pad.bottom + 12);
+            ctx.fillText('1.0', sx(1), height - pad.bottom + 12);
+
+            document.getElementById('aucBadge').textContent = `AUC = ${auc.toFixed(3)}`;
+        }
+
+        function drawPR() {
+            const canvas = document.getElementById('prChart');
+            const { width, height, ctx } = setupCanvas(canvas);
+            const pad = { top: 15, right: 15, bottom: 30, left: 40 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const points = calcPRPoints();
+            const prauc = calcPRAUC(points);
+            const observedPosRate = getObservedPosRate();
+
+            const sx = v => pad.left + v * plotW;
+            const sy = v => pad.top + (1 - v) * plotH;
+
+            ctx.strokeStyle = '#f1f5f9';
+            ctx.lineWidth = 1;
+            [0, 0.5, 1].forEach(v => {
+                ctx.beginPath();
+                ctx.moveTo(pad.left, sy(v));
+                ctx.lineTo(width - pad.right, sy(v));
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(sx(v), pad.top);
+                ctx.lineTo(sx(v), height - pad.bottom);
+                ctx.stroke();
+            });
+
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(pad.left, sy(observedPosRate));
+            ctx.lineTo(width - pad.right, sy(observedPosRate));
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.strokeStyle = '#10b981';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            const sorted = [...points].sort((a, b) => a.recall - b.recall);
+            sorted.forEach((pt, i) => {
+                const x = sx(pt.recall);
+                const y = sy(pt.precision);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            const cm = calcConfusion(threshold);
+            const m = calcMetrics(cm);
+            const px = sx(m.recall);
+            const py = sy(m.precision);
+
+            ctx.fillStyle = '#1e293b';
+            ctx.beginPath();
+            ctx.arc(px, py, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            drawPointLabel(
+                ctx,
+                `t=${threshold.toFixed(2)} | P=${m.precision.toFixed(2)} | R=${m.recall.toFixed(2)}`,
+                px,
+                py,
+                pad,
+                width,
+                height
+            );
+
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px -apple-system';
+            ctx.textAlign = 'center';
+            ctx.fillText('Recall', width / 2, height - 5);
+            ctx.save();
+            ctx.translate(12, height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Precision', 0, 0);
+            ctx.restore();
+
+            ctx.textAlign = 'right';
+            ctx.fillText('1.0', pad.left - 5, sy(1) + 3);
+            ctx.fillText('0.5', pad.left - 5, sy(0.5) + 3);
+            ctx.fillText('0.0', pad.left - 5, sy(0) + 3);
+            ctx.textAlign = 'center';
+            ctx.fillText('0.0', sx(0), height - pad.bottom + 12);
+            ctx.fillText('0.5', sx(0.5), height - pad.bottom + 12);
+            ctx.fillText('1.0', sx(1), height - pad.bottom + 12);
+
+            document.getElementById('praucBadge').textContent = `PR-AUC = ${prauc.toFixed(3)}`;
+        }
+
+        function drawMetricsChart() {
+            const canvas = document.getElementById('metricsChart');
+            const { width, height, ctx } = setupCanvas(canvas);
+            const pad = { top: 18, right: 15, bottom: 40, left: 42 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+
+            ctx.clearRect(0, 0, width, height);
+
+            const thresholds = [];
+            const precisions = [];
+            const recalls = [];
+            const f1s = [];
+            for (let t = 0; t <= 1.0001; t += 0.005) {
+                const m = calcMetrics(calcConfusion(t));
+                thresholds.push(t);
+                precisions.push(m.precision);
+                recalls.push(m.recall);
+                f1s.push(m.f1);
+            }
+
+            const sx = t => pad.left + t * plotW;
+            const sy = v => pad.top + (1 - v) * plotH;
+
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 0.7;
+            [0, 0.5, 1].forEach(v => {
+                ctx.beginPath();
+                ctx.moveTo(pad.left, sy(v));
+                ctx.lineTo(width - pad.right, sy(v));
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(sx(v), pad.top);
+                ctx.lineTo(sx(v), height - pad.bottom);
+                ctx.stroke();
+            });
+
+            ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            thresholds.forEach((t, i) => {
+                const x = sx(t);
+                const y = sy(precisions[i]);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            ctx.strokeStyle = '#ef4444';
+            ctx.beginPath();
+            thresholds.forEach((t, i) => {
+                const x = sx(t);
+                const y = sy(recalls[i]);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            ctx.strokeStyle = '#f97316';
+            ctx.beginPath();
+            thresholds.forEach((t, i) => {
+                const x = sx(t);
+                const y = sy(f1s[i]);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            ctx.strokeStyle = '#1e293b';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(sx(threshold), pad.top);
+            ctx.lineTo(sx(threshold), height - pad.bottom);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.font = '9px -apple-system';
+            ctx.fillStyle = '#3b82f6';
+            ctx.textAlign = 'left';
+            ctx.fillText('Precision', pad.left, pad.top - 4);
+            ctx.fillStyle = '#ef4444';
+            ctx.fillText('Recall', pad.left + 60, pad.top - 4);
+            ctx.fillStyle = '#f97316';
+            ctx.fillText('F1', pad.left + 108, pad.top - 4);
+
+            ctx.fillStyle = '#64748b';
+            ctx.textAlign = 'right';
+            ctx.fillText('1.0', pad.left - 5, sy(1) + 3);
+            ctx.fillText('0.5', pad.left - 5, sy(0.5) + 3);
+            ctx.fillText('0.0', pad.left - 5, sy(0) + 3);
+            ctx.textAlign = 'center';
+            ctx.fillText('0.0', sx(0), height - pad.bottom + 12);
+            ctx.fillText('0.5', sx(0.5), height - pad.bottom + 12);
+            ctx.fillText('1.0', sx(1), height - pad.bottom + 12);
+
+            ctx.fillStyle = '#64748b';
+            ctx.fillText('Threshold', width / 2, height - 5);
+            ctx.save();
+            ctx.translate(12, pad.top + plotH / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Metric value (0-1)', 0, 0);
+            ctx.restore();
+        }
+
+        // ============================================
+        // UI
+        // ============================================
+        function updateUI() {
+            const cm = calcConfusion(threshold);
+            const m = calcMetrics(cm);
+
+            document.getElementById('tpValue').textContent = cm.tp;
+            document.getElementById('fpValue').textContent = cm.fp;
+            document.getElementById('tnValue').textContent = cm.tn;
+            document.getElementById('fnValue').textContent = cm.fn;
+
+            document.getElementById('precisionValue').textContent = (m.precision * 100).toFixed(1) + '%';
+            document.getElementById('recallValue').textContent = (m.recall * 100).toFixed(1) + '%';
+            document.getElementById('f1Value').textContent = (m.f1 * 100).toFixed(1) + '%';
+            document.getElementById('accuracyValue').textContent = (m.accuracy * 100).toFixed(1) + '%';
+            document.getElementById('specificityValue').textContent = (m.specificity * 100).toFixed(1) + '%';
+            document.getElementById('fprValue').textContent = (m.fpr * 100).toFixed(1) + '%';
+
+            const best = findCostOptimalThreshold();
+            document.getElementById('recommendedThreshold').textContent = best.threshold.toFixed(2);
+            document.getElementById('recommendedCost').textContent = '$' + best.cost;
+
+            updateInsight(cm, m, best);
+        }
+
+        function updateInsight(cm, m, best) {
+            const currentCost = cm.fp * fpCost + cm.fn * fnCost;
+            const observedPosRatePct = (getObservedPosRate() * 100).toFixed(0);
+            const costDelta = currentCost - best.cost;
+
+            let insight = '';
+            if (posRate <= 10 && m.accuracy > 0.9 && m.recall < 0.5) {
+                insight = `<strong>Accuracy trap!</strong> ${(m.accuracy * 100).toFixed(0)}% accuracy looks great, but recall is only ${(m.recall * 100).toFixed(0)}%. At ${observedPosRatePct}% positives, always predicting negative can still look "accurate."`;
+            } else if (Math.abs(threshold - best.threshold) > 0.05) {
+                insight = `<strong>Cost mismatch:</strong> Current threshold ${threshold.toFixed(2)} costs <strong>$${currentCost}</strong>, while the cost-optimal threshold ${best.threshold.toFixed(2)} costs <strong>$${best.cost}</strong> (saving $${Math.max(0, costDelta)}).`;
+            } else if (m.precision < 0.3 && m.recall > 0.9) {
+                insight = `<strong>High recall, low precision:</strong> You catch ${(m.recall * 100).toFixed(0)}% of positives, but ${(100 - m.precision * 100).toFixed(0)}% of alerts are false alarms. Good when missing positives is very costly.`;
+            } else if (m.precision > 0.9 && m.recall < 0.3) {
+                insight = `<strong>High precision, low recall:</strong> Alerts are usually correct (${(m.precision * 100).toFixed(0)}%), but you miss many positives (${(100 - m.recall * 100).toFixed(0)}%).`;
+            } else if (Math.abs(m.precision - m.recall) < 0.1) {
+                insight = `<strong>Balanced tradeoff:</strong> Precision (${(m.precision * 100).toFixed(0)}%) and recall (${(m.recall * 100).toFixed(0)}%) are close. F1 = ${(m.f1 * 100).toFixed(0)}% summarizes this balance.`;
+            } else {
+                insight = `At threshold ${threshold.toFixed(2)}: catching ${cm.tp} of ${cm.tp + cm.fn} positives (${(m.recall * 100).toFixed(0)}% recall) with ${cm.fp} false alarms (${(m.precision * 100).toFixed(0)}% precision). Current cost = $${currentCost}.`;
+            }
+
+            document.getElementById('insightText').innerHTML = insight;
+        }
+
+        function redrawAll() {
+            drawDistributions();
+            drawROC();
+            drawPR();
+            drawMetricsChart();
+            updateUI();
+        }
+
+        // ============================================
+        // EVENTS
+        // ============================================
+        document.getElementById('thresholdSlider').addEventListener('input', function() {
+            threshold = parseFloat(this.value);
+            document.getElementById('thresholdValue').textContent = threshold.toFixed(2);
+            document.getElementById('thresholdMarker').style.left = (threshold * 100) + '%';
+            redrawAll();
+        });
+
+        document.getElementById('posRateSlider').addEventListener('input', function() {
+            posRate = parseInt(this.value, 10);
+            document.getElementById('posRateValue').textContent = posRate + '%';
+            regenerateData();
+        });
+
+        document.getElementById('separationSlider').addEventListener('input', function() {
+            separation = parseFloat(this.value);
+            document.getElementById('separationValue').textContent = separation.toFixed(1);
+            regenerateData();
+        });
+
+        document.getElementById('sampleSlider').addEventListener('input', function() {
+            nSamples = parseInt(this.value, 10);
+            document.getElementById('sampleValue').textContent = nSamples;
+            regenerateData();
+        });
+
+        document.getElementById('fpCostSlider').addEventListener('input', function() {
+            fpCost = parseInt(this.value, 10);
+            document.getElementById('fpCostValue').textContent = '$' + fpCost;
+            redrawAll();
+        });
+
+        document.getElementById('fnCostSlider').addEventListener('input', function() {
+            fnCost = parseInt(this.value, 10);
+            document.getElementById('fnCostValue').textContent = '$' + fnCost;
+            redrawAll();
+        });
+
+        document.getElementById('distModeSelect').addEventListener('change', function() {
+            distMode = this.value;
+            redrawAll();
+        });
+
+        // ============================================
+        // PRESETS
+        // ============================================
+        const presets = {
+            balanced: {
+                posRate: 50, separation: 1.5, threshold: 0.5, mode: 'default', fpCost: 50, fnCost: 500,
+                hint: '<strong>Balanced data:</strong> 50/50 split. Accuracy is meaningful here; compare precision, recall, and F1 around threshold 0.5.'
+            },
+            imbalanced: {
+                posRate: 5, separation: 1.5, threshold: 0.5, mode: 'default', fpCost: 50, fnCost: 500,
+                hint: '<strong>Severe imbalance (5%):</strong> Accuracy can look high even while recall is weak. PR and cost are more informative.'
+            },
+            aggressive: {
+                posRate: 20, separation: 1.5, threshold: 0.25, mode: 'default', fpCost: 50, fnCost: 500,
+                hint: '<strong>Aggressive (low threshold):</strong> Higher recall with more false alarms. Useful when missed positives are expensive.'
+            },
+            conservative: {
+                posRate: 20, separation: 1.5, threshold: 0.75, mode: 'default', fpCost: 50, fnCost: 500,
+                hint: '<strong>Conservative (high threshold):</strong> Higher precision with lower recall. Useful when false alarms are expensive.'
+            },
+            costbased: {
+                posRate: 20, separation: 1.5, threshold: 0.35, mode: 'default', fpCost: 50, fnCost: 500,
+                hint: '<strong>Cost-based setup:</strong> Use FP/FN cost sliders and the recommended-threshold panel to pick the minimum-cost operating point.'
+            },
+            bad_calibration: {
+                posRate: 20, separation: 2.5, threshold: 0.5, mode: 'bad_calibration', fpCost: 50, fnCost: 500,
+                hint: '<strong>Good ranking, bad calibration:</strong> ROC/PR can stay strong while raw probabilities become overconfident.'
+            },
+            noskill: {
+                posRate: 20, separation: 1.0, threshold: 0.5, mode: 'noskill', fpCost: 50, fnCost: 500,
+                hint: '<strong>No skill:</strong> Scores are random relative to labels. ROC trends toward diagonal and PR-AUC approaches the positive-rate baseline.'
+            }
+        };
+
+        function loadPreset(name) {
+            const p = presets[name];
+
+            posRate = p.posRate;
+            separation = p.separation;
+            threshold = p.threshold;
+            fpCost = p.fpCost;
+            fnCost = p.fnCost;
+            dataMode = p.mode || 'default';
+
+            document.getElementById('posRateSlider').value = posRate;
+            document.getElementById('separationSlider').value = separation;
+            document.getElementById('thresholdSlider').value = threshold;
+            document.getElementById('fpCostSlider').value = fpCost;
+            document.getElementById('fnCostSlider').value = fnCost;
+
+            document.getElementById('posRateValue').textContent = posRate + '%';
+            document.getElementById('separationValue').textContent = separation.toFixed(1);
+            document.getElementById('thresholdValue').textContent = threshold.toFixed(2);
+            document.getElementById('fpCostValue').textContent = '$' + fpCost;
+            document.getElementById('fnCostValue').textContent = '$' + fnCost;
+            document.getElementById('thresholdMarker').style.left = (threshold * 100) + '%';
+
+            regenerateData();
+
+            document.getElementById('scenarioHint').innerHTML = p.hint;
+            document.getElementById('scenarioHint').classList.add('visible');
+        }
+
+        function resetPlayground() {
+            posRate = 30;
+            separation = 1.5;
+            threshold = 0.5;
+            nSamples = 500;
+            fpCost = 50;
+            fnCost = 500;
+            distMode = 'counts';
+            dataMode = 'default';
+
+            document.getElementById('posRateSlider').value = 30;
+            document.getElementById('separationSlider').value = 1.5;
+            document.getElementById('thresholdSlider').value = 0.5;
+            document.getElementById('sampleSlider').value = 500;
+            document.getElementById('fpCostSlider').value = 50;
+            document.getElementById('fnCostSlider').value = 500;
+            document.getElementById('distModeSelect').value = 'counts';
+
+            document.getElementById('posRateValue').textContent = '30%';
+            document.getElementById('separationValue').textContent = '1.5';
+            document.getElementById('thresholdValue').textContent = '0.50';
+            document.getElementById('sampleValue').textContent = '500';
+            document.getElementById('fpCostValue').textContent = '$50';
+            document.getElementById('fnCostValue').textContent = '$500';
+            document.getElementById('thresholdMarker').style.left = '50%';
+
+            document.getElementById('scenarioHint').classList.remove('visible');
+
+            // Keep seed fixed on reset so users can compare changes.
+            regenerateData();
+        }
+
+        function toggleHelp() {
+            const content = document.getElementById('helpContent');
+            const toggle = document.getElementById('helpToggle');
+            const isVisible = content.classList.toggle('visible');
+            toggle.textContent = isVisible ? 'Hide ▲' : 'Show ▼';
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        window.addEventListener('resize', () => {
+            dprCached = window.devicePixelRatio || 1;
+            redrawAll();
+        });
+
+        updateSeedDisplay();
+        regenerateData();
+    </script>
+</body>
+</html>

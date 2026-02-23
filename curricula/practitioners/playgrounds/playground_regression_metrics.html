@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regression Metrics Playground</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        h1 { font-size: 1.4rem; color: #0f172a; margin-bottom: 4px; }
+        .header-subtitle { font-size: 0.85rem; color: #64748b; }
+
+        .reset-btn {
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .reset-btn:hover { background: #f1f5f9; }
+
+        .start-banner {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+            color: white;
+            border-radius: 14px;
+            padding: 20px 28px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .start-banner-icon { font-size: 2.2rem; }
+        .start-banner-content h2 { font-size: 1rem; margin-bottom: 6px; }
+        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; }
+        .start-banner-steps { display: flex; gap: 20px; margin-top: 10px; flex-wrap: wrap; }
+        .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
+        .step-num {
+            background: rgba(255,255,255,0.2);
+            width: 22px; height: 22px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 0.7rem;
+        }
+
+        .scenarios-bar {
+            background: white;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+        }
+        .scenarios-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        .scenario-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .scenario-btn.good { background: #dcfce7; color: #166534; }
+        .scenario-btn.outlier { background: #fee2e2; color: #991b1b; }
+        .scenario-btn.bias { background: #fef3c7; color: #92400e; }
+        .scenario-btn.pattern { background: #e0e7ff; color: #3730a3; }
+        .scenario-hint {
+            flex: 1;
+            min-width: 180px;
+            padding: 8px 12px;
+            background: #f8fafc;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            color: #475569;
+            display: none;
+            border-left: 3px solid #0ea5e9;
+        }
+        .scenario-hint.visible { display: block; }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .charts-area { display: flex; flex-direction: column; gap: 12px; }
+
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 10px;
+            padding: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .chart-card.full { grid-column: 1 / -1; }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .chart-title { font-size: 0.75rem; font-weight: 600; color: #475569; }
+        .chart-badge {
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        canvas { display: block; width: 100%; }
+
+        .sidebar { display: flex; flex-direction: column; gap: 12px; }
+
+        .sidebar-card {
+            background: white;
+            border-radius: 10px;
+            padding: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .sidebar-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .control-group { margin-bottom: 12px; }
+        .control-group:last-child { margin-bottom: 0; }
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        .control-value {
+            font-family: 'SF Mono', Monaco, monospace;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: #0ea5e9;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 5px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: #0ea5e9;
+            cursor: pointer;
+        }
+
+        .metrics-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .metric-card {
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .metric-card.highlight {
+            background: #e0f2fe;
+            border: 1px solid #7dd3fc;
+        }
+        .metric-name {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .metric-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0c4a6e;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+        .metric-desc {
+            font-size: 0.65rem;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        .insight-bar {
+            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+            border: 1px solid #7dd3fc;
+            border-radius: 10px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .insight-icon { font-size: 1.2rem; }
+        .insight-content { flex: 1; }
+        .insight-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #0369a1;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .insight-text { font-size: 0.85rem; color: #0c4a6e; }
+
+        .help-panel {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .help-header {
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            cursor: pointer;
+            background: #f8fafc;
+        }
+        .help-title { font-size: 0.8rem; font-weight: 600; color: #475569; }
+        .help-toggle { font-size: 0.7rem; color: #64748b; }
+        .help-content {
+            padding: 14px;
+            display: none;
+            border-top: 1px solid #e2e8f0;
+        }
+        .help-content.visible { display: block; }
+        .help-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+        }
+        .help-item {
+            display: flex;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: #475569;
+        }
+
+        @media (max-width: 1000px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .sidebar { flex-direction: row; flex-wrap: wrap; }
+            .sidebar-card { flex: 1; min-width: 240px; }
+        }
+        @media (max-width: 650px) {
+            .chart-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Regression Metrics Playground</h1>
+                <span class="header-subtitle">Compare MAE, RMSE, and R² on different error patterns</span>
+            </div>
+            <button class="reset-btn" onclick="resetPlayground()">↻ Reset</button>
+        </header>
+
+        <div class="start-banner">
+            <div class="start-banner-icon">📏</div>
+            <div class="start-banner-content">
+                <h2>Measuring How Wrong: MAE vs RMSE vs R²</h2>
+                <p>Same predictions, different metrics tell different stories. See which metric catches what.</p>
+                <div class="start-banner-steps">
+                    <div class="start-step"><span class="step-num">1</span> Add outliers — watch RMSE spike</div>
+                    <div class="start-step"><span class="step-num">2</span> Add bias — watch R² drop</div>
+                    <div class="start-step"><span class="step-num">3</span> Check residual patterns</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="scenarios-bar">
+            <span class="scenarios-label">Try:</span>
+            <button class="scenario-btn good" onclick="loadPreset('good')">✅ Good Model</button>
+            <button class="scenario-btn outlier" onclick="loadPreset('outliers')">💥 Outlier Errors</button>
+            <button class="scenario-btn bias" onclick="loadPreset('bias')">↗️ Systematic Bias</button>
+            <button class="scenario-btn pattern" onclick="loadPreset('nonlinear')">🌊 Missing Non-linearity</button>
+            <button class="scenario-btn pattern" onclick="loadPreset('fan')">📣 Fan Shape</button>
+            <div class="scenario-hint" id="scenarioHint"></div>
+        </div>
+
+        <div class="main-grid">
+            <div class="charts-area">
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span class="chart-title">Predicted vs Actual</span>
+                            <span class="chart-badge">perfect = diagonal</span>
+                        </div>
+                        <canvas id="scatterChart" height="250"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span class="chart-title">Residuals vs Predicted</span>
+                            <span class="chart-badge">good = random scatter</span>
+                        </div>
+                        <canvas id="residualChart" height="250"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span class="chart-title">Residual Distribution</span>
+                            <span class="chart-badge">good = centered at 0</span>
+                        </div>
+                        <canvas id="histChart" height="180"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span class="chart-title">Error Breakdown</span>
+                        </div>
+                        <canvas id="errorChart" height="180"></canvas>
+                    </div>
+                </div>
+
+                <div class="insight-bar">
+                    <div class="insight-icon">💡</div>
+                    <div class="insight-content">
+                        <div class="insight-title">Metric Insight</div>
+                        <div class="insight-text" id="insightText">Adjust the error controls to see how different metrics respond.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Metrics</div>
+                    <div class="metrics-panel">
+                        <div class="metric-card highlight">
+                            <div class="metric-name">MAE</div>
+                            <div class="metric-value" id="maeValue">--</div>
+                            <div class="metric-desc">Avg absolute error</div>
+                        </div>
+                        <div class="metric-card highlight">
+                            <div class="metric-name">RMSE</div>
+                            <div class="metric-value" id="rmseValue">--</div>
+                            <div class="metric-desc">Penalizes big errors</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-name">R²</div>
+                            <div class="metric-value" id="r2Value">--</div>
+                            <div class="metric-desc">Variance explained</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-name">MAPE</div>
+                            <div class="metric-value" id="mapeValue">--</div>
+                            <div class="metric-desc">% error</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Error Controls</div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Random Noise (σ)</span>
+                            <span class="control-value" id="noiseValue">15</span>
+                        </div>
+                        <input type="range" id="noiseSlider" min="0" max="50" step="1" value="15">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Systematic Bias</span>
+                            <span class="control-value" id="biasValue">0</span>
+                        </div>
+                        <input type="range" id="biasSlider" min="-30" max="30" step="1" value="0">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Outlier %</span>
+                            <span class="control-value" id="outlierValue">0%</span>
+                        </div>
+                        <input type="range" id="outlierSlider" min="0" max="20" step="1" value="0">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Non-linearity</span>
+                            <span class="control-value" id="nonlinearValue">0</span>
+                        </div>
+                        <input type="range" id="nonlinearSlider" min="0" max="10" step="0.5" value="0">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Heteroscedasticity</span>
+                            <span class="control-value" id="heteroValue">0</span>
+                        </div>
+                        <input type="range" id="heteroSlider" min="0" max="1" step="0.1" value="0">
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Data</div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Sample Size</span>
+                            <span class="control-value" id="sampleValue">100</span>
+                        </div>
+                        <input type="range" id="sampleSlider" min="30" max="300" step="10" value="100">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="help-panel">
+            <div class="help-header" onclick="toggleHelp()">
+                <span class="help-title">📖 Metric Reference</span>
+                <span class="help-toggle" id="helpToggle">Show ▼</span>
+            </div>
+            <div class="help-content" id="helpContent">
+                <div class="help-grid">
+                    <div class="help-item">
+                        <span>📏</span>
+                        <span><strong>MAE:</strong> Average |error|. Robust to outliers. In original units.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>📐</span>
+                        <span><strong>RMSE:</strong> √(avg error²). Penalizes big errors. In original units.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>📊</span>
+                        <span><strong>R²:</strong> 1 - (your error / baseline). 0-1 scale, higher = better.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>💯</span>
+                        <span><strong>MAPE:</strong> Average % error. Good for comparing scales.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>🎯</span>
+                        <span><strong>Residual:</strong> Actual - Predicted. Should be random around 0.</span>
+                    </div>
+                    <div class="help-item">
+                        <span>⚠️</span>
+                        <span><strong>RMSE >> MAE:</strong> You have outlier errors. Investigate extremes.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // STATE
+        // ============================================
+        let nSamples = 100;
+        let noise = 15;
+        let bias = 0;
+        let outlierPct = 0;
+        let nonlinear = 0;
+        let hetero = 0;
+        
+        let actual = [];
+        let predicted = [];
+        let residuals = [];
+        
+        const dpr = window.devicePixelRatio || 1;
+
+        // ============================================
+        // DATA GENERATION
+        // ============================================
+        function generateData() {
+            actual = [];
+            predicted = [];
+            residuals = [];
+            
+            for (let i = 0; i < nSamples; i++) {
+                // True value (uniform 50-200)
+                const trueVal = 50 + Math.random() * 150;
+                actual.push(trueVal);
+                
+                // Base prediction = true value
+                let pred = trueVal;
+                
+                // Add random noise
+                pred += (Math.random() - 0.5) * 2 * noise;
+                
+                // Add systematic bias
+                pred += bias;
+                
+                // Add non-linear error (curved residuals)
+                if (nonlinear > 0) {
+                    const centered = (trueVal - 125) / 75; // -1 to 1
+                    pred += nonlinear * 10 * centered * centered;
+                }
+                
+                // Add heteroscedasticity (fan shape)
+                if (hetero > 0) {
+                    const scale = 1 + hetero * (trueVal - 50) / 150;
+                    pred += (Math.random() - 0.5) * 2 * noise * scale;
+                }
+                
+                // Add outliers
+                if (Math.random() < outlierPct / 100) {
+                    const outlierMag = 50 + Math.random() * 50;
+                    pred += (Math.random() > 0.5 ? 1 : -1) * outlierMag;
+                }
+                
+                predicted.push(pred);
+                residuals.push(trueVal - pred);
+            }
+        }
+
+        // ============================================
+        // METRICS
+        // ============================================
+        function calcMetrics() {
+            const n = actual.length;
+            
+            // MAE
+            let sumAbsError = 0;
+            for (let i = 0; i < n; i++) {
+                sumAbsError += Math.abs(residuals[i]);
+            }
+            const mae = sumAbsError / n;
+            
+            // MSE and RMSE
+            let sumSqError = 0;
+            for (let i = 0; i < n; i++) {
+                sumSqError += residuals[i] * residuals[i];
+            }
+            const mse = sumSqError / n;
+            const rmse = Math.sqrt(mse);
+            
+            // R²
+            const meanActual = actual.reduce((a, b) => a + b, 0) / n;
+            let ssTot = 0;
+            for (let i = 0; i < n; i++) {
+                ssTot += (actual[i] - meanActual) ** 2;
+            }
+            const r2 = 1 - sumSqError / ssTot;
+            
+            // MAPE
+            let sumPctError = 0;
+            for (let i = 0; i < n; i++) {
+                if (actual[i] !== 0) {
+                    sumPctError += Math.abs(residuals[i] / actual[i]);
+                }
+            }
+            const mape = (sumPctError / n) * 100;
+            
+            return { mae, rmse, r2, mape };
+        }
+
+        // ============================================
+        // CANVAS
+        // ============================================
+        function setupCanvas(canvas) {
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+            return { width: rect.width, height: rect.height, ctx };
+        }
+
+        function drawScatterPlot() {
+            const canvas = document.getElementById('scatterChart');
+            const { width, height, ctx } = setupCanvas(canvas);
+            const pad = { top: 15, right: 15, bottom: 30, left: 40 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Find ranges
+            const allVals = [...actual, ...predicted];
+            const minVal = Math.min(...allVals) - 10;
+            const maxVal = Math.max(...allVals) + 10;
+            const range = maxVal - minVal;
+            
+            const sx = v => pad.left + ((v - minVal) / range) * plotW;
+            const sy = v => pad.top + (1 - (v - minVal) / range) * plotH;
+            
+            // Perfect prediction line
+            ctx.strokeStyle = '#22c55e';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(sx(minVal), sy(minVal));
+            ctx.lineTo(sx(maxVal), sy(maxVal));
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Points
+            for (let i = 0; i < actual.length; i++) {
+                const error = Math.abs(residuals[i]);
+                const alpha = Math.min(0.8, 0.3 + error / 50);
+                ctx.fillStyle = `rgba(14, 165, 233, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(sx(predicted[i]), sy(actual[i]), 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Axes
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px -apple-system';
+            ctx.textAlign = 'center';
+            ctx.fillText('Predicted', width / 2, height - 5);
+            ctx.save();
+            ctx.translate(12, height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Actual', 0, 0);
+            ctx.restore();
+        }
+
+        function drawResidualPlot() {
+            const canvas = document.getElementById('residualChart');
+            const { width, height, ctx } = setupCanvas(canvas);
+            const pad = { top: 15, right: 15, bottom: 30, left: 40 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const minPred = Math.min(...predicted) - 10;
+            const maxPred = Math.max(...predicted) + 10;
+            const predRange = maxPred - minPred;
+            
+            const maxRes = Math.max(...residuals.map(Math.abs)) + 10;
+            
+            const sx = v => pad.left + ((v - minPred) / predRange) * plotW;
+            const sy = v => pad.top + (1 - (v + maxRes) / (2 * maxRes)) * plotH;
+            
+            // Zero line
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(pad.left, sy(0));
+            ctx.lineTo(width - pad.right, sy(0));
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Points
+            for (let i = 0; i < predicted.length; i++) {
+                const error = Math.abs(residuals[i]);
+                const isOutlier = error > 40;
+                ctx.fillStyle = isOutlier ? '#ef4444' : '#0ea5e9';
+                ctx.beginPath();
+                ctx.arc(sx(predicted[i]), sy(residuals[i]), isOutlier ? 5 : 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // Axes
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px -apple-system';
+            ctx.textAlign = 'center';
+            ctx.fillText('Predicted', width / 2, height - 5);
+            ctx.save();
+            ctx.translate(12, height / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText('Residual', 0, 0);
+            ctx.restore();
+        }
+
+        function drawHistogram() {
+            const canvas = document.getElementById('histChart');
+            const { width, height, ctx } = setupCanvas(canvas);
+            const pad = { top: 15, right: 15, bottom: 30, left: 40 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Create bins
+            const nBins = 20;
+            const maxRes = Math.max(...residuals.map(Math.abs));
+            const binWidth = (2 * maxRes) / nBins;
+            const bins = new Array(nBins).fill(0);
+            
+            for (const r of residuals) {
+                const idx = Math.min(nBins - 1, Math.floor((r + maxRes) / binWidth));
+                if (idx >= 0 && idx < nBins) bins[idx]++;
+            }
+            
+            const maxCount = Math.max(...bins);
+            const barW = plotW / nBins;
+            
+            // Draw bars
+            for (let i = 0; i < nBins; i++) {
+                const barH = (bins[i] / maxCount) * plotH;
+                const x = pad.left + i * barW;
+                const y = pad.top + plotH - barH;
+                
+                ctx.fillStyle = '#0ea5e9';
+                ctx.fillRect(x + 1, y, barW - 2, barH);
+            }
+            
+            // Zero line
+            const zeroX = pad.left + (maxRes / (2 * maxRes)) * plotW;
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(zeroX, pad.top);
+            ctx.lineTo(zeroX, height - pad.bottom);
+            ctx.stroke();
+            
+            // Labels
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px -apple-system';
+            ctx.textAlign = 'center';
+            ctx.fillText('Residual Value', width / 2, height - 5);
+        }
+
+        function drawErrorChart() {
+            const canvas = document.getElementById('errorChart');
+            const { width, height, ctx } = setupCanvas(canvas);
+            const pad = { top: 20, right: 15, bottom: 40, left: 15 };
+            const plotW = width - pad.left - pad.right;
+            const plotH = height - pad.top - pad.bottom;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            const metrics = calcMetrics();
+            const maxError = Math.max(metrics.mae, metrics.rmse) * 1.2;
+            
+            const barWidth = 60;
+            const gap = 40;
+            const startX = (width - (2 * barWidth + gap)) / 2;
+            
+            // MAE bar
+            const maeH = (metrics.mae / maxError) * plotH;
+            ctx.fillStyle = '#0ea5e9';
+            ctx.fillRect(startX, pad.top + plotH - maeH, barWidth, maeH);
+            ctx.fillStyle = '#0c4a6e';
+            ctx.font = 'bold 12px -apple-system';
+            ctx.textAlign = 'center';
+            ctx.fillText(metrics.mae.toFixed(1), startX + barWidth / 2, pad.top + plotH - maeH - 5);
+            ctx.fillStyle = '#64748b';
+            ctx.font = '11px -apple-system';
+            ctx.fillText('MAE', startX + barWidth / 2, height - 10);
+            
+            // RMSE bar
+            const rmseH = (metrics.rmse / maxError) * plotH;
+            ctx.fillStyle = '#f97316';
+            ctx.fillRect(startX + barWidth + gap, pad.top + plotH - rmseH, barWidth, rmseH);
+            ctx.fillStyle = '#9a3412';
+            ctx.font = 'bold 12px -apple-system';
+            ctx.fillText(metrics.rmse.toFixed(1), startX + barWidth + gap + barWidth / 2, pad.top + plotH - rmseH - 5);
+            ctx.fillStyle = '#64748b';
+            ctx.font = '11px -apple-system';
+            ctx.fillText('RMSE', startX + barWidth + gap + barWidth / 2, height - 10);
+            
+            // RMSE/MAE ratio
+            const ratio = metrics.rmse / metrics.mae;
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '10px -apple-system';
+            ctx.fillText(`RMSE/MAE = ${ratio.toFixed(2)}`, width / 2, height - 25);
+        }
+
+        // ============================================
+        // UI
+        // ============================================
+        function updateMetricsDisplay() {
+            const m = calcMetrics();
+            
+            document.getElementById('maeValue').textContent = m.mae.toFixed(2);
+            document.getElementById('rmseValue').textContent = m.rmse.toFixed(2);
+            document.getElementById('r2Value').textContent = m.r2.toFixed(3);
+            document.getElementById('mapeValue').textContent = m.mape.toFixed(1) + '%';
+            
+            // Color coding
+            const r2El = document.getElementById('r2Value');
+            r2El.style.color = m.r2 > 0.7 ? '#16a34a' : m.r2 > 0.4 ? '#d97706' : '#dc2626';
+            
+            // Insight
+            updateInsight(m);
+        }
+
+        function updateInsight(m) {
+            let insight = '';
+            
+            const ratio = m.rmse / m.mae;
+            
+            if (m.r2 < 0) {
+                insight = '<strong>Warning:</strong> R² is negative! Your model is worse than just predicting the mean. Check for bugs or very high bias.';
+            } else if (ratio > 1.5) {
+                insight = `<strong>Outlier alert:</strong> RMSE (${m.rmse.toFixed(1)}) is ${ratio.toFixed(1)}x larger than MAE (${m.mae.toFixed(1)}). You have some large errors. Check the residual plot for outliers.`;
+            } else if (Math.abs(bias) > 10) {
+                insight = `<strong>Systematic bias detected:</strong> The model consistently ${bias > 0 ? 'under-predicts' : 'over-predicts'} by ~${Math.abs(bias).toFixed(0)} units. This shows in the residual histogram being off-center.`;
+            } else if (nonlinear > 3) {
+                insight = '<strong>Non-linear pattern:</strong> The residual plot shows a curved pattern. The model is missing non-linear relationships. Consider adding polynomial features.';
+            } else if (hetero > 0.5) {
+                insight = '<strong>Fan shape detected:</strong> Errors grow with predicted values. Consider log-transforming the target or using weighted regression.';
+            } else if (m.r2 > 0.9) {
+                insight = `<strong>Excellent fit!</strong> R² = ${m.r2.toFixed(2)} means the model explains ${(m.r2*100).toFixed(0)}% of variance. MAE of ${m.mae.toFixed(1)} means typical errors are small.`;
+            } else {
+                insight = `<strong>Metrics overview:</strong> MAE = ${m.mae.toFixed(1)} (average error), RMSE = ${m.rmse.toFixed(1)} (penalizes big errors), R² = ${(m.r2*100).toFixed(0)}% variance explained.`;
+            }
+            
+            document.getElementById('insightText').innerHTML = insight;
+        }
+
+        function updateAll() {
+            generateData();
+            drawScatterPlot();
+            drawResidualPlot();
+            drawHistogram();
+            drawErrorChart();
+            updateMetricsDisplay();
+        }
+
+        // ============================================
+        // EVENTS
+        // ============================================
+        document.getElementById('noiseSlider').addEventListener('input', function() {
+            noise = parseFloat(this.value);
+            document.getElementById('noiseValue').textContent = noise;
+            updateAll();
+        });
+
+        document.getElementById('biasSlider').addEventListener('input', function() {
+            bias = parseFloat(this.value);
+            document.getElementById('biasValue').textContent = bias;
+            updateAll();
+        });
+
+        document.getElementById('outlierSlider').addEventListener('input', function() {
+            outlierPct = parseFloat(this.value);
+            document.getElementById('outlierValue').textContent = outlierPct + '%';
+            updateAll();
+        });
+
+        document.getElementById('nonlinearSlider').addEventListener('input', function() {
+            nonlinear = parseFloat(this.value);
+            document.getElementById('nonlinearValue').textContent = nonlinear;
+            updateAll();
+        });
+
+        document.getElementById('heteroSlider').addEventListener('input', function() {
+            hetero = parseFloat(this.value);
+            document.getElementById('heteroValue').textContent = hetero;
+            updateAll();
+        });
+
+        document.getElementById('sampleSlider').addEventListener('input', function() {
+            nSamples = parseInt(this.value);
+            document.getElementById('sampleValue').textContent = nSamples;
+            updateAll();
+        });
+
+        // ============================================
+        // PRESETS
+        // ============================================
+        const presets = {
+            good: {
+                noise: 10, bias: 0, outlier: 0, nonlinear: 0, hetero: 0,
+                hint: '<strong>Good model:</strong> Low noise, no bias, no outliers. Notice MAE ≈ RMSE and high R².'
+            },
+            outliers: {
+                noise: 15, bias: 0, outlier: 15, nonlinear: 0, hetero: 0,
+                hint: '<strong>Outlier errors:</strong> 15% of predictions are way off. Watch RMSE spike while MAE stays moderate.'
+            },
+            bias: {
+                noise: 10, bias: 25, outlier: 0, nonlinear: 0, hetero: 0,
+                hint: '<strong>Systematic bias:</strong> Model consistently under-predicts by ~25. The residual histogram shifts right of zero.'
+            },
+            nonlinear: {
+                noise: 10, bias: 0, outlier: 0, nonlinear: 8, hetero: 0,
+                hint: '<strong>Missing non-linearity:</strong> Look at the curved pattern in residuals vs predicted. The model needs polynomial features.'
+            },
+            fan: {
+                noise: 15, bias: 0, outlier: 0, nonlinear: 0, hetero: 0.8,
+                hint: '<strong>Heteroscedasticity:</strong> Errors grow for larger predictions (fan shape). Consider log-transforming the target.'
+            }
+        };
+
+        function loadPreset(name) {
+            const p = presets[name];
+            
+            noise = p.noise;
+            bias = p.bias;
+            outlierPct = p.outlier;
+            nonlinear = p.nonlinear;
+            hetero = p.hetero;
+            
+            document.getElementById('noiseSlider').value = noise;
+            document.getElementById('biasSlider').value = bias;
+            document.getElementById('outlierSlider').value = outlierPct;
+            document.getElementById('nonlinearSlider').value = nonlinear;
+            document.getElementById('heteroSlider').value = hetero;
+            
+            document.getElementById('noiseValue').textContent = noise;
+            document.getElementById('biasValue').textContent = bias;
+            document.getElementById('outlierValue').textContent = outlierPct + '%';
+            document.getElementById('nonlinearValue').textContent = nonlinear;
+            document.getElementById('heteroValue').textContent = hetero;
+            
+            updateAll();
+            
+            document.getElementById('scenarioHint').innerHTML = p.hint;
+            document.getElementById('scenarioHint').classList.add('visible');
+        }
+
+        function resetPlayground() {
+            noise = 15;
+            bias = 0;
+            outlierPct = 0;
+            nonlinear = 0;
+            hetero = 0;
+            nSamples = 100;
+            
+            document.getElementById('noiseSlider').value = 15;
+            document.getElementById('biasSlider').value = 0;
+            document.getElementById('outlierSlider').value = 0;
+            document.getElementById('nonlinearSlider').value = 0;
+            document.getElementById('heteroSlider').value = 0;
+            document.getElementById('sampleSlider').value = 100;
+            
+            document.getElementById('noiseValue').textContent = '15';
+            document.getElementById('biasValue').textContent = '0';
+            document.getElementById('outlierValue').textContent = '0%';
+            document.getElementById('nonlinearValue').textContent = '0';
+            document.getElementById('heteroValue').textContent = '0';
+            document.getElementById('sampleValue').textContent = '100';
+            
+            document.getElementById('scenarioHint').classList.remove('visible');
+            
+            updateAll();
+        }
+
+        function toggleHelp() {
+            const content = document.getElementById('helpContent');
+            const toggle = document.getElementById('helpToggle');
+            const isVisible = content.classList.toggle('visible');
+            toggle.textContent = isVisible ? 'Hide ▲' : 'Show ▼';
+        }
+
+        // ============================================
+        // INIT
+        // ============================================
+        window.addEventListener('resize', updateAll);
+        updateAll();
+    </script>
+</body>
+</html>

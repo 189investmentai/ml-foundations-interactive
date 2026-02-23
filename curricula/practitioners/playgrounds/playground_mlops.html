@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLOps Playground</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        h1 { font-size: 1.4rem; color: #0f172a; margin-bottom: 4px; }
+        .header-subtitle { font-size: 0.85rem; color: #64748b; }
+
+        .reset-btn {
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .reset-btn:hover { background: #f1f5f9; }
+
+        .start-banner {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: white;
+            border-radius: 14px;
+            padding: 20px 28px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .start-banner-icon { font-size: 2.2rem; }
+        .start-banner-content h2 { font-size: 1rem; margin-bottom: 6px; }
+        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; }
+
+        .lifecycle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        .lifecycle-stage {
+            flex: 1;
+            min-width: 150px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lifecycle-stage:hover { border-color: #6366f1; }
+        .lifecycle-stage.active {
+            border-color: #6366f1;
+            background: #eef2ff;
+        }
+        .lifecycle-stage.completed {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        .stage-icon { font-size: 1.5rem; margin-bottom: 8px; }
+        .stage-title { font-size: 0.85rem; font-weight: 600; color: #1e293b; }
+        .stage-desc { font-size: 0.7rem; color: #64748b; margin-top: 4px; }
+        
+        .arrow {
+            display: flex;
+            align-items: center;
+            color: #cbd5e1;
+            font-size: 1.5rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .panel-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .panel-badge {
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: #eef2ff;
+            color: #4f46e5;
+        }
+
+        .version-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+        .version-item .label { color: #64748b; }
+        .version-item .value { font-family: monospace; color: #1e293b; font-weight: 500; }
+        .version-item.updated { background: #fef3c7; border-color: #fcd34d; }
+
+        .experiment-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        .experiment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .experiment-name { font-weight: 600; color: #1e293b; }
+        .experiment-time { font-size: 0.75rem; color: #64748b; }
+        .experiment-metrics {
+            display: flex;
+            gap: 16px;
+        }
+        .metric {
+            text-align: center;
+        }
+        .metric-value { font-size: 1.1rem; font-weight: 600; color: #4f46e5; }
+        .metric-label { font-size: 0.7rem; color: #64748b; }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        .btn-primary {
+            background: #6366f1;
+            color: white;
+        }
+        .btn-primary:hover { background: #4f46e5; }
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        .btn-secondary:hover { background: #e2e8f0; }
+
+        .pipeline {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            overflow-x: auto;
+        }
+        .pipeline-step {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+        .pipeline-step.active {
+            background: #6366f1;
+            color: white;
+            border-color: #6366f1;
+        }
+        .pipeline-step.done {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+        .pipeline-arrow { color: #cbd5e1; }
+
+        .insight-bar {
+            background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+            border: 1px solid #a5b4fc;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-top: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .insight-icon { font-size: 1.2rem; }
+        .insight-content { flex: 1; }
+        .insight-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #4338ca;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .insight-text { font-size: 0.85rem; color: #3730a3; }
+
+        @media (max-width: 900px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .lifecycle { flex-wrap: nowrap; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>MLOps Playground</h1>
+                <span class="header-subtitle">From notebook to production</span>
+            </div>
+            <button class="reset-btn" onclick="resetPlayground()">↻ Reset</button>
+        </header>
+
+        <div class="start-banner">
+            <div class="start-banner-icon">🚀</div>
+            <div class="start-banner-content">
+                <h2>ML Lifecycle Simulator</h2>
+                <p>Walk through the stages of taking a model from experimentation to production.</p>
+            </div>
+        </div>
+
+        <div class="lifecycle" id="lifecycle">
+            <div class="lifecycle-stage active" onclick="selectStage(0)">
+                <div class="stage-icon">🧪</div>
+                <div class="stage-title">Experiment</div>
+                <div class="stage-desc">Notebooks, iterations</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="lifecycle-stage" onclick="selectStage(1)">
+                <div class="stage-icon">💻</div>
+                <div class="stage-title">Develop</div>
+                <div class="stage-desc">Code, tests, version</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="lifecycle-stage" onclick="selectStage(2)">
+                <div class="stage-icon">🧪</div>
+                <div class="stage-title">Stage</div>
+                <div class="stage-desc">Validate, test</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="lifecycle-stage" onclick="selectStage(3)">
+                <div class="stage-icon">🌐</div>
+                <div class="stage-title">Production</div>
+                <div class="stage-desc">Serve, monitor</div>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="panel">
+                <div class="panel-title">
+                    <span>Version Control</span>
+                    <span class="panel-badge" id="versionBadge">v1.0.0</span>
+                </div>
+                
+                <div id="versionItems">
+                    <div class="version-item">
+                        <span class="label">Code (git)</span>
+                        <span class="value" id="codeVersion">abc123</span>
+                    </div>
+                    <div class="version-item">
+                        <span class="label">Data</span>
+                        <span class="value" id="dataVersion">2024-01-15</span>
+                    </div>
+                    <div class="version-item">
+                        <span class="label">Model</span>
+                        <span class="value" id="modelVersion">v1.0.0</span>
+                    </div>
+                    <div class="version-item">
+                        <span class="label">Config</span>
+                        <span class="value" id="configVersion">default.yaml</span>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 12px;">
+                    <button class="btn btn-secondary" onclick="updateVersion('code')">Commit Code</button>
+                    <button class="btn btn-secondary" onclick="updateVersion('data')">Update Data</button>
+                    <button class="btn btn-secondary" onclick="updateVersion('model')">Train Model</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">
+                    <span>Experiments</span>
+                    <span class="panel-badge" id="expCount">3 runs</span>
+                </div>
+                
+                <div id="experiments">
+                    <div class="experiment-card">
+                        <div class="experiment-header">
+                            <span class="experiment-name">baseline_v1</span>
+                            <span class="experiment-time">2 hours ago</span>
+                        </div>
+                        <div class="experiment-metrics">
+                            <div class="metric">
+                                <div class="metric-value">0.82</div>
+                                <div class="metric-label">AUC</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">0.68</div>
+                                <div class="metric-label">Precision</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">0.71</div>
+                                <div class="metric-label">Recall</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="experiment-card">
+                        <div class="experiment-header">
+                            <span class="experiment-name">feature_eng_v2</span>
+                            <span class="experiment-time">1 hour ago</span>
+                        </div>
+                        <div class="experiment-metrics">
+                            <div class="metric">
+                                <div class="metric-value">0.85</div>
+                                <div class="metric-label">AUC</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">0.72</div>
+                                <div class="metric-label">Precision</div>
+                            </div>
+                            <div class="metric">
+                                <div class="metric-value">0.74</div>
+                                <div class="metric-label">Recall</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="runExperiment()">Run New Experiment</button>
+            </div>
+        </div>
+
+        <div class="panel" style="margin-top: 16px;">
+            <div class="panel-title">
+                <span>Training Pipeline</span>
+                <span class="panel-badge" id="pipelineStatus">Idle</span>
+            </div>
+            
+            <div class="pipeline" id="pipeline">
+                <div class="pipeline-step">Load Data</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-step">Preprocess</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-step">Train</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-step">Evaluate</div>
+                <span class="pipeline-arrow">→</span>
+                <div class="pipeline-step">Register</div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="runPipeline()">Run Pipeline</button>
+            <button class="btn btn-secondary" onclick="deployModel()">Deploy to Production</button>
+        </div>
+
+        <div class="insight-bar">
+            <div class="insight-icon">💡</div>
+            <div class="insight-content">
+                <div class="insight-title">MLOps Insight</div>
+                <div class="insight-text" id="insightText">MLOps ensures reproducibility and reliability. Every model should be traceable back to its code, data, and configuration.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStage = 0;
+        let versions = {
+            code: 'abc123',
+            data: '2024-01-15',
+            model: 'v1.0.0',
+            config: 'default.yaml'
+        };
+        let expCount = 2;
+
+        const stageInsights = [
+            "Experimentation: Iterate quickly, try different approaches. Track your experiments for later comparison.",
+            "Development: Refactor notebooks into modules. Add tests. Version everything.",
+            "Staging: Test in production-like environment. Validate metrics match expectations.",
+            "Production: Serve predictions reliably. Monitor performance. Be ready to rollback."
+        ];
+
+        function selectStage(idx) {
+            const stages = document.querySelectorAll('.lifecycle-stage');
+            stages.forEach((s, i) => {
+                s.classList.remove('active');
+                if (i < idx) s.classList.add('completed');
+                else s.classList.remove('completed');
+            });
+            stages[idx].classList.add('active');
+            currentStage = idx;
+            
+            document.getElementById('insightText').textContent = stageInsights[idx];
+        }
+
+        function updateVersion(type) {
+            if (type === 'code') {
+                versions.code = Math.random().toString(36).substring(2, 8);
+                document.getElementById('codeVersion').textContent = versions.code;
+            } else if (type === 'data') {
+                const date = new Date();
+                versions.data = date.toISOString().split('T')[0];
+                document.getElementById('dataVersion').textContent = versions.data;
+            } else if (type === 'model') {
+                const parts = versions.model.replace('v', '').split('.');
+                parts[2] = parseInt(parts[2]) + 1;
+                versions.model = 'v' + parts.join('.');
+                document.getElementById('modelVersion').textContent = versions.model;
+                document.getElementById('versionBadge').textContent = versions.model;
+            }
+            
+            // Highlight updated item
+            const items = document.querySelectorAll('.version-item');
+            items.forEach(item => item.classList.remove('updated'));
+            event.target.parentElement.querySelector('.version-item')?.classList.add('updated');
+            
+            document.getElementById('insightText').textContent = 
+                `Updated ${type} version. All versions are tracked together for reproducibility.`;
+        }
+
+        function runExperiment() {
+            expCount++;
+            document.getElementById('expCount').textContent = `${expCount} runs`;
+            
+            const auc = (0.80 + Math.random() * 0.10).toFixed(2);
+            const prec = (0.65 + Math.random() * 0.15).toFixed(2);
+            const rec = (0.68 + Math.random() * 0.12).toFixed(2);
+            
+            const card = document.createElement('div');
+            card.className = 'experiment-card';
+            card.innerHTML = `
+                <div class="experiment-header">
+                    <span class="experiment-name">experiment_${expCount}</span>
+                    <span class="experiment-time">Just now</span>
+                </div>
+                <div class="experiment-metrics">
+                    <div class="metric">
+                        <div class="metric-value">${auc}</div>
+                        <div class="metric-label">AUC</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">${prec}</div>
+                        <div class="metric-label">Precision</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value">${rec}</div>
+                        <div class="metric-label">Recall</div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('experiments').insertBefore(
+                card, 
+                document.getElementById('experiments').firstChild
+            );
+            
+            document.getElementById('insightText').textContent = 
+                `New experiment logged with AUC ${auc}. Compare with previous runs to track progress.`;
+        }
+
+        async function runPipeline() {
+            const steps = document.querySelectorAll('.pipeline-step');
+            document.getElementById('pipelineStatus').textContent = 'Running...';
+            
+            for (let i = 0; i < steps.length; i++) {
+                steps.forEach(s => s.classList.remove('active'));
+                steps[i].classList.add('active');
+                
+                if (i > 0) steps[i-1].classList.add('done');
+                
+                await new Promise(r => setTimeout(r, 600));
+            }
+            
+            steps[steps.length - 1].classList.remove('active');
+            steps[steps.length - 1].classList.add('done');
+            
+            document.getElementById('pipelineStatus').textContent = 'Complete';
+            
+            // Update model version
+            const parts = versions.model.replace('v', '').split('.');
+            parts[1] = parseInt(parts[1]) + 1;
+            parts[2] = '0';
+            versions.model = 'v' + parts.join('.');
+            document.getElementById('modelVersion').textContent = versions.model;
+            document.getElementById('versionBadge').textContent = versions.model;
+            
+            document.getElementById('insightText').textContent = 
+                `Pipeline complete! Model ${versions.model} trained and registered. Ready for staging.`;
+        }
+
+        function deployModel() {
+            selectStage(3);
+            document.getElementById('insightText').textContent = 
+                `Model ${versions.model} deployed to production. Monitor for drift and performance degradation.`;
+        }
+
+        function resetPlayground() {
+            versions = {
+                code: 'abc123',
+                data: '2024-01-15',
+                model: 'v1.0.0',
+                config: 'default.yaml'
+            };
+            expCount = 2;
+            
+            document.getElementById('codeVersion').textContent = versions.code;
+            document.getElementById('dataVersion').textContent = versions.data;
+            document.getElementById('modelVersion').textContent = versions.model;
+            document.getElementById('configVersion').textContent = versions.config;
+            document.getElementById('versionBadge').textContent = versions.model;
+            document.getElementById('expCount').textContent = '2 runs';
+            document.getElementById('pipelineStatus').textContent = 'Idle';
+            
+            document.querySelectorAll('.version-item').forEach(i => i.classList.remove('updated'));
+            document.querySelectorAll('.pipeline-step').forEach(s => {
+                s.classList.remove('active', 'done');
+            });
+            
+            selectStage(0);
+        }
+    </script>
+</body>
+</html>

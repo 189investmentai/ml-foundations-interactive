@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool Calling Playground</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        h1 { font-size: 1.4rem; color: #0f172a; margin-bottom: 4px; }
+        .header-subtitle { font-size: 0.85rem; color: #64748b; }
+
+        .reset-btn {
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .reset-btn:hover { background: #f1f5f9; }
+
+        .start-banner {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            border-radius: 14px;
+            padding: 20px 28px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .start-banner-icon { font-size: 2.2rem; }
+        .start-banner-content h2 { font-size: 1rem; margin-bottom: 6px; }
+        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 16px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 10px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .panel-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .panel-badge {
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #8b5cf6;
+            color: white;
+        }
+        .btn-primary:hover { background: #7c3aed; }
+
+        .examples {
+            margin-top: 16px;
+        }
+        .examples-title {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        .example-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 10px 12px;
+            margin-bottom: 6px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: #475569;
+        }
+        .example-btn:hover { background: #f1f5f9; border-color: #8b5cf6; }
+
+        .tools-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .tool-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+        }
+        .tool-name {
+            font-weight: 600;
+            color: #6d28d9;
+            margin-bottom: 4px;
+        }
+        .tool-desc { color: #64748b; font-size: 0.75rem; }
+
+        .flow-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .flow-step {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            position: relative;
+        }
+        .flow-step.active {
+            border-color: #8b5cf6;
+            background: #faf5ff;
+        }
+        .flow-step.complete {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        .flow-step-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .flow-step-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #64748b;
+        }
+        .flow-step.active .flow-step-number { background: #8b5cf6; color: white; }
+        .flow-step.complete .flow-step-number { background: #10b981; color: white; }
+        .flow-step-title { font-size: 0.8rem; font-weight: 600; color: #1e293b; }
+        .flow-step-content {
+            font-size: 0.8rem;
+            color: #475569;
+            font-family: 'SF Mono', Monaco, monospace;
+            background: white;
+            padding: 8px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .flow-step-content.empty { color: #94a3b8; font-style: italic; }
+
+        .arrow {
+            text-align: center;
+            color: #cbd5e1;
+            font-size: 1.2rem;
+        }
+
+        .insight-bar {
+            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+            border: 1px solid #c4b5fd;
+            border-radius: 10px;
+            padding: 14px 16px;
+            margin-top: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .insight-icon { font-size: 1.2rem; }
+        .insight-content { flex: 1; }
+        .insight-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #6d28d9;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .insight-text { font-size: 0.85rem; color: #5b21b6; }
+
+        .error-msg {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Tool Calling Playground</h1>
+                <span class="header-subtitle">See how LLMs interact with external systems</span>
+            </div>
+            <button class="reset-btn" onclick="resetPlayground()">↻ Reset</button>
+        </header>
+
+        <div class="start-banner">
+            <div class="start-banner-icon">🔧</div>
+            <div class="start-banner-content">
+                <h2>Function Execution Lab</h2>
+                <p>Watch the LLM select tools, extract parameters, and format responses from results.</p>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="panel">
+                <div class="panel-title">
+                    <span>Query Input</span>
+                    <span class="panel-badge">User</span>
+                </div>
+                
+                <input type="text" id="queryInput" placeholder="Ask something..." value="What's the status of order ORD-12345?">
+                <button class="btn btn-primary" onclick="processQuery()">Send Query</button>
+                
+                <div class="examples">
+                    <div class="examples-title">Try these examples:</div>
+                    <button class="example-btn" onclick="setQuery('What\\'s the status of order ORD-12345?')">📦 Check order status</button>
+                    <button class="example-btn" onclick="setQuery('What\\'s the weather in Tokyo?')">🌤️ Get weather</button>
+                    <button class="example-btn" onclick="setQuery('Search our help docs for password reset')">🔍 Search knowledge base</button>
+                    <button class="example-btn" onclick="setQuery('Calculate shipping for 2.5kg to London')">💰 Calculate shipping</button>
+                    <button class="example-btn" onclick="setQuery('Delete all user data')">⚠️ Dangerous request</button>
+                </div>
+
+                <div class="tools-section">
+                    <div class="panel-title"><span>Available Tools</span></div>
+                    <div class="tool-card">
+                        <div class="tool-name">get_order_status</div>
+                        <div class="tool-desc">Get status of a customer order by ID</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">get_weather</div>
+                        <div class="tool-desc">Get current weather for a city</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">search_kb</div>
+                        <div class="tool-desc">Search knowledge base for help articles</div>
+                    </div>
+                    <div class="tool-card">
+                        <div class="tool-name">calculate_shipping</div>
+                        <div class="tool-desc">Calculate shipping cost for weight and destination</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">
+                    <span>Execution Flow</span>
+                    <span class="panel-badge" id="flowBadge">Ready</span>
+                </div>
+                
+                <div class="flow-section">
+                    <div class="flow-step" id="step1">
+                        <div class="flow-step-header">
+                            <div class="flow-step-number">1</div>
+                            <div class="flow-step-title">User Query</div>
+                        </div>
+                        <div class="flow-step-content empty" id="step1Content">Waiting for query...</div>
+                    </div>
+                    
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step" id="step2">
+                        <div class="flow-step-header">
+                            <div class="flow-step-number">2</div>
+                            <div class="flow-step-title">LLM Tool Selection</div>
+                        </div>
+                        <div class="flow-step-content empty" id="step2Content">Waiting for LLM...</div>
+                    </div>
+                    
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step" id="step3">
+                        <div class="flow-step-header">
+                            <div class="flow-step-number">3</div>
+                            <div class="flow-step-title">Tool Execution</div>
+                        </div>
+                        <div class="flow-step-content empty" id="step3Content">Waiting for execution...</div>
+                    </div>
+                    
+                    <div class="arrow">↓</div>
+                    
+                    <div class="flow-step" id="step4">
+                        <div class="flow-step-header">
+                            <div class="flow-step-number">4</div>
+                            <div class="flow-step-title">Final Response</div>
+                        </div>
+                        <div class="flow-step-content empty" id="step4Content">Waiting for response...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="insight-bar">
+            <div class="insight-icon">💡</div>
+            <div class="insight-content">
+                <div class="insight-title">Tool Calling Insight</div>
+                <div class="insight-text" id="insightText">The LLM routes queries to the right tool, extracts parameters, and formats results into natural language.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tools = {
+            get_order_status: {
+                match: /order|ORD-/i,
+                extract: (q) => {
+                    const match = q.match(/ORD-\d+/i) || q.match(/order\s+(\w+)/i);
+                    return match ? { order_id: match[0] || match[1] } : null;
+                },
+                execute: (args) => ({
+                    order_id: args.order_id,
+                    status: "shipped",
+                    shipped_date: "2024-01-15",
+                    tracking: "1Z999AA10123456784",
+                    estimated_delivery: "2024-01-18"
+                }),
+                format: (result) => `Your order ${result.order_id} has been shipped! It was sent on ${result.shipped_date} with tracking number ${result.tracking}. Expected delivery: ${result.estimated_delivery}.`
+            },
+            get_weather: {
+                match: /weather|temperature|forecast/i,
+                extract: (q) => {
+                    const cities = ['tokyo', 'london', 'paris', 'new york', 'sydney'];
+                    for (let city of cities) {
+                        if (q.toLowerCase().includes(city)) {
+                            return { city: city.charAt(0).toUpperCase() + city.slice(1) };
+                        }
+                    }
+                    const match = q.match(/in\s+(\w+)/i);
+                    return match ? { city: match[1] } : { city: "Unknown" };
+                },
+                execute: (args) => ({
+                    city: args.city,
+                    temperature: Math.floor(Math.random() * 20) + 10,
+                    conditions: ["sunny", "partly cloudy", "cloudy", "rainy"][Math.floor(Math.random() * 4)],
+                    humidity: Math.floor(Math.random() * 40) + 40
+                }),
+                format: (result) => `The weather in ${result.city} is currently ${result.temperature}°C and ${result.conditions} with ${result.humidity}% humidity.`
+            },
+            search_kb: {
+                match: /search|help|docs|article|how to|password|reset/i,
+                extract: (q) => {
+                    const terms = q.replace(/search|help|docs|our|for/gi, '').trim();
+                    return { query: terms };
+                },
+                execute: (args) => ({
+                    query: args.query,
+                    results: [
+                        { title: "Password Reset Guide", snippet: "Click 'Forgot Password' on login page..." },
+                        { title: "Account Security FAQ", snippet: "Enable 2FA in Security Settings..." }
+                    ]
+                }),
+                format: (result) => `I found ${result.results.length} articles about "${result.query}":\n\n1. ${result.results[0].title}: ${result.results[0].snippet}\n2. ${result.results[1].title}: ${result.results[1].snippet}`
+            },
+            calculate_shipping: {
+                match: /shipping|calculate|cost|deliver/i,
+                extract: (q) => {
+                    const weight = q.match(/(\d+\.?\d*)\s*kg/i);
+                    const dest = q.match(/to\s+(\w+)/i);
+                    return {
+                        weight: weight ? parseFloat(weight[1]) : 1,
+                        destination: dest ? dest[1] : "Unknown"
+                    };
+                },
+                execute: (args) => ({
+                    weight: args.weight,
+                    destination: args.destination,
+                    standard_cost: (args.weight * 5.99).toFixed(2),
+                    express_cost: (args.weight * 12.99).toFixed(2),
+                    standard_days: 7,
+                    express_days: 2
+                }),
+                format: (result) => `Shipping ${result.weight}kg to ${result.destination}:\n• Standard: $${result.standard_cost} (${result.standard_days} days)\n• Express: $${result.express_cost} (${result.express_days} days)`
+            }
+        };
+
+        const DANGEROUS_PATTERNS = /delete|drop|remove all|destroy|admin|hack/i;
+
+        function setQuery(q) {
+            document.getElementById('queryInput').value = q;
+        }
+
+        function resetSteps() {
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`step${i}`).className = 'flow-step';
+                document.getElementById(`step${i}Content`).className = 'flow-step-content empty';
+                document.getElementById(`step${i}Content`).textContent = 
+                    ['Waiting for query...', 'Waiting for LLM...', 'Waiting for execution...', 'Waiting for response...'][i-1];
+            }
+            document.getElementById('flowBadge').textContent = 'Ready';
+        }
+
+        async function processQuery() {
+            const query = document.getElementById('queryInput').value;
+            resetSteps();
+
+            // Step 1: Show query
+            await animateStep(1, query);
+
+            // Check for dangerous request
+            if (DANGEROUS_PATTERNS.test(query)) {
+                await animateStep(2, JSON.stringify({
+                    error: "BLOCKED",
+                    reason: "Tool not found in allowlist"
+                }, null, 2));
+                document.getElementById('step2').classList.add('complete');
+                document.getElementById('step2').style.borderColor = '#ef4444';
+                document.getElementById('step2').style.background = '#fef2f2';
+                
+                await animateStep(3, "Execution blocked: Security validation failed");
+                document.getElementById('step3').style.borderColor = '#ef4444';
+                document.getElementById('step3').style.background = '#fef2f2';
+                
+                await animateStep(4, "I'm sorry, but I can't perform that action. That operation is not available through this interface.");
+                
+                document.getElementById('insightText').textContent = 
+                    "⚠️ Security: Dangerous operations are blocked by validating tool names against an allowlist before execution.";
+                return;
+            }
+
+            // Find matching tool
+            let selectedTool = null;
+            let toolName = null;
+            for (let [name, tool] of Object.entries(tools)) {
+                if (tool.match.test(query)) {
+                    selectedTool = tool;
+                    toolName = name;
+                    break;
+                }
+            }
+
+            if (!selectedTool) {
+                await animateStep(2, JSON.stringify({
+                    tool: null,
+                    reason: "No matching tool found"
+                }, null, 2));
+                await animateStep(3, "No tool execution needed");
+                await animateStep(4, "I don't have a tool to help with that request. Could you rephrase or try something else?");
+                document.getElementById('insightText').textContent = 
+                    "The LLM couldn't match this query to any available tool. Clear tool descriptions help with routing.";
+                return;
+            }
+
+            // Step 2: Tool selection
+            const args = selectedTool.extract(query);
+            await animateStep(2, JSON.stringify({
+                tool: toolName,
+                arguments: args
+            }, null, 2));
+
+            // Step 3: Execution
+            const result = selectedTool.execute(args);
+            await animateStep(3, JSON.stringify(result, null, 2));
+
+            // Step 4: Response
+            const response = selectedTool.format(result);
+            await animateStep(4, response);
+
+            // Update insight
+            document.getElementById('insightText').textContent = 
+                `The LLM selected "${toolName}" based on the query, extracted parameters, executed the function, and formatted the result into a natural response.`;
+        }
+
+        async function animateStep(step, content) {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    document.getElementById(`step${step}`).classList.add('active');
+                    document.getElementById(`step${step}Content`).className = 'flow-step-content';
+                    document.getElementById(`step${step}Content`).textContent = content;
+                    document.getElementById('flowBadge').textContent = `Step ${step}`;
+                    
+                    if (step > 1) {
+                        document.getElementById(`step${step-1}`).classList.remove('active');
+                        document.getElementById(`step${step-1}`).classList.add('complete');
+                    }
+                    if (step === 4) {
+                        document.getElementById(`step${step}`).classList.remove('active');
+                        document.getElementById(`step${step}`).classList.add('complete');
+                        document.getElementById('flowBadge').textContent = 'Complete';
+                    }
+                    resolve();
+                }, 500);
+            });
+        }
+
+        function resetPlayground() {
+            document.getElementById('queryInput').value = "What's the status of order ORD-12345?";
+            resetSteps();
+            document.getElementById('insightText').textContent = 
+                "The LLM routes queries to the right tool, extracts parameters, and formats results into natural language.";
+        }
+    </script>
+</body>
+</html>

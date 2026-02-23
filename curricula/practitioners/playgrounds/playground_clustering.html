@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clustering Playground</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        h1 { font-size: 1.4rem; color: #0f172a; margin-bottom: 4px; }
+        .header-subtitle { font-size: 0.85rem; color: #64748b; }
+
+        .reset-btn {
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .reset-btn:hover { background: #f1f5f9; }
+
+        .start-banner {
+            background: linear-gradient(135deg, #14b8a6, #0d9488);
+            color: white;
+            border-radius: 14px;
+            padding: 20px 28px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .start-banner-icon { font-size: 2.2rem; }
+        .start-banner-content h2 { font-size: 1rem; margin-bottom: 6px; }
+        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .charts-area { display: flex; flex-direction: column; gap: 12px; }
+
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 10px;
+            padding: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .chart-title { font-size: 0.75rem; font-weight: 600; color: #475569; }
+        .chart-badge {
+            font-size: 0.65rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        canvas { display: block; width: 100%; }
+        .chart-help {
+            margin-top: 8px;
+            font-size: 0.75rem;
+            color: #64748b;
+            line-height: 1.45;
+        }
+        .chart-interaction-hint {
+            margin-top: 6px;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            font-style: italic;
+        }
+
+        .sidebar { display: flex; flex-direction: column; gap: 12px; }
+
+        .sidebar-card {
+            background: white;
+            border-radius: 10px;
+            padding: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .sidebar-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+
+        .control-group { margin-bottom: 12px; }
+        .control-group:last-child { margin-bottom: 0; }
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+        .control-value {
+            font-family: 'SF Mono', Monaco, monospace;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            color: #14b8a6;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            background: white;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 5px;
+            border-radius: 3px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            background: #14b8a6;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #14b8a6;
+            color: white;
+        }
+        .btn-primary:hover { background: #0d9488; }
+        .btn-full { width: 100%; }
+
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .btn-group .btn {
+            padding: 8px 4px;
+            font-size: 0.78rem;
+            text-align: center;
+        }
+        .btn-outline {
+            background: white;
+            color: #0f766e;
+            border: 1px solid #99f6e4;
+        }
+        .btn-outline:hover { background: #f0fdfa; }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: #475569;
+            cursor: pointer;
+            user-select: none;
+            margin-top: 8px;
+        }
+        .toggle-label input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #14b8a6;
+        }
+
+        input[type="range"]:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .metrics-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .metric-card {
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .metric-card.highlight {
+            background: #ccfbf1;
+            border: 1px solid #5eead4;
+        }
+        .metric-name {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        .metric-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0f766e;
+            font-family: 'SF Mono', Monaco, monospace;
+        }
+
+        .insight-bar {
+            background: linear-gradient(135deg, #ccfbf1, #99f6e4);
+            border: 1px solid #5eead4;
+            border-radius: 10px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .insight-icon { font-size: 1.2rem; }
+        .insight-content { flex: 1; }
+        .insight-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #0f766e;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .insight-text { font-size: 0.85rem; color: #115e59; }
+
+        .presets-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+        .preset-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            color: #334155;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: left;
+        }
+        .preset-btn:hover {
+            background: #f0fdfa;
+            border-color: #99f6e4;
+        }
+        .preset-icon { font-size: 0.85rem; flex-shrink: 0; }
+        .preset-name { line-height: 1.2; }
+
+        #clusterChart { cursor: crosshair; }
+
+        @media (max-width: 1000px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .chart-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Clustering Playground</h1>
+                <span class="header-subtitle">See how K-means finds natural groups in data</span>
+            </div>
+            <button class="reset-btn" onclick="resetPlayground()">↻ Reset</button>
+        </header>
+
+        <div class="start-banner">
+            <div class="start-banner-icon">🎯</div>
+            <div class="start-banner-content">
+                <h2>K-Means in Action</h2>
+                <p>Elbow + silhouette are hints, not truth. K-means works best for blob-like clusters.</p>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="charts-area">
+                <div class="chart-row">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span class="chart-title">Data Points with Clusters</span>
+                            <span class="chart-badge" id="nPoints">100 points</span>
+                        </div>
+                        <canvas id="clusterChart" height="300"></canvas>
+                        <div class="chart-interaction-hint">Click to add points · Drag centroids to reposition</div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <span class="chart-title">Elbow Plot</span>
+                            <span class="chart-badge">inertia vs K</span>
+                        </div>
+                        <canvas id="elbowChart" height="300"></canvas>
+                        <div class="chart-help">
+                            Inertia = sum of squared distances to centroids.<br>
+                            It always decreases as K increases; look for the bend where gains shrink.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <span class="chart-title">Silhouette Scores by K</span>
+                        <span class="chart-badge" id="bestK">best K = --</span>
+                    </div>
+                    <canvas id="silhouetteChart" height="150"></canvas>
+                    <div class="chart-help">
+                        Silhouette ranges roughly -1 to 1; higher is better.<br>
+                        Prefer peaks, but treat unstable scores as a warning sign.
+                    </div>
+                </div>
+
+                <div class="insight-bar">
+                    <div class="insight-icon">💡</div>
+                    <div class="insight-content">
+                        <div class="insight-title">Clustering Insight</div>
+                        <div class="insight-text" id="insightText">Generate data and run K-means to see clustering in action.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Data Generation</div>
+                    <div class="control-group">
+                        <div class="control-label"><span>Data Pattern</span></div>
+                        <select id="dataPattern" onchange="generateData()">
+                            <option value="blobs">Blob Clusters</option>
+                            <option value="moons">Two Moons</option>
+                            <option value="circles">Concentric Circles</option>
+                            <option value="anisotropic">Stretched Clusters</option>
+                            <option value="varied">Varied Density</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Sample Size</span>
+                            <span class="control-value" id="nSamplesValue">200</span>
+                        </div>
+                        <input type="range" id="nSamplesSlider" min="100" max="500" step="50" value="200" oninput="scheduleGenerateData()">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span id="trueClustersLabel">True Clusters</span>
+                            <span class="control-value" id="trueClustersValue">3</span>
+                        </div>
+                        <input type="range" id="trueClustersSlider" min="2" max="6" step="1" value="3" oninput="scheduleGenerateData()">
+                    </div>
+                    <button class="btn btn-primary btn-full" onclick="generateData()">Generate New Data</button>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">K-Means</div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Number of Clusters (K)</span>
+                            <span class="control-value" id="kValue">3</span>
+                        </div>
+                        <input type="range" id="kSlider" min="2" max="10" step="1" value="3" oninput="updateK()">
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" id="animateBtn" onclick="toggleAnimate()">▶ Play</button>
+                        <button class="btn btn-outline" onclick="stepKmeans()">Step</button>
+                        <button class="btn btn-outline" onclick="applyCurrentK()">Apply K</button>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Animation Speed</span>
+                            <span class="control-value" id="speedValue">Medium</span>
+                        </div>
+                        <input type="range" id="speedSlider" min="1" max="5" step="1" value="3" oninput="updateSpeed()">
+                    </div>
+                    <label class="toggle-label">
+                        <input type="checkbox" id="showVoronoi" onchange="drawClusters()">
+                        <span>Show decision boundaries</span>
+                    </label>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Metrics</div>
+                    <div class="metrics-panel">
+                        <div class="metric-card highlight">
+                            <div class="metric-name">Silhouette</div>
+                            <div class="metric-value" id="silhouetteValue">--</div>
+                        </div>
+                        <div class="metric-card highlight">
+                            <div class="metric-name">Inertia</div>
+                            <div class="metric-value" id="inertiaValue">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-name">Iterations</div>
+                            <div class="metric-value" id="iterValue">--</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-name">Clusters</div>
+                            <div class="metric-value" id="clustersFound">--</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-title">Challenge Presets</div>
+                    <div class="presets-grid">
+                        <button class="preset-btn" onclick="loadPreset('easy')">
+                            <span class="preset-icon">🟢</span>
+                            <span class="preset-name">Easy blobs</span>
+                        </button>
+                        <button class="preset-btn" onclick="loadPreset('aniso')">
+                            <span class="preset-icon">🟡</span>
+                            <span class="preset-name">Stretched</span>
+                        </button>
+                        <button class="preset-btn" onclick="loadPreset('moons')">
+                            <span class="preset-icon">🔴</span>
+                            <span class="preset-name">Two moons</span>
+                        </button>
+                        <button class="preset-btn" onclick="loadPreset('circles')">
+                            <span class="preset-icon">🔴</span>
+                            <span class="preset-name">Circles</span>
+                        </button>
+                        <button class="preset-btn" onclick="loadPreset('varied')">
+                            <span class="preset-icon">🟠</span>
+                            <span class="preset-name">Varied density</span>
+                        </button>
+                        <button class="preset-btn" onclick="loadPreset('findK')">
+                            <span class="preset-icon">🔍</span>
+                            <span class="preset-name">Find K</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const dpr = window.devicePixelRatio || 1;
+    const K_MIN = 2;
+    const K_MAX = 10;
+    const KMEANS_RESTARTS = 5;
+    const MAX_KMEANS_ITER = 100;
+    const LERP_DURATION = 220;
+
+    const colors = ['#ef4444','#22c55e','#0ea5e9','#f97316','#8b5cf6',
+                    '#ec4899','#14b8a6','#eab308','#6366f1','#f43f5e'];
+
+    const speedLabels = ['Very slow','Slow','Medium','Fast','Very fast'];
+    const speedIntervals = [1000, 700, 420, 220, 90];
+
+    let data = [];
+    let labels = [];
+    let centroids = [];
+    let distanceMatrix = [];
+    let dataVersion = 0;
+    let metricsCache = createEmptyCache();
+    let stepState = null;
+    let generateTimer = null;
+
+    let animRunning = false;
+    let animFrameId = null;
+    let animLastStepTime = 0;
+    let animStepInterval = speedIntervals[2];
+    let animPrevCentroids = null;
+    let animNextCentroids = null;
+    let animStepStartTime = 0;
+
+    let dragState = null;
+    let lastPlotTransform = null;
+
+    /* ── Utility ─────────────────────────────────────────────── */
+
+    function createEmptyCache() {
+        return { inertias:[], silhouettes:[], bestByK:{}, bestK:null, version:-1 };
+    }
+
+    function setupCanvas(canvas) {
+        const ctx = canvas.getContext('2d');
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.setTransform(1,0,0,1,0,0);
+        ctx.scale(dpr, dpr);
+        return { width: rect.width, height: rect.height, ctx };
+    }
+
+    function scheduleGenerateData() {
+        clearTimeout(generateTimer);
+        generateTimer = setTimeout(generateData, 120);
+    }
+
+    function hashString(text) {
+        let h = 2166136261;
+        for (let i = 0; i < text.length; i++) {
+            h ^= text.charCodeAt(i);
+            h = Math.imul(h, 16777619);
+        }
+        return h >>> 0;
+    }
+
+    function createSeededRng(seed) {
+        let s = seed >>> 0;
+        return function() {
+            s += 0x6D2B79F5;
+            let t = s;
+            t = Math.imul(t ^ (t >>> 15), t | 1);
+            t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+    }
+
+    function makeSeed(tag, k=0, restart=0) {
+        return hashString(`${tag}|${dataVersion}|${k}|${restart}`);
+    }
+
+    function gaussianRandom(rng) {
+        let u = 0, v = 0;
+        while (u === 0) u = rng();
+        while (v === 0) v = rng();
+        return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+
+    function squaredDistance(a, b) {
+        const dx = a[0]-b[0], dy = a[1]-b[1];
+        return dx*dx + dy*dy;
+    }
+
+    function hexAlpha(hex, alpha) {
+        const a = Math.round(alpha * 255).toString(16).padStart(2, '0');
+        return hex + a;
+    }
+
+    function easeInOut(t) {
+        return t < 0.5 ? 2*t*t : -1 + (4-2*t)*t;
+    }
+
+    /* ── Coordinate Conversion ──────────────────────────────── */
+
+    function pixelToData(px, py) {
+        const t = lastPlotTransform;
+        if (!t) return null;
+        const dataX = ((px - t.pad.left) / t.plotW) * (t.maxX - t.minX) + t.minX;
+        const dataY = (1 - (py - t.pad.top) / t.plotH) * (t.maxY - t.minY) + t.minY;
+        return [dataX, dataY];
+    }
+
+    function dataToPixel(x, y) {
+        const t = lastPlotTransform;
+        if (!t) return null;
+        return [
+            t.pad.left + ((x - t.minX) / (t.maxX - t.minX || 1)) * t.plotW,
+            t.pad.top + (1 - (y - t.minY) / (t.maxY - t.minY || 1)) * t.plotH
+        ];
+    }
+
+    /* ── True-Cluster Control ───────────────────────────────── */
+
+    function updateTrueClusterControl(pattern) {
+        const slider = document.getElementById('trueClustersSlider');
+        const labelEl = document.getElementById('trueClustersLabel');
+        const valueEl = document.getElementById('trueClustersValue');
+
+        if (pattern === 'moons' || pattern === 'circles') {
+            slider.disabled = true;
+            slider.value = 2;
+            labelEl.textContent = 'True Clusters (fixed)';
+            valueEl.textContent = '2 (fixed)';
+            return 2;
+        }
+        slider.disabled = false;
+        labelEl.textContent = 'True Clusters';
+        valueEl.textContent = slider.value;
+        return parseInt(slider.value, 10);
+    }
+
+    /* ── Data Generation ────────────────────────────────────── */
+
+    function generateData() {
+        stopAnimate();
+        const pattern = document.getElementById('dataPattern').value;
+        const n = parseInt(document.getElementById('nSamplesSlider').value, 10);
+        const trueK = updateTrueClusterControl(pattern);
+
+        document.getElementById('nSamplesValue').textContent = n;
+        document.getElementById('kValue').textContent = document.getElementById('kSlider').value;
+
+        data = [];
+        labels = [];
+        centroids = [];
+        stepState = null;
+        metricsCache = createEmptyCache();
+        dataVersion += 1;
+        const rng = createSeededRng(makeSeed(`data-${pattern}`));
+
+        if (pattern === 'blobs') {
+            const centers = [];
+            for (let i = 0; i < trueK; i++) centers.push([rng()*8-4, rng()*8-4]);
+            for (let i = 0; i < n; i++) {
+                const c = i % trueK;
+                data.push([centers[c][0]+gaussianRandom(rng)*0.5, centers[c][1]+gaussianRandom(rng)*0.5]);
+            }
+        } else if (pattern === 'moons') {
+            for (let i = 0; i < n; i++) {
+                const t = (i/n)*Math.PI;
+                if (i < n/2) data.push([Math.cos(t)+gaussianRandom(rng)*0.1, Math.sin(t)+gaussianRandom(rng)*0.1]);
+                else data.push([1-Math.cos(t)+gaussianRandom(rng)*0.1, 0.5-Math.sin(t)+gaussianRandom(rng)*0.1]);
+            }
+        } else if (pattern === 'circles') {
+            for (let i = 0; i < n; i++) {
+                const t = (i/n)*Math.PI*2;
+                if (i < n/2) data.push([Math.cos(t)*2+gaussianRandom(rng)*0.1, Math.sin(t)*2+gaussianRandom(rng)*0.1]);
+                else data.push([Math.cos(t)+gaussianRandom(rng)*0.1, Math.sin(t)+gaussianRandom(rng)*0.1]);
+            }
+        } else if (pattern === 'anisotropic') {
+            for (let i = 0; i < n; i++) {
+                const c = i % trueK;
+                const angle = (c/trueK)*Math.PI;
+                const x = gaussianRandom(rng)*2, y = gaussianRandom(rng)*0.3;
+                data.push([x*Math.cos(angle)-y*Math.sin(angle)+c*3, x*Math.sin(angle)+y*Math.cos(angle)]);
+            }
+        } else {
+            for (let i = 0; i < n; i++) {
+                const c = i % trueK;
+                const spread = 0.3 + c*0.3;
+                data.push([c*3+gaussianRandom(rng)*spread, gaussianRandom(rng)*spread]);
+            }
+        }
+
+        distanceMatrix = buildDistanceMatrix();
+        document.getElementById('nPoints').textContent = `${data.length} points`;
+        drawClusters();
+        calcAllMetrics();
+        applyCurrentK();
+    }
+
+    /* ── Distance Matrix ────────────────────────────────────── */
+
+    function buildDistanceMatrix() {
+        const n = data.length;
+        const m = Array.from({length:n}, ()=> new Float32Array(n));
+        for (let i = 0; i < n; i++) {
+            for (let j = i+1; j < n; j++) {
+                const d = Math.sqrt(squaredDistance(data[i], data[j]));
+                m[i][j] = d;
+                m[j][i] = d;
+            }
+        }
+        return m;
+    }
+
+    function extendDistanceMatrix(newPoint) {
+        const n = distanceMatrix.length;
+        const newRow = new Float32Array(n + 1);
+        for (let i = 0; i < n; i++) {
+            const d = Math.sqrt(squaredDistance(data[i], newPoint));
+            newRow[i] = d;
+            const extended = new Float32Array(n + 1);
+            extended.set(distanceMatrix[i]);
+            extended[n] = d;
+            distanceMatrix[i] = extended;
+        }
+        newRow[n] = 0;
+        distanceMatrix.push(newRow);
+    }
+
+    /* ── K-Means Algorithm ──────────────────────────────────── */
+
+    function initCentroidsKmeansPP(k, rng) {
+        if (data.length === 0) return [];
+        const out = [];
+        const chosen = new Set();
+        const first = Math.floor(rng() * data.length);
+        out.push([...data[first]]);
+        chosen.add(first);
+
+        while (out.length < k) {
+            const minD = new Array(data.length).fill(0);
+            let total = 0;
+            for (let i = 0; i < data.length; i++) {
+                let best = Infinity;
+                for (let c = 0; c < out.length; c++) {
+                    const d = squaredDistance(data[i], out[c]);
+                    if (d < best) best = d;
+                }
+                minD[i] = best;
+                total += best;
+            }
+            let nextIdx = -1;
+            if (total <= 0) {
+                for (let i = 0; i < data.length; i++) { if (!chosen.has(i)) { nextIdx = i; break; } }
+                if (nextIdx === -1) nextIdx = Math.floor(rng()*data.length);
+            } else {
+                let thresh = rng()*total;
+                for (let i = 0; i < minD.length; i++) { thresh -= minD[i]; if (thresh <= 0) { nextIdx = i; break; } }
+                if (nextIdx === -1) nextIdx = minD.length - 1;
+            }
+            chosen.add(nextIdx);
+            out.push([...data[nextIdx]]);
+        }
+        return out;
+    }
+
+    function assignLabels(cents, prev = null) {
+        const next = new Array(data.length).fill(0);
+        let changed = prev === null;
+        for (let i = 0; i < data.length; i++) {
+            let bc = 0, bd = Infinity;
+            for (let c = 0; c < cents.length; c++) {
+                const d = squaredDistance(data[i], cents[c]);
+                if (d < bd) { bd = d; bc = c; }
+            }
+            next[i] = bc;
+            if (prev && prev[i] !== bc) changed = true;
+        }
+        return { labels: next, changed };
+    }
+
+    function recomputeCentroids(k, labs, rng, prev = null) {
+        const sx = new Array(k).fill(0), sy = new Array(k).fill(0), cnt = new Array(k).fill(0);
+        for (let i = 0; i < data.length; i++) {
+            const c = labs[i];
+            sx[c] += data[i][0]; sy[c] += data[i][1]; cnt[c]++;
+        }
+        const out = new Array(k);
+        for (let c = 0; c < k; c++) {
+            if (cnt[c] > 0) out[c] = [sx[c]/cnt[c], sy[c]/cnt[c]];
+            else if (prev && prev[c]) out[c] = [...prev[c]];
+            else { const ri = Math.floor(rng()*data.length); out[c] = [...data[ri]]; }
+        }
+        return out;
+    }
+
+    function kmeansSingleRun(k, rng) {
+        let cents = initCentroidsKmeansPP(k, rng);
+        let labs = null, iters = 0;
+        while (iters < MAX_KMEANS_ITER) {
+            const a = assignLabels(cents, labs);
+            labs = a.labels;
+            cents = recomputeCentroids(k, labs, rng, cents);
+            iters++;
+            if (!a.changed && iters > 1) break;
+        }
+        return { labels: labs || [], centroids: cents, iterations: iters };
+    }
+
+    function kmeansStep(k, cents, prevLabs, rng) {
+        const a = assignLabels(cents, prevLabs);
+        const next = recomputeCentroids(k, a.labels, rng, cents);
+        return { labels: a.labels, centroids: next, changed: a.changed };
+    }
+
+    function runBestKmeans(k) {
+        let best = null;
+        for (let r = 0; r < KMEANS_RESTARTS; r++) {
+            const rng = createSeededRng(makeSeed('kmeans', k, r));
+            const run = kmeansSingleRun(k, rng);
+            const inertia = calcInertia(run.labels, run.centroids);
+            if (!best || inertia < best.inertia) {
+                best = { labels: run.labels, centroids: run.centroids, iterations: run.iterations, inertia };
+            }
+        }
+        return { ...best, silhouette: calcSilhouette(best.labels, k) };
+    }
+
+    /* ── Metrics ────────────────────────────────────────────── */
+
+    function calcInertia(labs, cents) {
+        if (!labs || labs.length !== data.length || !cents || cents.length === 0) return 0;
+        let sum = 0;
+        for (let i = 0; i < data.length; i++) {
+            const c = labs[i];
+            if (c >= 0 && c < cents.length) sum += squaredDistance(data[i], cents[c]);
+        }
+        return sum;
+    }
+
+    function calcSilhouette(labs, k) {
+        if (k < 2 || labs.length !== data.length || data.length < k || distanceMatrix.length !== data.length) return 0;
+        const members = Array.from({length:k}, ()=>[]);
+        for (let i = 0; i < labs.length; i++) {
+            const c = labs[i];
+            if (c < 0 || c >= k) return 0;
+            members[c].push(i);
+        }
+        let total = 0, valid = 0;
+        for (let i = 0; i < data.length; i++) {
+            const cl = labs[i];
+            const same = members[cl];
+            if (same.length <= 1) continue;
+            let a = 0;
+            for (const j of same) if (j !== i) a += distanceMatrix[i][j];
+            a /= (same.length - 1);
+            let b = Infinity;
+            for (let c = 0; c < k; c++) {
+                if (c === cl || members[c].length === 0) continue;
+                let avg = 0;
+                for (const j of members[c]) avg += distanceMatrix[i][j];
+                avg /= members[c].length;
+                if (avg < b) b = avg;
+            }
+            if (!isFinite(b)) continue;
+            total += (b-a) / Math.max(a, b, 1e-9);
+            valid++;
+        }
+        return valid > 0 ? total / valid : 0;
+    }
+
+    /* ── Metrics Cache / Sweep ──────────────────────────────── */
+
+    function updateMetricsDisplay(sil, inertia, iters, clusters) {
+        document.getElementById('silhouetteValue').textContent = Number.isFinite(sil) ? sil.toFixed(3) : '--';
+        document.getElementById('inertiaValue').textContent = Number.isFinite(inertia) ? inertia.toFixed(0) : '--';
+        document.getElementById('iterValue').textContent = Number.isFinite(iters) ? iters.toString() : '--';
+        document.getElementById('clustersFound').textContent = Number.isFinite(clusters) ? clusters.toString() : '--';
+    }
+
+    function calcAllMetrics() {
+        if (data.length === 0) return;
+        const inertias = [], silhouettes = [], bestByK = {};
+        for (let k = K_MIN; k <= K_MAX; k++) {
+            const run = runBestKmeans(k);
+            inertias.push(run.inertia);
+            silhouettes.push(run.silhouette);
+            bestByK[k] = run;
+        }
+        let bestIdx = 0;
+        for (let i = 1; i < silhouettes.length; i++) if (silhouettes[i] > silhouettes[bestIdx]) bestIdx = i;
+        metricsCache = { inertias, silhouettes, bestByK, bestK: bestIdx+K_MIN, version: dataVersion };
+        drawElbowPlot(inertias);
+        drawSilhouettePlot(silhouettes);
+        document.getElementById('bestK').textContent = `best K = ${metricsCache.bestK}`;
+    }
+
+    /* ── Apply / Step / Animate ─────────────────────────────── */
+
+    function updateK() {
+        const k = document.getElementById('kSlider').value;
+        document.getElementById('kValue').textContent = k;
+        if (stepState && stepState.k !== parseInt(k,10)) stepState = null;
+        applyCurrentK();
+    }
+
+    function applyCurrentK() {
+        stopAnimate();
+        const k = parseInt(document.getElementById('kSlider').value, 10);
+        if (data.length === 0) return;
+        if (metricsCache.version !== dataVersion) calcAllMetrics();
+        const cached = metricsCache.bestByK[k];
+        if (!cached) return;
+        stepState = null;
+        labels = [...cached.labels];
+        centroids = cached.centroids.map(c=>[...c]);
+        updateMetricsDisplay(cached.silhouette, cached.inertia, cached.iterations, k);
+        drawClusters();
+        redrawMetricCharts();
+        updateInsight();
+    }
+
+    function startStepSession(k) {
+        const rng = createSeededRng(makeSeed('step', k, 0));
+        stepState = {
+            k, rng,
+            labels: new Array(data.length).fill(-1),
+            centroids: initCentroidsKmeansPP(k, rng),
+            iterations: 0,
+            done: false
+        };
+        labels = [];
+        centroids = stepState.centroids.map(c=>[...c]);
+        updateMetricsDisplay(NaN, NaN, 0, k);
+        drawClusters();
+    }
+
+    function stepKmeans() {
+        stopAnimate();
+        const k = parseInt(document.getElementById('kSlider').value, 10);
+        if (data.length === 0) return;
+        if (!stepState || stepState.k !== k || stepState.done) startStepSession(k);
+        const r = kmeansStep(stepState.k, stepState.centroids, stepState.labels, stepState.rng);
+        stepState.labels = r.labels;
+        stepState.centroids = r.centroids;
+        stepState.iterations++;
+        stepState.done = !r.changed || stepState.iterations >= MAX_KMEANS_ITER;
+        labels = [...stepState.labels];
+        centroids = stepState.centroids.map(c=>[...c]);
+        const inertia = calcInertia(labels, centroids);
+        const sil = calcSilhouette(labels, k);
+        updateMetricsDisplay(sil, inertia, stepState.iterations, k);
+        drawClusters();
+        redrawMetricCharts();
+        document.getElementById('insightText').textContent = stepState.done
+            ? `K-means converged in ${stepState.iterations} steps for K=${k}.`
+            : `Step ${stepState.iterations}: reassigned points, then updated centroids.`;
+    }
+
+    /* ── Animation System ───────────────────────────────────── */
+
+    function toggleAnimate() {
+        if (animRunning) stopAnimate();
+        else startAnimate();
+    }
+
+    function startAnimate() {
+        const k = parseInt(document.getElementById('kSlider').value, 10);
+        if (data.length === 0) return;
+        if (!stepState || stepState.k !== k || stepState.done) startStepSession(k);
+        animRunning = true;
+        animLastStepTime = performance.now();
+        animPrevCentroids = centroids.map(c=>[...c]);
+        animNextCentroids = null;
+        animStepStartTime = 0;
+        document.getElementById('animateBtn').textContent = '⏸ Pause';
+        animFrameId = requestAnimationFrame(animLoop);
+    }
+
+    function stopAnimate() {
+        animRunning = false;
+        if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
+        document.getElementById('animateBtn').textContent = '▶ Play';
+        if (animNextCentroids) {
+            centroids = animNextCentroids.map(c=>[...c]);
+            animNextCentroids = null;
+            drawClusters();
+        }
+    }
+
+    function animLoop(now) {
+        if (!animRunning) return;
+        const elapsed = now - animLastStepTime;
+
+        if (elapsed >= animStepInterval && (!animNextCentroids || now - animStepStartTime >= LERP_DURATION)) {
+            animPrevCentroids = (animNextCentroids || centroids).map(c=>[...c]);
+            const r = kmeansStep(stepState.k, stepState.centroids, stepState.labels, stepState.rng);
+            stepState.labels = r.labels;
+            stepState.centroids = r.centroids;
+            stepState.iterations++;
+            stepState.done = !r.changed || stepState.iterations >= MAX_KMEANS_ITER;
+            labels = [...stepState.labels];
+            animNextCentroids = stepState.centroids.map(c=>[...c]);
+            animStepStartTime = now;
+            animLastStepTime = now;
+            const inertia = calcInertia(labels, animNextCentroids);
+            const sil = calcSilhouette(labels, stepState.k);
+            updateMetricsDisplay(sil, inertia, stepState.iterations, stepState.k);
+            if (stepState.done) {
+                centroids = animNextCentroids.map(c=>[...c]);
+                drawClusters();
+                redrawMetricCharts();
+                stopAnimate();
+                document.getElementById('insightText').textContent =
+                    `Converged in ${stepState.iterations} steps for K=${stepState.k}.`;
+                return;
+            }
+            document.getElementById('insightText').textContent =
+                `Animating step ${stepState.iterations}...`;
+        }
+
+        if (animPrevCentroids && animNextCentroids) {
+            const t = Math.min((now - animStepStartTime) / LERP_DURATION, 1);
+            const e = easeInOut(t);
+            centroids = animPrevCentroids.map((p,i) => [
+                p[0] + (animNextCentroids[i][0]-p[0]) * e,
+                p[1] + (animNextCentroids[i][1]-p[1]) * e
+            ]);
+        }
+
+        drawClusters();
+        animFrameId = requestAnimationFrame(animLoop);
+    }
+
+    function updateSpeed() {
+        const v = parseInt(document.getElementById('speedSlider').value, 10);
+        document.getElementById('speedValue').textContent = speedLabels[v-1];
+        animStepInterval = speedIntervals[v-1];
+    }
+
+    /* ── Drawing: Cluster Chart ─────────────────────────────── */
+
+    function drawClusters() {
+        const canvas = document.getElementById('clusterChart');
+        const { width, height, ctx } = setupCanvas(canvas);
+        const pad = { top: 20, right: 20, bottom: 30, left: 40 };
+        const plotW = width - pad.left - pad.right;
+        const plotH = height - pad.top - pad.bottom;
+
+        ctx.clearRect(0, 0, width, height);
+        if (data.length === 0) return;
+
+        const xs = data.map(d=>d[0]), ys = data.map(d=>d[1]);
+        const minX = Math.min(...xs)-0.5, maxX = Math.max(...xs)+0.5;
+        const minY = Math.min(...ys)-0.5, maxY = Math.max(...ys)+0.5;
+
+        lastPlotTransform = { minX, maxX, minY, maxY, pad, plotW, plotH, width, height };
+
+        const sx = x => pad.left + ((x-minX)/(maxX-minX||1))*plotW;
+        const sy = y => pad.top + (1-(y-minY)/(maxY-minY||1))*plotH;
+
+        // Grid
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+            const gx = pad.left + (i/4)*plotW;
+            const gy = pad.top + (i/4)*plotH;
+            ctx.beginPath(); ctx.moveTo(gx, pad.top); ctx.lineTo(gx, height-pad.bottom); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(pad.left, gy); ctx.lineTo(width-pad.right, gy); ctx.stroke();
+        }
+
+        // Voronoi decision boundaries
+        if (document.getElementById('showVoronoi').checked && centroids.length > 0) {
+            const step = 6;
+            for (let px = pad.left; px < pad.left + plotW; px += step) {
+                for (let py = pad.top; py < pad.top + plotH; py += step) {
+                    const dx = ((px-pad.left)/plotW)*(maxX-minX)+minX;
+                    const dy = (1-(py-pad.top)/plotH)*(maxY-minY)+minY;
+                    let bc = 0, bd = Infinity;
+                    for (let c = 0; c < centroids.length; c++) {
+                        const d = squaredDistance([dx,dy], centroids[c]);
+                        if (d < bd) { bd = d; bc = c; }
+                    }
+                    ctx.fillStyle = hexAlpha(colors[bc % colors.length], 0.10);
+                    ctx.fillRect(px, py, step, step);
+                }
+            }
+        }
+
+        // Points
+        const isClustered = labels.length === data.length;
+        for (let i = 0; i < data.length; i++) {
+            ctx.fillStyle = isClustered ? colors[labels[i] % colors.length] : '#94a3b8';
+            ctx.beginPath();
+            ctx.arc(sx(data[i][0]), sy(data[i][1]), 4, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        // Centroids
+        for (let c = 0; c < centroids.length; c++) {
+            const cx = sx(centroids[c][0]), cy = sy(centroids[c][1]);
+            ctx.fillStyle = colors[c % colors.length];
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 11, 0, Math.PI*2);
+            ctx.fill();
+            ctx.stroke();
+            // X mark
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx-4, cy-4); ctx.lineTo(cx+4, cy+4);
+            ctx.moveTo(cx+4, cy-4); ctx.lineTo(cx-4, cy+4);
+            ctx.stroke();
+        }
+    }
+
+    /* ── Drawing: Elbow & Silhouette ────────────────────────── */
+
+    function redrawMetricCharts() {
+        if (metricsCache.version === dataVersion && metricsCache.inertias.length > 0) {
+            drawElbowPlot(metricsCache.inertias);
+            drawSilhouettePlot(metricsCache.silhouettes);
+        }
+    }
+
+    function drawElbowPlot(inertias) {
+        const canvas = document.getElementById('elbowChart');
+        const { width, height, ctx } = setupCanvas(canvas);
+        const pad = { top: 20, right: 20, bottom: 35, left: 50 };
+        const plotW = width-pad.left-pad.right;
+        const plotH = height-pad.top-pad.bottom;
+        ctx.clearRect(0, 0, width, height);
+        if (!inertias || inertias.length === 0) return;
+
+        const maxI = Math.max(...inertias), minI = Math.min(...inertias);
+        const kSpan = K_MAX - K_MIN;
+        const sx = k => pad.left + ((k-K_MIN)/(kSpan||1))*plotW;
+        const sy = v => pad.top + (1-(v-minI)/(maxI-minI||1))*plotH;
+
+        ctx.strokeStyle = '#14b8a6'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let k = K_MIN; k <= K_MAX; k++) {
+            const x = sx(k), y = sy(inertias[k-K_MIN]);
+            k === K_MIN ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+
+        for (let k = K_MIN; k <= K_MAX; k++) {
+            ctx.fillStyle = '#0d9488';
+            ctx.beginPath();
+            ctx.arc(sx(k), sy(inertias[k-K_MIN]), 5, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        const curK = parseInt(document.getElementById('kSlider').value, 10);
+        ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2;
+        ctx.setLineDash([5,5]);
+        ctx.beginPath(); ctx.moveTo(sx(curK), pad.top); ctx.lineTo(sx(curK), height-pad.bottom); ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle = '#64748b'; ctx.font = '10px -apple-system'; ctx.textAlign = 'center';
+        for (let k = K_MIN; k <= K_MAX; k += 2) ctx.fillText(k.toString(), sx(k), height-10);
+        ctx.fillText('K', width/2, height-20);
+        ctx.save(); ctx.translate(15, height/2); ctx.rotate(-Math.PI/2); ctx.fillText('Inertia', 0, 0); ctx.restore();
+    }
+
+    function drawSilhouettePlot(silhouettes) {
+        const canvas = document.getElementById('silhouetteChart');
+        const { width, height, ctx } = setupCanvas(canvas);
+        const pad = { top: 15, right: 20, bottom: 30, left: 50 };
+        const plotW = width-pad.left-pad.right;
+        const plotH = height-pad.top-pad.bottom;
+        ctx.clearRect(0, 0, width, height);
+        if (!silhouettes || silhouettes.length === 0) return;
+
+        const minS = Math.min(...silhouettes, -0.1), maxS = Math.max(...silhouettes, 0.5);
+        const yScale = v => pad.top + (1-(v-minS)/(maxS-minS||1))*plotH;
+        const barW = plotW/(K_MAX-K_MIN+1) - 4;
+        const bestS = Math.max(...silhouettes);
+        const zeroY = yScale(0);
+
+        ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(pad.left, zeroY); ctx.lineTo(width-pad.right, zeroY); ctx.stroke();
+
+        for (let k = K_MIN; k <= K_MAX; k++) {
+            const s = silhouettes[k-K_MIN];
+            const x = pad.left + ((k-K_MIN)/(K_MAX-K_MIN+1))*plotW + 2;
+            const y = yScale(s);
+            const top = Math.min(y, zeroY), h = Math.max(Math.abs(zeroY-y), 1);
+            ctx.fillStyle = s === bestS ? '#0d9488' : '#5eead4';
+            ctx.fillRect(x, top, barW, h);
+            ctx.fillStyle = '#64748b'; ctx.font = '9px -apple-system'; ctx.textAlign = 'center';
+            ctx.fillText(k.toString(), x+barW/2, height-10);
+            ctx.fillText(s.toFixed(2), x+barW/2, top-3);
+        }
+
+        const curK = parseInt(document.getElementById('kSlider').value, 10);
+        const mx = pad.left + ((curK-K_MIN)/(K_MAX-K_MIN+1))*plotW + barW/2 + 2;
+        ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(mx, height-18, 8, 0, Math.PI*2); ctx.stroke();
+    }
+
+    /* ── Insight ────────────────────────────────────────────── */
+
+    function updateInsight() {
+        const pattern = document.getElementById('dataPattern').value;
+        const k = parseInt(document.getElementById('kSlider').value, 10);
+        const silVal = parseFloat(document.getElementById('silhouetteValue').textContent);
+        let msg;
+        if (labels.length === 0 || !Number.isFinite(silVal)) {
+            msg = 'Data ready. Use Play, Step, or Apply K to cluster.';
+        } else if (pattern === 'moons' || pattern === 'circles') {
+            msg = `K-means assumes blob-like clusters; density-based methods often handle ${pattern} shapes better.`;
+        } else if (silVal > 0.5) {
+            msg = `Good clustering. Silhouette = ${silVal.toFixed(3)} suggests clear separation at K=${k}.`;
+        } else if (silVal > 0.25) {
+            msg = `Moderate clustering. Silhouette = ${silVal.toFixed(3)}. Try nearby K values.`;
+        } else {
+            msg = `Weak clustering. Silhouette = ${silVal.toFixed(3)}. This pattern may not suit K-means at K=${k}.`;
+        }
+        document.getElementById('insightText').textContent = msg;
+    }
+
+    /* ── Click-to-Add & Drag Centroids ──────────────────────── */
+
+    function getCanvasCoords(e) {
+        const canvas = document.getElementById('clusterChart');
+        const rect = canvas.getBoundingClientRect();
+        return [e.clientX - rect.left, e.clientY - rect.top];
+    }
+
+    function findNearestCentroid(px, py) {
+        if (centroids.length === 0 || !lastPlotTransform) return -1;
+        for (let c = 0; c < centroids.length; c++) {
+            const [cx, cy] = dataToPixel(centroids[c][0], centroids[c][1]);
+            const dx = px - cx, dy = py - cy;
+            if (dx*dx + dy*dy < 15*15) return c;
+        }
+        return -1;
+    }
+
+    function reassignFromCentroids() {
+        if (centroids.length === 0 || data.length === 0) return;
+        const a = assignLabels(centroids);
+        labels = a.labels;
+        const inertia = calcInertia(labels, centroids);
+        const k = centroids.length;
+        const sil = calcSilhouette(labels, k);
+        updateMetricsDisplay(sil, inertia, stepState ? stepState.iterations : '-', k);
+    }
+
+    function addPointAtPixel(px, py) {
+        if (animRunning) return;
+        const pt = pixelToData(px, py);
+        if (!pt) return;
+        const t = lastPlotTransform;
+        if (pt[0] < t.minX || pt[0] > t.maxX || pt[1] < t.minY || pt[1] > t.maxY) return;
+
+        extendDistanceMatrix(pt);
+        data.push(pt);
+        metricsCache = createEmptyCache();
+        stepState = null;
+
+        if (centroids.length > 0) {
+            reassignFromCentroids();
+        } else {
+            labels = [];
+        }
+        document.getElementById('nPoints').textContent = `${data.length} points`;
+        drawClusters();
+    }
+
+    (function initInteractions() {
+        const canvas = document.getElementById('clusterChart');
+
+        canvas.addEventListener('mousedown', e => {
+            const [px, py] = getCanvasCoords(e);
+            const ci = findNearestCentroid(px, py);
+            if (ci >= 0) {
+                if (animRunning) stopAnimate();
+                dragState = { centroidIdx: ci, startPixel: [px, py] };
+                canvas.style.cursor = 'grabbing';
+                e.preventDefault();
+            }
+        });
+
+        canvas.addEventListener('mousemove', e => {
+            const [px, py] = getCanvasCoords(e);
+            if (dragState) {
+                const pt = pixelToData(px, py);
+                if (!pt) return;
+                centroids[dragState.centroidIdx] = pt;
+                if (stepState) {
+                    stepState.centroids[dragState.centroidIdx] = [...pt];
+                }
+                reassignFromCentroids();
+                drawClusters();
+            } else {
+                const ci = findNearestCentroid(px, py);
+                canvas.style.cursor = ci >= 0 ? 'grab' : 'crosshair';
+            }
+        });
+
+        canvas.addEventListener('mouseup', e => {
+            if (dragState) {
+                dragState = null;
+                canvas.style.cursor = 'crosshair';
+                return;
+            }
+        });
+
+        canvas.addEventListener('click', e => {
+            if (dragState) return;
+            const [px, py] = getCanvasCoords(e);
+            if (findNearestCentroid(px, py) >= 0) return;
+            addPointAtPixel(px, py);
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            if (dragState) {
+                dragState = null;
+                canvas.style.cursor = 'crosshair';
+            }
+        });
+    })();
+
+    /* ── Challenge Presets ──────────────────────────────────── */
+
+    const presets = {
+        easy:    { pattern:'blobs',       n:200, trueK:3, k:3, hint:'K-means shines on well-separated blobs.' },
+        aniso:   { pattern:'anisotropic', n:200, trueK:3, k:3, hint:'Elongated clusters challenge K-means.' },
+        moons:   { pattern:'moons',       n:250, trueK:2, k:2, hint:'K-means fails on non-convex shapes.' },
+        circles: { pattern:'circles',     n:300, trueK:2, k:2, hint:'Concentric rings break distance-based clustering.' },
+        varied:  { pattern:'varied',      n:300, trueK:3, k:3, hint:'Unequal spread fools K-means.' },
+        findK:   { pattern:'blobs',       n:300, trueK:5, k:3, hint:'Can you find the right K? Check elbow + silhouette.' }
+    };
+
+    function loadPreset(name) {
+        stopAnimate();
+        const p = presets[name];
+        if (!p) return;
+        document.getElementById('dataPattern').value = p.pattern;
+        document.getElementById('nSamplesSlider').value = p.n;
+        document.getElementById('trueClustersSlider').value = p.trueK;
+        document.getElementById('kSlider').value = p.k;
+        document.getElementById('kValue').textContent = p.k;
+        generateData();
+        document.getElementById('insightText').textContent = p.hint;
+    }
+
+    /* ── Reset ──────────────────────────────────────────────── */
+
+    function resetPlayground() {
+        stopAnimate();
+        clearTimeout(generateTimer);
+        document.getElementById('dataPattern').value = 'blobs';
+        document.getElementById('nSamplesSlider').value = 200;
+        document.getElementById('trueClustersSlider').value = 3;
+        document.getElementById('kSlider').value = 3;
+        document.getElementById('trueClustersSlider').disabled = false;
+        document.getElementById('trueClustersLabel').textContent = 'True Clusters';
+        document.getElementById('nSamplesValue').textContent = '200';
+        document.getElementById('trueClustersValue').textContent = '3';
+        document.getElementById('kValue').textContent = '3';
+        document.getElementById('showVoronoi').checked = false;
+        document.getElementById('speedSlider').value = 3;
+        document.getElementById('speedValue').textContent = 'Medium';
+        animStepInterval = speedIntervals[2];
+        data = []; labels = []; centroids = []; distanceMatrix = [];
+        stepState = null; metricsCache = createEmptyCache(); dragState = null;
+        updateMetricsDisplay(NaN, NaN, NaN, NaN);
+        generateData();
+    }
+
+    /* ── Resize ─────────────────────────────────────────────── */
+
+    window.addEventListener('resize', () => {
+        drawClusters();
+        redrawMetricCharts();
+    });
+
+    /* ── Init ───────────────────────────────────────────────── */
+
+    generateData();
+    </script>
+</body>
+</html>
