@@ -5,93 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Drift Detection Playground</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             background: #f8fafc;
             color: #1e293b;
             line-height: 1.6;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 24px;
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 16px;
+            margin-bottom: 24px;
         }
 
-        h1 { font-size: 1.4rem; color: #0f172a; margin-bottom: 4px; }
-        .header-subtitle { font-size: 0.85rem; color: #64748b; }
+        h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
+        .header-subtitle { font-size: 0.9rem; color: #64748b; }
 
         .reset-btn {
             background: white;
             color: #64748b;
             border: 1px solid #e2e8f0;
-            padding: 8px 14px;
+            padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
+            transition: all 0.2s;
         }
-        .reset-btn:hover { background: #f1f5f9; }
+        .reset-btn:hover { background: #f1f5f9; color: #475569; }
 
         .start-banner {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
+            background: linear-gradient(135deg, #f97316, #ea580c);
             color: white;
-            border-radius: 14px;
-            padding: 20px 28px;
-            margin-bottom: 16px;
+            border-radius: 16px;
+            padding: 24px 32px;
+            margin-bottom: 24px;
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 24px;
         }
-        .start-banner-icon { font-size: 2.2rem; }
-        .start-banner-content h2 { font-size: 1rem; margin-bottom: 6px; }
-        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; }
+        .start-banner-icon { font-size: 2.5rem; flex-shrink: 0; }
+        .start-banner-content h2 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
+        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 12px; }
 
         .controls {
-            background: white;
-            border-radius: 10px;
-            padding: 16px;
-            margin-bottom: 16px;
             display: flex;
-            gap: 20px;
-            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
             flex-wrap: wrap;
         }
         .control-group {
             display: flex;
-            flex-direction: column;
-            gap: 4px;
+            align-items: center;
+            gap: 8px;
         }
         .control-label {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             color: #64748b;
-            font-weight: 500;
-        }
-        .slider-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
         input[type="range"] {
             width: 150px;
         }
-        .slider-value {
-            font-size: 0.85rem;
+        .control-value {
+            font-size: 0.8rem;
             font-weight: 600;
             color: #1e293b;
-            min-width: 30px;
+            min-width: 40px;
         }
 
         .btn {
-            padding: 10px 18px;
+            padding: 10px 16px;
             border: none;
             border-radius: 6px;
             font-size: 0.85rem;
@@ -100,10 +95,10 @@
             transition: all 0.2s;
         }
         .btn-primary {
-            background: #f59e0b;
+            background: #f97316;
             color: white;
         }
-        .btn-primary:hover { background: #d97706; }
+        .btn-primary:hover { background: #ea580c; }
         .btn-secondary {
             background: #f1f5f9;
             color: #475569;
@@ -112,13 +107,13 @@
 
         .main-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 2fr 1fr;
             gap: 16px;
         }
 
         .panel {
             background: white;
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 16px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
@@ -131,53 +126,58 @@
             justify-content: space-between;
             align-items: center;
         }
+        .panel-badge {
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+        .badge-healthy { background: #dcfce7; color: #166534; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-critical { background: #fee2e2; color: #991b1b; }
 
         .chart-container {
-            height: 200px;
-            background: #f8fafc;
-            border-radius: 8px;
             position: relative;
-            overflow: hidden;
+            height: 200px;
+            margin-bottom: 16px;
         }
-
-        .distribution {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-around;
+        canvas {
+            width: 100%;
             height: 100%;
-            padding: 10px;
-        }
-        .bar {
-            width: 20px;
-            background: #6366f1;
-            border-radius: 3px 3px 0 0;
-            transition: height 0.3s;
-        }
-        .bar.production {
-            background: #f59e0b;
         }
 
-        .metric-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .metric-card {
             background: #f8fafc;
-            border-radius: 6px;
-            margin-bottom: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
         }
-        .metric-label { font-size: 0.85rem; color: #64748b; }
-        .metric-value { font-size: 1rem; font-weight: 600; color: #1e293b; }
-
-        .status-badge {
-            padding: 4px 10px;
-            border-radius: 12px;
+        .metric-card.alert {
+            background: #fef2f2;
+            border-color: #fecaca;
+        }
+        .metric-card.warning {
+            background: #fef3c7;
+            border-color: #fcd34d;
+        }
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .metric-value.good { color: #10b981; }
+        .metric-value.warning { color: #f59e0b; }
+        .metric-value.bad { color: #ef4444; }
+        .metric-label {
             font-size: 0.75rem;
-            font-weight: 600;
+            color: #64748b;
+            margin-top: 4px;
         }
-        .status-healthy { background: #dcfce7; color: #16a34a; }
-        .status-warning { background: #fef3c7; color: #d97706; }
-        .status-critical { background: #fee2e2; color: #dc2626; }
 
         .alert-list {
             max-height: 200px;
@@ -185,39 +185,29 @@
         }
         .alert-item {
             display: flex;
+            align-items: center;
             gap: 10px;
-            padding: 10px 12px;
+            padding: 10px;
             background: #f8fafc;
+            border: 1px solid #e2e8f0;
             border-radius: 6px;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             font-size: 0.85rem;
         }
-        .alert-icon { font-size: 1rem; }
-        .alert-content { flex: 1; }
-        .alert-time { color: #64748b; font-size: 0.75rem; }
-        .alert-warning { border-left: 3px solid #f59e0b; }
-        .alert-critical { border-left: 3px solid #dc2626; }
-
-        .timeline {
-            display: flex;
-            gap: 4px;
-            margin-bottom: 16px;
+        .alert-item.warning {
+            background: #fef3c7;
+            border-color: #fcd34d;
         }
-        .timeline-bar {
-            flex: 1;
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            cursor: pointer;
+        .alert-item.critical {
+            background: #fee2e2;
+            border-color: #fecaca;
         }
-        .timeline-bar.healthy { background: #10b981; }
-        .timeline-bar.warning { background: #f59e0b; }
-        .timeline-bar.critical { background: #ef4444; }
-        .timeline-bar.active { outline: 2px solid #1e293b; }
+        .alert-icon { font-size: 1.2rem; }
+        .alert-time { font-size: 0.7rem; color: #64748b; }
 
         .insight-bar {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            border: 1px solid #fcd34d;
+            background: linear-gradient(135deg, #ffedd5, #fed7aa);
+            border: 1px solid #fdba74;
             border-radius: 10px;
             padding: 14px 16px;
             margin-top: 16px;
@@ -230,30 +220,15 @@
         .insight-title {
             font-size: 0.7rem;
             font-weight: 600;
-            color: #92400e;
+            color: #9a3412;
             text-transform: uppercase;
             margin-bottom: 4px;
         }
-        .insight-text { font-size: 0.85rem; color: #78350f; }
-
-        .legend {
-            display: flex;
-            gap: 16px;
-            font-size: 0.75rem;
-            margin-top: 8px;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
-        }
+        .insight-text { font-size: 0.85rem; color: #7c2d12; }
 
         @media (max-width: 900px) {
+            .start-banner { flex-direction: column; text-align: center; padding: 20px; }
+            .start-banner-steps { justify-content: center; }
             .main-grid { grid-template-columns: 1fr; }
         }
     </style>
@@ -263,114 +238,88 @@
         <header>
             <div>
                 <h1>Drift Detection Playground</h1>
-                <span class="header-subtitle">Watch models degrade over time</span>
+                <span class="header-subtitle">Monitor model health in production</span>
             </div>
-            <button class="reset-btn" onclick="resetSimulation()">↻ Reset</button>
+            <button class="reset-btn" onclick="resetPlayground()">↻ Reset</button>
         </header>
 
         <div class="start-banner">
-            <div class="start-banner-icon">📉</div>
+            <div class="start-banner-icon">📊</div>
             <div class="start-banner-content">
-                <h2>Model Monitoring Simulator</h2>
-                <p>Simulate data drift and watch how it affects model performance.</p>
+                <h2>Production Monitoring Simulator</h2>
+                <p>Watch how data drift affects model performance over time. Adjust drift intensity to see alert triggers.</p>
             </div>
         </div>
 
         <div class="controls">
             <div class="control-group">
-                <span class="control-label">Data Drift Amount</span>
-                <div class="slider-row">
-                    <input type="range" id="driftAmount" min="0" max="100" value="0" oninput="updateDrift()">
-                    <span class="slider-value" id="driftValue">0%</span>
-                </div>
+                <span class="control-label">Data Drift:</span>
+                <input type="range" id="driftSlider" min="0" max="100" value="0" onchange="updateDrift()">
+                <span class="control-value" id="driftValue">0%</span>
             </div>
             <div class="control-group">
-                <span class="control-label">Concept Drift</span>
-                <div class="slider-row">
-                    <input type="range" id="conceptDrift" min="0" max="100" value="0" oninput="updateConcept()">
-                    <span class="slider-value" id="conceptValue">0%</span>
-                </div>
+                <span class="control-label">Concept Drift:</span>
+                <input type="range" id="conceptSlider" min="0" max="100" value="0" onchange="updateDrift()">
+                <span class="control-value" id="conceptValue">0%</span>
             </div>
-            <button class="btn btn-primary" onclick="simulateTime()">▶ Advance Time</button>
-            <button class="btn btn-secondary" onclick="autoSimulate()">⏩ Auto-Simulate</button>
-        </div>
-
-        <div class="panel" style="margin-bottom: 16px;">
-            <div class="panel-title">
-                <span>Timeline (30 days)</span>
-                <span class="status-badge" id="overallStatus">Healthy</span>
-            </div>
-            <div class="timeline" id="timeline"></div>
-            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b;">
-                <span>Day 1</span>
-                <span>Day 15</span>
-                <span>Day 30</span>
-            </div>
+            <button class="btn btn-primary" onclick="simulateDay()">Simulate Day</button>
+            <button class="btn btn-secondary" onclick="autoSimulate()">Auto Run</button>
         </div>
 
         <div class="main-grid">
             <div class="panel">
                 <div class="panel-title">
-                    <span>Feature Distribution: Age</span>
-                    <span class="status-badge" id="featureStatus">No Drift</span>
+                    <span>Performance Over Time</span>
+                    <span class="panel-badge badge-healthy" id="statusBadge">Healthy</span>
                 </div>
+                
                 <div class="chart-container">
-                    <div class="distribution" id="featureChart"></div>
+                    <canvas id="accuracyChart"></canvas>
                 </div>
-                <div class="legend">
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #6366f1;"></div>
-                        <span>Training</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #f59e0b;"></div>
-                        <span>Production</span>
-                    </div>
+                
+                <div class="chart-container">
+                    <canvas id="driftChart"></canvas>
                 </div>
             </div>
 
-            <div class="panel">
-                <div class="panel-title">
-                    <span>Model Metrics</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Accuracy</span>
-                    <span class="metric-value" id="accuracy">85.0%</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">PSI Score</span>
-                    <span class="metric-value" id="psi">0.00</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Prediction Mean</span>
-                    <span class="metric-value" id="predMean">0.32</span>
-                </div>
-                <div class="metric-row">
-                    <span class="metric-label">Days Since Retrain</span>
-                    <span class="metric-value" id="daysSince">0</span>
-                </div>
-            </div>
-
-            <div class="panel">
-                <div class="panel-title">
-                    <span>Alerts</span>
-                    <span class="status-badge status-healthy" id="alertCount">0 Active</span>
-                </div>
-                <div class="alert-list" id="alertList">
-                    <div style="text-align: center; color: #64748b; padding: 20px;">
-                        No alerts - system healthy
+            <div>
+                <div class="panel" style="margin-bottom: 16px;">
+                    <div class="panel-title">
+                        <span>Current Metrics</span>
+                        <span class="panel-badge" id="dayBadge">Day 0</span>
+                    </div>
+                    
+                    <div class="metric-grid">
+                        <div class="metric-card" id="accuracyCard">
+                            <div class="metric-value good" id="accuracyValue">85%</div>
+                            <div class="metric-label">Accuracy</div>
+                        </div>
+                        <div class="metric-card" id="psiCard">
+                            <div class="metric-value good" id="psiValue">0.02</div>
+                            <div class="metric-label">PSI</div>
+                        </div>
+                        <div class="metric-card" id="predMeanCard">
+                            <div class="metric-value good" id="predMeanValue">0.23</div>
+                            <div class="metric-label">Pred Mean</div>
+                        </div>
+                        <div class="metric-card" id="volumeCard">
+                            <div class="metric-value" id="volumeValue">1,000</div>
+                            <div class="metric-label">Daily Volume</div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="panel">
-                <div class="panel-title">
-                    <span>Recommendations</span>
-                </div>
-                <div id="recommendations" style="font-size: 0.9rem; line-height: 1.8;">
-                    <div style="color: #16a34a;">✓ Model is healthy</div>
-                    <div style="color: #16a34a;">✓ No retraining needed</div>
-                    <div style="color: #16a34a;">✓ Data distribution stable</div>
+                <div class="panel">
+                    <div class="panel-title">
+                        <span>Alerts</span>
+                        <span class="panel-badge badge-healthy" id="alertCount">0 active</span>
+                    </div>
+                    
+                    <div class="alert-list" id="alertList">
+                        <div style="text-align: center; color: #64748b; padding: 20px; font-size: 0.85rem;">
+                            No alerts yet. Increase drift to trigger alerts.
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -379,319 +328,293 @@
             <div class="insight-icon">💡</div>
             <div class="insight-content">
                 <div class="insight-title">Monitoring Insight</div>
-                <div class="insight-text" id="insightText">Adjust the drift sliders and advance time to see how drift affects model performance. Watch for alerts as metrics degrade.</div>
+                <div class="insight-text" id="insightText">Start by increasing the drift sliders to see how data and concept drift affect model performance over time.</div>
             </div>
         </div>
     </div>
 
     <script>
-        let state = {
-            day: 0,
-            dataDrift: 0,
-            conceptDrift: 0,
-            accuracy: 85,
-            psi: 0,
-            predMean: 0.32,
-            alerts: [],
-            timeline: []
-        };
+        let day = 0;
+        let accuracyHistory = [0.85];
+        let psiHistory = [0.02];
+        let alerts = [];
+        let autoRunning = false;
 
-        const trainingDist = [5, 8, 12, 18, 22, 25, 22, 18, 12, 8, 5];
-
-        function initTimeline() {
-            const container = document.getElementById('timeline');
-            container.innerHTML = '';
-            for (let i = 0; i < 30; i++) {
-                const bar = document.createElement('div');
-                bar.className = 'timeline-bar';
-                bar.onclick = () => selectDay(i);
-                container.appendChild(bar);
-            }
-        }
-
-        function updateFeatureChart() {
-            const container = document.getElementById('featureChart');
-            container.innerHTML = '';
-            
-            const driftFactor = state.dataDrift / 100;
-            
-            for (let i = 0; i < trainingDist.length; i++) {
-                const trainHeight = trainingDist[i] * 6;
-                
-                // Shift distribution based on drift
-                const shiftedIndex = Math.min(trainingDist.length - 1, Math.max(0, 
-                    Math.round(i + driftFactor * 3)));
-                const prodHeight = trainingDist[shiftedIndex] * 6 * (1 + driftFactor * 0.3);
-                
-                const group = document.createElement('div');
-                group.style.display = 'flex';
-                group.style.gap = '2px';
-                group.style.alignItems = 'flex-end';
-                
-                const trainBar = document.createElement('div');
-                trainBar.className = 'bar';
-                trainBar.style.height = `${trainHeight}px`;
-                
-                const prodBar = document.createElement('div');
-                prodBar.className = 'bar production';
-                prodBar.style.height = `${prodHeight}px`;
-                
-                group.appendChild(trainBar);
-                group.appendChild(prodBar);
-                container.appendChild(group);
-            }
-        }
+        const baselineAccuracy = 0.85;
+        const baselinePSI = 0.02;
+        const baselinePredMean = 0.23;
 
         function updateDrift() {
-            state.dataDrift = parseInt(document.getElementById('driftAmount').value);
-            document.getElementById('driftValue').textContent = state.dataDrift + '%';
-            calculateMetrics();
-            updateUI();
+            document.getElementById('driftValue').textContent = document.getElementById('driftSlider').value + '%';
+            document.getElementById('conceptValue').textContent = document.getElementById('conceptSlider').value + '%';
         }
 
-        function updateConcept() {
-            state.conceptDrift = parseInt(document.getElementById('conceptDrift').value);
-            document.getElementById('conceptValue').textContent = state.conceptDrift + '%';
-            calculateMetrics();
-            updateUI();
-        }
-
-        function calculateMetrics() {
-            // PSI based on data drift
-            state.psi = state.dataDrift * 0.004;
+        function simulateDay() {
+            day++;
+            document.getElementById('dayBadge').textContent = `Day ${day}`;
             
-            // Accuracy drops with concept drift
-            state.accuracy = Math.max(50, 85 - state.conceptDrift * 0.35);
+            const dataDrift = parseInt(document.getElementById('driftSlider').value) / 100;
+            const conceptDrift = parseInt(document.getElementById('conceptSlider').value) / 100;
             
-            // Prediction mean shifts with data drift
-            state.predMean = 0.32 + state.dataDrift * 0.003;
+            // Calculate new metrics
+            const noise = (Math.random() - 0.5) * 0.02;
+            const newAccuracy = Math.max(0.5, baselineAccuracy - conceptDrift * 0.3 + noise);
+            const newPSI = Math.min(0.5, baselinePSI + dataDrift * 0.4 + Math.random() * 0.02);
+            const newPredMean = baselinePredMean + (dataDrift * 0.15) + (conceptDrift * 0.1);
+            
+            accuracyHistory.push(newAccuracy);
+            psiHistory.push(newPSI);
+            
+            // Keep last 30 days
+            if (accuracyHistory.length > 30) {
+                accuracyHistory.shift();
+                psiHistory.shift();
+            }
+            
+            // Update display
+            updateMetrics(newAccuracy, newPSI, newPredMean);
+            checkAlerts(newAccuracy, newPSI);
+            drawCharts();
+            updateInsight(newAccuracy, newPSI);
         }
 
-        function checkAlerts() {
+        function updateMetrics(accuracy, psi, predMean) {
+            const accEl = document.getElementById('accuracyValue');
+            accEl.textContent = (accuracy * 100).toFixed(0) + '%';
+            accEl.className = 'metric-value ' + (accuracy > 0.8 ? 'good' : accuracy > 0.7 ? 'warning' : 'bad');
+            document.getElementById('accuracyCard').className = 'metric-card' + (accuracy < 0.75 ? ' alert' : accuracy < 0.8 ? ' warning' : '');
+            
+            const psiEl = document.getElementById('psiValue');
+            psiEl.textContent = psi.toFixed(2);
+            psiEl.className = 'metric-value ' + (psi < 0.1 ? 'good' : psi < 0.25 ? 'warning' : 'bad');
+            document.getElementById('psiCard').className = 'metric-card' + (psi > 0.25 ? ' alert' : psi > 0.1 ? ' warning' : '');
+            
+            document.getElementById('predMeanValue').textContent = predMean.toFixed(2);
+            document.getElementById('volumeValue').textContent = (900 + Math.floor(Math.random() * 200)).toLocaleString();
+            
+            // Update status badge
+            const badge = document.getElementById('statusBadge');
+            if (accuracy < 0.75 || psi > 0.25) {
+                badge.textContent = 'Critical';
+                badge.className = 'panel-badge badge-critical';
+            } else if (accuracy < 0.8 || psi > 0.1) {
+                badge.textContent = 'Warning';
+                badge.className = 'panel-badge badge-warning';
+            } else {
+                badge.textContent = 'Healthy';
+                badge.className = 'panel-badge badge-healthy';
+            }
+        }
+
+        function checkAlerts(accuracy, psi) {
             const newAlerts = [];
             
-            if (state.psi > 0.25) {
+            if (accuracy < 0.75) {
                 newAlerts.push({
-                    type: 'critical',
+                    level: 'critical',
                     icon: '🚨',
-                    message: 'Critical: PSI > 0.25 - Significant drift detected',
-                    time: `Day ${state.day}`
+                    message: `Accuracy dropped to ${(accuracy * 100).toFixed(0)}%`,
+                    time: `Day ${day}`
                 });
-            } else if (state.psi > 0.1) {
+            } else if (accuracy < 0.8) {
                 newAlerts.push({
-                    type: 'warning',
+                    level: 'warning',
                     icon: '⚠️',
-                    message: 'Warning: PSI > 0.1 - Moderate drift detected',
-                    time: `Day ${state.day}`
+                    message: `Accuracy at ${(accuracy * 100).toFixed(0)}%`,
+                    time: `Day ${day}`
                 });
             }
             
-            if (state.accuracy < 75) {
+            if (psi > 0.25) {
                 newAlerts.push({
-                    type: 'critical',
+                    level: 'critical',
                     icon: '🚨',
-                    message: `Critical: Accuracy dropped to ${state.accuracy.toFixed(1)}%`,
-                    time: `Day ${state.day}`
+                    message: `Significant drift detected (PSI: ${psi.toFixed(2)})`,
+                    time: `Day ${day}`
                 });
-            } else if (state.accuracy < 80) {
+            } else if (psi > 0.1) {
                 newAlerts.push({
-                    type: 'warning',
+                    level: 'warning',
                     icon: '⚠️',
-                    message: `Warning: Accuracy at ${state.accuracy.toFixed(1)}%`,
-                    time: `Day ${state.day}`
+                    message: `Moderate drift (PSI: ${psi.toFixed(2)})`,
+                    time: `Day ${day}`
                 });
             }
             
-            if (state.day > 14) {
-                newAlerts.push({
-                    type: 'warning',
-                    icon: '📅',
-                    message: 'Time-based: Consider scheduled retrain',
-                    time: `Day ${state.day}`
-                });
+            if (newAlerts.length > 0) {
+                alerts = [...newAlerts, ...alerts].slice(0, 10);
+                renderAlerts();
             }
             
-            return newAlerts;
+            const countBadge = document.getElementById('alertCount');
+            const activeCount = alerts.filter(a => a.level === 'critical').length;
+            countBadge.textContent = activeCount > 0 ? `${activeCount} critical` : '0 active';
+            countBadge.className = 'panel-badge ' + (activeCount > 0 ? 'badge-critical' : 'badge-healthy');
         }
 
-        function simulateTime() {
-            if (state.day >= 30) return;
-            
-            state.day++;
-            
-            // Auto-increase drift over time
-            state.dataDrift = Math.min(100, state.dataDrift + 2);
-            state.conceptDrift = Math.min(100, state.conceptDrift + 1);
-            
-            document.getElementById('driftAmount').value = state.dataDrift;
-            document.getElementById('driftValue').textContent = state.dataDrift + '%';
-            document.getElementById('conceptDrift').value = state.conceptDrift;
-            document.getElementById('conceptValue').textContent = state.conceptDrift + '%';
-            
-            calculateMetrics();
-            
-            // Determine day status
-            let dayStatus = 'healthy';
-            if (state.psi > 0.25 || state.accuracy < 75) dayStatus = 'critical';
-            else if (state.psi > 0.1 || state.accuracy < 80) dayStatus = 'warning';
-            
-            state.timeline.push(dayStatus);
-            
-            // Update timeline visual
-            const bars = document.querySelectorAll('.timeline-bar');
-            if (bars[state.day - 1]) {
-                bars[state.day - 1].className = `timeline-bar ${dayStatus}`;
+        function renderAlerts() {
+            const list = document.getElementById('alertList');
+            if (alerts.length === 0) {
+                list.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px; font-size: 0.85rem;">No alerts yet.</div>';
+                return;
             }
             
-            state.alerts = checkAlerts();
-            updateUI();
+            list.innerHTML = alerts.map(a => `
+                <div class="alert-item ${a.level}">
+                    <span class="alert-icon">${a.icon}</span>
+                    <div style="flex: 1;">
+                        <div>${a.message}</div>
+                        <div class="alert-time">${a.time}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function drawCharts() {
+            // Accuracy chart
+            const accCanvas = document.getElementById('accuracyChart');
+            const accCtx = accCanvas.getContext('2d');
+            accCanvas.width = accCanvas.offsetWidth * 2;
+            accCanvas.height = accCanvas.offsetHeight * 2;
+            accCtx.scale(2, 2);
             
-            // Update insight
-            if (state.accuracy < 75) {
-                document.getElementById('insightText').textContent = 
-                    'Critical accuracy drop! The model is making significantly worse predictions. Immediate retraining recommended.';
-            } else if (state.psi > 0.25) {
-                document.getElementById('insightText').textContent = 
-                    'Significant data drift detected. The production data looks very different from training data. Investigate the cause.';
-            } else if (state.day > 14) {
-                document.getElementById('insightText').textContent = 
-                    'Model has been running for ' + state.day + ' days. Consider a scheduled retrain to incorporate recent patterns.';
+            const width = accCanvas.offsetWidth;
+            const height = accCanvas.offsetHeight;
+            
+            accCtx.clearRect(0, 0, width, height);
+            
+            // Draw accuracy line
+            accCtx.beginPath();
+            accCtx.strokeStyle = '#10b981';
+            accCtx.lineWidth = 2;
+            
+            const xStep = width / Math.max(accuracyHistory.length - 1, 1);
+            accuracyHistory.forEach((val, i) => {
+                const x = i * xStep;
+                const y = height - (val - 0.5) * height / 0.5;
+                if (i === 0) accCtx.moveTo(x, y);
+                else accCtx.lineTo(x, y);
+            });
+            accCtx.stroke();
+            
+            // Threshold line
+            accCtx.beginPath();
+            accCtx.strokeStyle = '#ef4444';
+            accCtx.setLineDash([5, 5]);
+            const thresholdY = height - (0.75 - 0.5) * height / 0.5;
+            accCtx.moveTo(0, thresholdY);
+            accCtx.lineTo(width, thresholdY);
+            accCtx.stroke();
+            accCtx.setLineDash([]);
+            
+            // Labels
+            accCtx.fillStyle = '#64748b';
+            accCtx.font = '10px sans-serif';
+            accCtx.fillText('Accuracy', 5, 12);
+            accCtx.fillText('75% threshold', 5, thresholdY - 5);
+            
+            // PSI chart
+            const psiCanvas = document.getElementById('driftChart');
+            const psiCtx = psiCanvas.getContext('2d');
+            psiCanvas.width = psiCanvas.offsetWidth * 2;
+            psiCanvas.height = psiCanvas.offsetHeight * 2;
+            psiCtx.scale(2, 2);
+            
+            const psiWidth = psiCanvas.offsetWidth;
+            const psiHeight = psiCanvas.offsetHeight;
+            
+            psiCtx.clearRect(0, 0, psiWidth, psiHeight);
+            
+            // Draw PSI bars
+            const barWidth = Math.max(1, psiWidth / Math.max(psiHistory.length, 1) - 2);
+            psiHistory.forEach((val, i) => {
+                const x = i * (barWidth + 2);
+                const barHeight = val * psiHeight / 0.5;
+                const y = psiHeight - barHeight;
+                
+                psiCtx.fillStyle = val > 0.25 ? '#ef4444' : val > 0.1 ? '#f59e0b' : '#10b981';
+                psiCtx.fillRect(x, y, barWidth, barHeight);
+            });
+            
+            // Threshold lines
+            psiCtx.beginPath();
+            psiCtx.strokeStyle = '#f59e0b';
+            psiCtx.setLineDash([5, 5]);
+            const warn = psiHeight - 0.1 * psiHeight / 0.5;
+            psiCtx.moveTo(0, warn);
+            psiCtx.lineTo(psiWidth, warn);
+            psiCtx.stroke();
+            
+            psiCtx.strokeStyle = '#ef4444';
+            const crit = psiHeight - 0.25 * psiHeight / 0.5;
+            psiCtx.moveTo(0, crit);
+            psiCtx.lineTo(psiWidth, crit);
+            psiCtx.stroke();
+            psiCtx.setLineDash([]);
+            
+            psiCtx.fillStyle = '#64748b';
+            psiCtx.fillText('PSI (Drift)', 5, 12);
+        }
+
+        function updateInsight(accuracy, psi) {
+            let insight = '';
+            
+            if (accuracy < 0.75 && psi > 0.25) {
+                insight = '🚨 Critical: Both accuracy and drift are in dangerous territory. Consider retraining immediately with recent data.';
+            } else if (accuracy < 0.75) {
+                insight = '⚠️ Concept drift detected: Model accuracy has dropped significantly. The relationship between features and target may have changed.';
+            } else if (psi > 0.25) {
+                insight = '⚠️ Data drift detected: Input distribution has shifted significantly. Monitor accuracy closely.';
+            } else if (psi > 0.1) {
+                insight = 'Moderate drift detected. Keep monitoring—may need to retrain if accuracy starts dropping.';
+            } else if (accuracy < 0.8) {
+                insight = 'Slight accuracy degradation. Worth investigating recent data quality and feature distributions.';
+            } else {
+                insight = 'Model is healthy. Continue monitoring for changes.';
             }
+            
+            document.getElementById('insightText').textContent = insight;
         }
 
         let autoInterval = null;
         function autoSimulate() {
-            if (autoInterval) {
+            if (autoRunning) {
                 clearInterval(autoInterval);
-                autoInterval = null;
-                return;
+                autoRunning = false;
+            } else {
+                autoRunning = true;
+                autoInterval = setInterval(simulateDay, 500);
             }
-            autoInterval = setInterval(() => {
-                if (state.day >= 30) {
-                    clearInterval(autoInterval);
-                    autoInterval = null;
-                    return;
-                }
-                simulateTime();
-            }, 500);
         }
 
-        function updateUI() {
-            updateFeatureChart();
+        function resetPlayground() {
+            day = 0;
+            accuracyHistory = [0.85];
+            psiHistory = [0.02];
+            alerts = [];
             
-            // Update metrics
-            document.getElementById('accuracy').textContent = state.accuracy.toFixed(1) + '%';
-            document.getElementById('psi').textContent = state.psi.toFixed(2);
-            document.getElementById('predMean').textContent = state.predMean.toFixed(2);
-            document.getElementById('daysSince').textContent = state.day;
-            
-            // Update feature status
-            const featureStatus = document.getElementById('featureStatus');
-            if (state.psi > 0.25) {
-                featureStatus.textContent = 'High Drift';
-                featureStatus.className = 'status-badge status-critical';
-            } else if (state.psi > 0.1) {
-                featureStatus.textContent = 'Moderate Drift';
-                featureStatus.className = 'status-badge status-warning';
-            } else {
-                featureStatus.textContent = 'No Drift';
-                featureStatus.className = 'status-badge status-healthy';
-            }
-            
-            // Update overall status
-            const overallStatus = document.getElementById('overallStatus');
-            if (state.accuracy < 75 || state.psi > 0.25) {
-                overallStatus.textContent = 'Critical';
-                overallStatus.className = 'status-badge status-critical';
-            } else if (state.accuracy < 80 || state.psi > 0.1) {
-                overallStatus.textContent = 'Warning';
-                overallStatus.className = 'status-badge status-warning';
-            } else {
-                overallStatus.textContent = 'Healthy';
-                overallStatus.className = 'status-badge status-healthy';
-            }
-            
-            // Update alerts
-            const alertList = document.getElementById('alertList');
-            const alertCount = document.getElementById('alertCount');
-            
-            if (state.alerts.length === 0) {
-                alertList.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px;">No alerts - system healthy</div>';
-                alertCount.textContent = '0 Active';
-                alertCount.className = 'status-badge status-healthy';
-            } else {
-                alertList.innerHTML = state.alerts.map(alert => `
-                    <div class="alert-item alert-${alert.type}">
-                        <span class="alert-icon">${alert.icon}</span>
-                        <div class="alert-content">
-                            <div>${alert.message}</div>
-                            <div class="alert-time">${alert.time}</div>
-                        </div>
-                    </div>
-                `).join('');
-                alertCount.textContent = state.alerts.length + ' Active';
-                alertCount.className = state.alerts.some(a => a.type === 'critical') 
-                    ? 'status-badge status-critical' 
-                    : 'status-badge status-warning';
-            }
-            
-            // Update recommendations
-            const recs = document.getElementById('recommendations');
-            const items = [];
-            
-            if (state.accuracy < 80) {
-                items.push('<div style="color: #dc2626;">✗ Retrain model - accuracy has dropped</div>');
-            } else {
-                items.push('<div style="color: #16a34a;">✓ Accuracy acceptable</div>');
-            }
-            
-            if (state.psi > 0.1) {
-                items.push('<div style="color: #d97706;">⚠ Investigate data drift cause</div>');
-            } else {
-                items.push('<div style="color: #16a34a;">✓ Data distribution stable</div>');
-            }
-            
-            if (state.day > 14) {
-                items.push('<div style="color: #d97706;">⚠ Consider scheduled retrain</div>');
-            } else {
-                items.push('<div style="color: #16a34a;">✓ Recent training</div>');
-            }
-            
-            recs.innerHTML = items.join('');
-        }
-
-        function resetSimulation() {
             if (autoInterval) {
                 clearInterval(autoInterval);
-                autoInterval = null;
+                autoRunning = false;
             }
             
-            state = {
-                day: 0,
-                dataDrift: 0,
-                conceptDrift: 0,
-                accuracy: 85,
-                psi: 0,
-                predMean: 0.32,
-                alerts: [],
-                timeline: []
-            };
+            document.getElementById('driftSlider').value = 0;
+            document.getElementById('conceptSlider').value = 0;
+            updateDrift();
             
-            document.getElementById('driftAmount').value = 0;
-            document.getElementById('driftValue').textContent = '0%';
-            document.getElementById('conceptDrift').value = 0;
-            document.getElementById('conceptValue').textContent = '0%';
-            
-            initTimeline();
-            updateUI();
-            
+            document.getElementById('dayBadge').textContent = 'Day 0';
+            updateMetrics(0.85, 0.02, 0.23);
+            renderAlerts();
+            drawCharts();
             document.getElementById('insightText').textContent = 
-                'Adjust the drift sliders and advance time to see how drift affects model performance. Watch for alerts as metrics degrade.';
+                'Start by increasing the drift sliders to see how data and concept drift affect model performance over time.';
         }
 
         // Initialize
-        initTimeline();
-        updateUI();
+        drawCharts();
+        
+        // Handle window resize
+        window.addEventListener('resize', drawCharts);
     </script>
 </body>
 </html>

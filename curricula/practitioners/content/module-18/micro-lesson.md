@@ -92,33 +92,37 @@ tools = [
 ]
 ```
 
-### OpenAI Function Calling Example
+### OpenAI Tool Calling Example
 
 ```python
-import openai
+from openai import OpenAI
+import json
 
-response = openai.ChatCompletion.create(
+client = OpenAI()
+
+response = client.chat.completions.create(
     model="gpt-4",
     messages=[{"role": "user", "content": "What's the weather in Paris?"}],
-    functions=tools,
-    function_call="auto"  # Let model decide
+    tools=tools,
+    tool_choice="auto"  # Let model decide
 )
 
-# Check if model wants to call a function
-if response.choices[0].message.get("function_call"):
-    func_name = response.choices[0].message.function_call.name
-    func_args = json.loads(response.choices[0].message.function_call.arguments)
+# Check if model wants to call a tool
+if response.choices[0].message.tool_calls:
+    tool_call = response.choices[0].message.tool_calls[0]
+    func_name = tool_call.function.name
+    func_args = json.loads(tool_call.function.arguments)
     
     # Execute the function
     result = execute_function(func_name, func_args)
     
     # Send result back to model
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4",
         messages=[
             {"role": "user", "content": "What's the weather in Paris?"},
-            {"role": "assistant", "content": None, "function_call": {...}},
-            {"role": "function", "name": func_name, "content": json.dumps(result)}
+            response.choices[0].message,  # Include the assistant message with tool_calls
+            {"role": "tool", "tool_call_id": tool_call.id, "content": json.dumps(result)}
         ]
     )
 ```

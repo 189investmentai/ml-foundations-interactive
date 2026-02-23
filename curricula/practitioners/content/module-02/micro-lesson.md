@@ -200,6 +200,60 @@ df['orders_before_date'] = df.apply(
 
 ---
 
+## StreamCart Example: Leaky vs Safe Features
+
+You're predicting churn as of **January 1, 2025**. Here's how the same concept can be leaky or safe:
+
+### Feature: Customer Value
+
+```python
+# ❌ LEAKY: Uses all-time data
+customer_value = df['total_spend']  
+# Problem: Includes Feb, March purchases that haven't happened yet!
+
+# ✅ SAFE: Uses point-in-time data
+customer_value = df[df['order_date'] < '2025-01-01']['spend'].sum()
+# Only counts purchases BEFORE prediction date
+```
+
+### Feature: Days Since Last Order
+
+```python
+# ❌ LEAKY (subtle): What if they order on Jan 5?
+days_since_last = (today - df['last_order_date']).days
+# If 'last_order_date' includes Jan 5 order, we're using the future
+
+# ✅ SAFE: Explicitly filter to before prediction date
+last_order_before_pred = df[df['order_date'] < prediction_date]['order_date'].max()
+days_since_last = (prediction_date - last_order_before_pred).days
+```
+
+### Feature: Churn Risk Score
+
+```python
+# ❌ LEAKY: Uses target directly!
+churn_risk = inactivity_score + (1 - churned) * 0.5
+# This literally uses the answer in the feature
+
+# ✅ SAFE: Build from legitimate signals only
+churn_risk = (
+    days_since_last_order / 30 +
+    (30 - logins_last_30d) / 30 +
+    support_tickets_30d * 0.1
+)
+```
+
+### Quick Reference: Safe Feature Patterns
+
+| Pattern | Example |
+|---------|---------|
+| **Windowed aggregations** | `orders_last_90d` instead of `orders_total` |
+| **As-of-date calculations** | `tenure_as_of(prediction_date)` |
+| **Explicit time bounds** | `WHERE date < prediction_date` |
+| **No target derivatives** | Never use `churned`, `converted`, `target` in feature code |
+
+---
+
 ## Failure Modes
 
 ### 1. The "I'll Fix It Later" Leak
@@ -225,6 +279,59 @@ df['orders_before_date'] = df.apply(
 **Problem:** Train/test looks fine, production fails.
 
 **Fix:** Use the same feature engineering code for training and inference.
+
+---
+
+---
+
+## How Bad Is This Leakage? Severity Guide
+
+Not all leakage is equally catastrophic. Here's how to assess severity:
+
+### Severity Levels
+
+| Correlation with Target | Severity | Impact on Production | Action |
+|------------------------|----------|---------------------|--------|
+| **0.90+** | 🔴 Critical | Model useless in production | Stop. Fix immediately. |
+| **0.70-0.90** | 🟠 High | Major performance drop | Fix before deployment |
+| **0.50-0.70** | 🟡 Medium | Noticeable degradation | Fix or remove feature |
+| **0.30-0.50** | 🟢 Low | Minor impact | Document and monitor |
+
+### Estimating Production Impact
+
+**Rule of thumb:** If a leaky feature has correlation `r` with the target, expect production AUC to drop by roughly:
+
+```
+Estimated AUC drop ≈ (feature_importance) × (r - safe_correlation)
+```
+
+**Example:**
+- Leaky feature: 0.85 correlation, 40% importance
+- Safe alternative: 0.20 correlation
+- Expected drop: 0.40 × (0.85 - 0.20) = 0.26 AUC points
+
+### When to Investigate
+
+| Signal | Threshold | What It Means |
+|--------|-----------|---------------|
+| Single feature importance | >30% | That feature is carrying the model |
+| Feature-target correlation | >0.7 | Suspiciously predictive |
+| Test AUC | >0.90 (for business problems) | Too good to be true |
+| Test-train AUC gap | <0.01 | Usually means leakage, not a good model |
+
+### The "What Would Production See?" Test
+
+For any suspicious feature, simulate production:
+
+```python
+# Create a "production" test where the feature is unavailable
+X_test_prod = X_test.copy()
+X_test_prod['suspicious_feature'] = 0  # Or drop entirely
+
+auc_prod_sim = roc_auc_score(y_test, model.predict_proba(X_test_prod)[:, 1])
+print(f"AUC without suspicious feature: {auc_prod_sim:.3f}")
+# If this drops dramatically, the feature is likely leaky
+```
 
 ---
 
@@ -285,10 +392,19 @@ features['support_tickets_past_30d'] = count_tickets_before(user_id, prediction_
 
 ---
 
+## Debug Drill
+
+Complete `drill_02_data_leakage.ipynb` to find TWO hidden leaky features.
+
+**Scenario:** A colleague's model gets 0.96 AUC. Find the target leakage AND the temporal leakage.
+
+---
+
 ## Done Checklist
 
 - [ ] Explored the data leakage playground
 - [ ] Understand the timeline test
 - [ ] Can identify obvious and subtle leakage
 - [ ] Know how to use time-based splits
-- [ ] Completed the notebook lab
+- [ ] Completed the debug drill notebook
+- [ ] Completed the quiz (including code debugging)

@@ -1,0 +1,10 @@
+{
+  "models": [
+    {
+      "name": "churn_model",
+      "version": "v1.0.0",
+      "path": "./demo_models/churn_model_v1.0.0.joblib",
+      "registered_at": "2026-02-23T07:42:30.553674"
+    }
+  ]
+}

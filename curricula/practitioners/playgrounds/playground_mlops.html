@@ -5,55 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MLOps Playground</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             background: #f8fafc;
             color: #1e293b;
             line-height: 1.6;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 24px;
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 16px;
+            margin-bottom: 24px;
         }
 
-        h1 { font-size: 1.4rem; color: #0f172a; margin-bottom: 4px; }
-        .header-subtitle { font-size: 0.85rem; color: #64748b; }
+        h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
+        .header-subtitle { font-size: 0.9rem; color: #64748b; }
 
         .reset-btn {
             background: white;
             color: #64748b;
             border: 1px solid #e2e8f0;
-            padding: 8px 14px;
+            padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
+            transition: all 0.2s;
         }
-        .reset-btn:hover { background: #f1f5f9; }
+        .reset-btn:hover { background: #f1f5f9; color: #475569; }
 
         .start-banner {
             background: linear-gradient(135deg, #6366f1, #4f46e5);
             color: white;
-            border-radius: 14px;
-            padding: 20px 28px;
-            margin-bottom: 16px;
+            border-radius: 16px;
+            padding: 24px 32px;
+            margin-bottom: 24px;
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 24px;
         }
-        .start-banner-icon { font-size: 2.2rem; }
-        .start-banner-content h2 { font-size: 1rem; margin-bottom: 6px; }
-        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; }
+        .start-banner-icon { font-size: 2.5rem; flex-shrink: 0; }
+        .start-banner-content h2 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
+        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 12px; }
 
         .lifecycle {
             display: flex;
@@ -101,7 +106,7 @@
 
         .panel {
             background: white;
-            border-radius: 10px;
+            border-radius: 12px;
             padding: 16px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
@@ -235,6 +240,8 @@
         .insight-text { font-size: 0.85rem; color: #3730a3; }
 
         @media (max-width: 900px) {
+            .start-banner { flex-direction: column; text-align: center; padding: 20px; }
+            .start-banner-steps { justify-content: center; }
             .main-grid { grid-template-columns: 1fr; }
             .lifecycle { flex-wrap: nowrap; }
         }
@@ -320,7 +327,7 @@
             <div class="panel">
                 <div class="panel-title">
                     <span>Experiments</span>
-                    <span class="panel-badge" id="expCount">3 runs</span>
+                    <span class="panel-badge" id="expCount">2 runs</span>
                 </div>
                 
                 <div id="experiments">
@@ -447,10 +454,11 @@
                 document.getElementById('versionBadge').textContent = versions.model;
             }
             
-            // Highlight updated item
+            const typeToId = { code: 'codeVersion', data: 'dataVersion', model: 'modelVersion' };
             const items = document.querySelectorAll('.version-item');
             items.forEach(item => item.classList.remove('updated'));
-            event.target.parentElement.querySelector('.version-item')?.classList.add('updated');
+            const targetEl = document.getElementById(typeToId[type]);
+            if (targetEl) targetEl.closest('.version-item').classList.add('updated');
             
             document.getElementById('insightText').textContent = 
                 `Updated ${type} version. All versions are tracked together for reproducibility.`;
@@ -553,6 +561,10 @@
             document.querySelectorAll('.pipeline-step').forEach(s => {
                 s.classList.remove('active', 'done');
             });
+
+            const expContainer = document.getElementById('experiments');
+            const cards = expContainer.querySelectorAll('.experiment-card');
+            cards.forEach((card, i) => { if (i >= 2) card.remove(); });
             
             selectStage(0);
         }

@@ -21,18 +21,22 @@ A premium, asynchronous ML course for practitioners who want deep conceptual und
 
 ## Course Structure
 
-### Section 0: Welcome + How to Succeed
-### Section 1: The ML Map (Module 0)
-### Section 2: Data & Problem Framing (Modules 1-2)
-### Section 3: Core Supervised Learning (Modules 3-6)
-- Linear Regression, Logistic Regression, Decision Trees, Ensembles
-### Section 4: Evaluation & Debugging (Modules 7-8)
-### Section 5: Features & Regularization (Modules 9-10)
-### Section 6: Modern Representations (Modules 11-13)
-### Section 7: Deep Learning Concepts (Modules 14-15)
-### Section 8: Agentic AI Systems (Modules 16-19)
-### Section 9: Shipping ML & Agents (Modules 20-21)
-### Section 10: Capstone
+### Foundation (Modules 0-2)
+ML Map, Problem Framing, Data Leakage
+### Supervised Learning (Modules 3-6)
+Linear Regression, Logistic Regression, Decision Trees, Ensembles
+### Optimization & Evaluation (Modules 7-11)
+Gradient Descent, Regression Metrics, Classification Metrics, Feature Engineering, Regularization
+### Representations (Modules 12-14)
+Embeddings, Clustering, Retrieval
+### Deep Learning (Modules 15-16)
+Neural Networks, Transformers
+### Agentic AI (Modules 17-20)
+LLM Fundamentals, Tool Calling, Agent Memory, Guardrails
+### Production (Modules 21-22)
+MLOps, Monitoring & Drift Detection
+### Capstone
+End-to-end portfolio project
 
 ## Folder Structure
 

@@ -43,6 +43,19 @@ Problem → Data → Features → Split → Train → Evaluate → Deploy
 - **Granularity:** Per-user? Per-transaction? Per-day?
 - **Error costs:** Is a false positive or false negative worse?
 
+### StreamCart Example
+
+The retention team wants to "predict churn." Here's how to make that concrete:
+
+| Question | Answer |
+|----------|--------|
+| **Target** | Binary: 1 if no orders in next 30 days, 0 otherwise |
+| **Timing** | Score on the 1st of each month, act within 7 days |
+| **Granularity** | Per-customer (not per-subscription) |
+| **Costs** | FP = $5 wasted call, FN = $200 lost customer |
+
+With these answers, the model problem is: *Predict P(no_orders_next_30d) for each customer on the 1st of the month.*
+
 ### What Breaks
 
 | Mistake | Example | Consequence |
@@ -69,6 +82,17 @@ If you can't answer this, your problem isn't well-defined.
 - **Enough samples:** Statistical power for the patterns
 - **Representative data:** Matches production distribution
 
+### StreamCart Example
+
+For the churn model, we need data as of the 1st of each month:
+
+| What We Need | StreamCart Source | Watch Out For |
+|--------------|-------------------|---------------|
+| **Features** | `tenure_months`, `orders_total`, `logins_last_30d`, `support_tickets` | All computed as of prediction date |
+| **Labels** | 1 if `next_order_date` is NULL or >30 days later | Requires future data to create (that's OK for labels) |
+| **Volume** | 5,000 customers × 12 months = 60K rows | Need ~500 churners minimum |
+| **Representativeness** | Include all customer segments | Don't exclude new customers |
+
 ### What Breaks
 
 | Mistake | Example | Consequence |
@@ -92,6 +116,25 @@ If you can't answer this, your problem isn't well-defined.
 - **Aggregations:** Counts, sums, averages
 - **Recency features:** Days since last X
 - **Derived features:** Ratios, differences
+
+### StreamCart Example
+
+Features for the churn model, computed as of prediction date:
+
+```python
+# Safe features (available at prediction time)
+features = {
+    'tenure_months': (prediction_date - signup_date).days / 30,
+    'orders_last_90d': count_orders(before=prediction_date, window=90),
+    'days_since_last_order': (prediction_date - last_order_date).days,
+    'avg_order_value': total_spend / orders_total,
+    'support_tickets_30d': count_tickets(before=prediction_date, window=30),
+}
+
+# LEAKY (DO NOT USE)
+# 'lifetime_value': total_spend  # Includes future purchases!
+# 'will_use_coupon': used_coupon  # That's the outcome!
+```
 
 ### What Breaks
 
@@ -117,6 +160,20 @@ If you can't answer this, your problem isn't well-defined.
 - **Random** only for cross-sectional snapshots
 - **Stratified** to maintain class balance
 
+### StreamCart Example
+
+Our churn predictions have a time component (predict Jan 1 → observe Jan 31):
+
+```python
+# TIME-BASED SPLIT (correct for StreamCart)
+train = df[df['prediction_date'] < '2025-07-01']  # Jan-Jun
+val   = df[df['prediction_date'] == '2025-07-01']  # Jul
+test  = df[df['prediction_date'] == '2025-08-01']  # Aug
+
+# WRONG: Random split would mix July predictions into training
+# Then the model "sees" patterns from the future
+```
+
 ### What Breaks
 
 | Mistake | Example | Consequence |
@@ -139,6 +196,19 @@ If you can't answer this, your problem isn't well-defined.
 - Choose algorithm based on problem type
 - Tune hyperparameters on validation set
 - Use cross-validation for robust estimates
+
+### StreamCart Example
+
+Baseline progression for churn:
+
+| Model | AUC | Notes |
+|-------|-----|-------|
+| **Random** | 0.50 | Coin flip |
+| **Heuristic:** no orders in 60d | 0.68 | Free, no ML |
+| **Logistic regression** | 0.72 | Simple, interpretable |
+| **LightGBM** | 0.78 | More complex, +0.06 over simple |
+
+If LightGBM only gets 0.72, something's wrong. If it gets 0.98, something's *also* wrong (likely leakage).
 
 ### What Breaks
 
@@ -164,6 +234,19 @@ If you can't answer this, your problem isn't well-defined.
 - **Sliced metrics:** Performance by segment
 - **Calibration:** Probability accuracy
 
+### StreamCart Example
+
+The retention team can call 200 customers/month. What metric matters?
+
+| Metric | Value | Business Translation |
+|--------|-------|---------------------|
+| **AUC** | 0.78 | Overall ranking quality |
+| **Precision@200** | 0.42 | 84 of 200 called will actually churn |
+| **Lift@200** | 4.2x | 4x better than random calling |
+| **Expected value** | $14,280/mo | (84 saves × $200) - (200 calls × $5) |
+
+Precision@200 and expected value are what the business cares about.
+
 ### What Breaks
 
 | Mistake | Example | Consequence |
@@ -187,6 +270,25 @@ If you can't answer this, your problem isn't well-defined.
 - Build inference pipeline
 - Set up monitoring
 - Plan for retraining
+
+### StreamCart Example
+
+Deploying the churn model:
+
+```python
+# Threshold: Pick top 200 customers (capacity-constrained)
+threshold = sorted_scores[200]  # ~0.35 for this model
+
+# Monitoring
+alerts = {
+    'score_drift': mean_score > 0.30,  # Was 0.20 in training
+    'precision_drop': precision_last_month < 0.35,  # Was 0.42
+    'feature_drift': any(feature_psi > 0.2),
+}
+
+# Retraining trigger
+retrain_monthly = True  # Or when alerts fire
+```
 
 ### What Breaks
 
@@ -250,9 +352,18 @@ Open the **Interactive Playground** (`playground_ml_pipeline.html`):
 
 ---
 
+## Debug Drill
+
+Complete `drill_01_pipeline_leakage.ipynb` to find a hidden preprocessing bug.
+
+**Scenario:** A colleague's model gets 97% AUC. That's suspiciously high. Find where in the pipeline the bug lives.
+
+---
+
 ## Done Checklist
 
 - [ ] Explored the ML Pipeline playground
 - [ ] Tried all failure scenarios
+- [ ] Completed the debug drill notebook
 - [ ] Understand where most bugs occur
 - [ ] Know the self-check questions for each stage

@@ -97,12 +97,13 @@ Every concept includes scripts for explaining it to non-technical stakeholders:
 
 | Section | Modules | Focus |
 |---------|---------|-------|
-| Foundation | 1-2 | Problem framing, data leakage, baselines |
+| Foundation | 0-2 | ML map, problem framing, data leakage |
 | Supervised Learning | 3-6 | Regression, classification, trees, ensembles |
-| Evaluation | 7-8 | Metrics, thresholds, error analysis |
-| Advanced | 9-12 | Embeddings, clustering, transformers |
-| Agentic AI | 13-17 | Tool use, RAG, guardrails, evaluation |
-| Deployment | 18-21 | MLOps, monitoring, responsible AI |
+| Optimization & Evaluation | 7-11 | Gradient descent, metrics, features, regularization |
+| Representations | 12-14 | Embeddings, clustering, retrieval |
+| Deep Learning | 15-16 | Neural networks, transformers |
+| Agentic AI | 17-20 | Prompting, tool calling, agents, guardrails |
+| Production | 21-22 | MLOps, monitoring, drift detection |
 | Capstone | Project | End-to-end system |
 
 ---

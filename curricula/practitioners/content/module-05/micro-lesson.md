@@ -46,6 +46,24 @@ At each split, the tree asks: "Which question maximally separates the classes?"
 - Gini = 0: Pure (all one class)
 - Gini = 0.5: Maximum mix (50/50)
 
+**Worked Example:**
+
+```
+Node with 100 customers: 30 churned, 70 retained
+
+Gini = 1 - (p_churn² + p_retained²)
+     = 1 - (0.30² + 0.70²)
+     = 1 - (0.09 + 0.49)
+     = 0.42  ← moderately mixed
+
+Split on "tenure < 30 days":
+  Left child (60 customers):  25 churned, 35 retained → Gini = 1 - (0.42² + 0.58²) = 0.49
+  Right child (40 customers): 5 churned, 35 retained  → Gini = 1 - (0.125² + 0.875²) = 0.22
+
+Weighted Gini after split = (60/100) × 0.49 + (40/100) × 0.22 = 0.38
+Information Gain = 0.42 - 0.38 = 0.04 ← This split helps!
+```
+
 The tree greedily picks splits that minimize weighted Gini in the children.
 
 ### 4. The Memorization Trap

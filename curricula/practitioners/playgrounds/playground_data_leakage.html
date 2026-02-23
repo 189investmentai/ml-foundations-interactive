@@ -5,27 +5,123 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Leakage Playground</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             background: #f8fafc;
             color: #1e293b;
             line-height: 1.6;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 24px;
         }
 
         header {
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
             margin-bottom: 24px;
         }
-        h1 { font-size: 1.6rem; color: #0f172a; margin-bottom: 8px; }
-        .subtitle { color: #64748b; font-size: 0.9rem; }
+
+        h1 {
+            font-size: 1.5rem;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .header-subtitle {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .reset-btn {
+            background: white;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .reset-btn:hover {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .start-banner {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border-radius: 16px;
+            padding: 24px 32px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .start-banner-icon {
+            font-size: 2.5rem;
+            flex-shrink: 0;
+        }
+
+        .start-banner-content h2 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .start-banner-content p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 12px;
+        }
+
+        .start-banner-steps {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .start-step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .step-num {
+            background: rgba(255,255,255,0.2);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .scenarios {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            flex-wrap: wrap;
+        }
 
         /* Timeline */
         .timeline-container {
@@ -326,17 +422,10 @@
         .warning-box.success { background: #dcfce7; border: 1px solid #86efac; color: #166534; }
         .warning-box.info { background: #e0f2fe; border: 1px solid #7dd3fc; color: #0369a1; }
 
-        /* Scenarios */
-        .scenarios {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-bottom: 16px;
-        }
         .scenario-btn {
-            padding: 10px 20px;
+            padding: 8px 16px;
             border: 2px solid #e2e8f0;
-            border-radius: 8px;
+            border-radius: 16px;
             background: white;
             cursor: pointer;
             font-size: 0.85rem;
@@ -357,6 +446,8 @@
         .explanation-text { font-size: 0.9rem; color: #78350f; }
 
         @media (max-width: 768px) {
+            .start-banner { flex-direction: column; text-align: center; padding: 20px; }
+            .start-banner-steps { justify-content: center; }
             .sim-controls { grid-template-columns: 1fr; }
             .controls { grid-template-columns: 1fr; }
             .metrics-row { grid-template-columns: 1fr 1fr; }
@@ -368,9 +459,25 @@
 <body>
     <div class="container">
         <header>
-            <h1>🚿 Data Leakage Playground</h1>
-            <p class="subtitle">See how using future information destroys your model's validity</p>
+            <div>
+                <h1>Data Leakage Playground</h1>
+                <span class="header-subtitle">See how using future information destroys your model's validity</span>
+            </div>
+            <button class="reset-btn" onclick="resetPlayground()">↻ Reset</button>
         </header>
+
+        <div class="start-banner">
+            <div class="start-banner-icon">🚿</div>
+            <div class="start-banner-content">
+                <h2>Explore how data leakage breaks ML models</h2>
+                <p>Choose a scenario below and drag the timeline to see how future information sneaks into training data.</p>
+                <div class="start-banner-steps">
+                    <div class="start-step"><span class="step-num">1</span> Pick a scenario</div>
+                    <div class="start-step"><span class="step-num">2</span> Drag the timeline</div>
+                    <div class="start-step"><span class="step-num">3</span> Watch metrics change</div>
+                </div>
+            </div>
+        </div>
 
         <div class="scenarios">
             <button class="scenario-btn active" data-scenario="clean" onclick="loadScenario('clean', this)">✅ No Leakage</button>
@@ -990,6 +1097,16 @@
                 stopTimelinePlayback();
                 updatePredictionFromPointer(event);
             });
+        }
+
+        function resetPlayground() {
+            splitMethod = 'random';
+            productionMode = 'freeze';
+            document.querySelectorAll('.split-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.split-btn[data-split="random"]').classList.add('active');
+            document.querySelectorAll('.prod-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.prod-btn[data-prod="freeze"]').classList.add('active');
+            loadScenario('clean');
         }
 
         function loadScenario(name, buttonEl = null) {

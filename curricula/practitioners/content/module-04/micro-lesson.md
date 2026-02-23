@@ -30,9 +30,24 @@ Logistic regression is the starting point for classification.
 Linear regression outputs any number (-∞ to +∞). But for classification, we need probabilities (0 to 1).
 
 **The sigmoid function** squashes any number into the 0-1 range:
-- Very negative inputs → probability near 0
-- Very positive inputs → probability near 1
-- Zero input → probability = 0.5
+
+```
+                    Sigmoid: σ(z) = 1 / (1 + e^(-z))
+                    
+        1.0 |                          ●●●●●●●●●●●
+            |                      ●●●
+            |                   ●●
+        0.5 |                 ●         ← z=0 → P=0.5
+            |               ●●
+            |            ●●●
+        0.0 |●●●●●●●●●●●●
+            +------|---------|---------|---------|---→ z
+                  -4        -2         0         2         4
+                  
+    z << 0: P ≈ 0 (certain no churn)
+    z >> 0: P ≈ 1 (certain churn)
+    z = 0:  P = 0.5 (uncertain)
+```
 
 Think of it as a "certainty dial" — the more evidence for churn, the higher the probability.
 

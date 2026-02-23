@@ -1,0 +1,16 @@
+{
+  "name": "deeper",
+  "timestamp": "2026-02-23T07:42:30.723558",
+  "params": {
+    "name": "deeper",
+    "n_estimators": 100,
+    "max_depth": 5
+  },
+  "metrics": {
+    "auc": 0.6323809523809524,
+    "precision": 0.4,
+    "recall": 0.11428571428571428
+  },
+  "data_hash": "e423dfee",
+  "notes": ""
+}

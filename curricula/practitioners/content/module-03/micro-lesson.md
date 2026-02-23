@@ -55,6 +55,15 @@ The linear regression equation looks like:
 y = β₀ + β₁x₁ + β₂x₂ + ... + ε
 ```
 
+**Visual breakdown:**
+
+```
+predicted_spend = $150 + ($12.50 × tenure_months) + ($0.80 × logins) + ($45 × orders)
+                   ↑         ↑                        ↑                  ↑
+               Intercept   Each month              Each login        Each order
+               (baseline)  adds $12.50             adds $0.80        adds $45
+```
+
 Each **coefficient (β)** is a multiplier that answers: "For every 1-unit increase in this feature, how much does the prediction change?"
 
 Example:

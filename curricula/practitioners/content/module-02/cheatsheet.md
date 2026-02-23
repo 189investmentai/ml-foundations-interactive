@@ -2,7 +2,7 @@
 
 ## What Is It?
 
-**Data leakage** = Using future information to predict the past.
+**Data leakage** = Using future information to predict the future.
 
 Your model "knows the answer" during training but won't have that info in production.
 

@@ -70,8 +70,8 @@ model = Lasso(alpha=lasso_cv.alpha_)
 
 | Flag | Cause | Fix |
 |------|-------|-----|
-| Train >> Test error | Underfitting | Increase λ |
-| Train << Test error | Overfitting | Decrease λ |
+| Train >> Test error | Underfitting | Decrease λ |
+| Train << Test error | Overfitting | Increase λ |
 | Random feature selection | L1 + correlated features | Use L2 or Elastic Net |
 | Different feature importances | Unscaled data | Scale first |
 

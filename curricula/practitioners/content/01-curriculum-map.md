@@ -4,8 +4,8 @@
 
 | Module | Title | Playground | Key Skills |
 |--------|-------|------------|------------|
-| 0 | The ML Map | `playground_ml_pipeline.html` | Workflow stages, failure points |
-| 1 | Problem Framing | `playground_baselines.html` | Targets, baselines, cost of errors |
+| 0 | Welcome & Setup | *(none)* | Course overview, learning approach |
+| 1 | The ML Map | `playground_ml_pipeline.html` | Workflow stages, failure points |
 | 2 | Data Leakage | `playground_data_leakage.html` | Train/test splits, temporal leakage |
 | 3 | Linear Regression | `playground_linear_regression.html` | Coefficients, residuals, R² |
 | 4 | Logistic Regression | `playground_logistic_regression.html` | Sigmoid, thresholds, decision boundaries |
@@ -14,7 +14,7 @@
 | 7 | **Optimization** | `playground_gradient_descent.html` | **SGD, momentum, Adam, learning rate** |
 | 8 | Regression Metrics | `playground_regression_metrics.html` | MAE, RMSE, residual analysis |
 | 9 | Classification Metrics | `playground_classification_metrics.html` | Precision, recall, ROC, PR curves |
-| 10 | Feature Engineering | `playground_features.html` | Transformations, interactions |
+| 10 | Feature Engineering | `playground_feature_engineering.html` | Transformations, interactions |
 | 11 | Regularization | `playground_regularization.html` | L1, L2, early stopping |
 | 12 | Embeddings | `playground_embeddings.html` | Similarity, nearest neighbors |
 | 13 | Clustering | `playground_clustering.html` | K-means, silhouette, elbow |
@@ -23,7 +23,7 @@
 | 16 | Transformers | `playground_attention.html` | Attention, context windows |
 | 17 | LLM Fundamentals | `playground_prompting.html` | Prompting, RAG basics |
 | 18 | Tool Calling | `playground_tool_calling.html` | Function execution, traces |
-| 19 | Agent Memory | `playground_memory.html` | Context, planning |
+| 19 | Agent Memory | `playground_agent_memory.html` | Context, planning |
 | 20 | Guardrails | `playground_guardrails.html` | Validation, safety, eval |
 | 21 | MLOps | `playground_mlops.html` | Versioning, reproducibility |
 | 22 | Monitoring | `playground_drift.html` | Drift detection, alerts |
@@ -31,9 +31,9 @@
 ## Learning Dependencies
 
 ```
-Module 0 (ML Map)
+Module 0 (Welcome)
     ↓
-Modules 1-2 (Problem Framing, Leakage)
+Modules 1-2 (ML Map, Leakage)
     ↓
 Modules 3-6 (Supervised Learning)
     ↓
@@ -99,5 +99,8 @@ Intuition for neural networks and transformers.
 ### Checkpoint 6: Agentic AI (Modules 17-20)
 Can build and evaluate tool-using agents.
 
-### Checkpoint 7: Capstone
+### Checkpoint 7: Production (Modules 21-22)
+Understands MLOps and production monitoring.
+
+### Checkpoint 8: Capstone
 Portfolio-ready project combining all skills.

@@ -2,7 +2,7 @@
 
 **Estimated Time:** 8-12 hours (can be spread across multiple sessions)
 
-**Prerequisites:** Completion of Modules 0-20
+**Prerequisites:** Completion of Modules 0-22
 
 ---
 

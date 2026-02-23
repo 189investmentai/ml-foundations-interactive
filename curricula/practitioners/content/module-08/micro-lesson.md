@@ -25,7 +25,7 @@ Different metrics answer different questions.
 
 **MAE (Mean Absolute Error):** A ruler measuring average distance
 - Every dollar of error counts equally
-- Miss by $10 or $10 → both cost $10 of error
+- Miss by $10 or $100 → both cost the same per dollar of error
 
 **MSE/RMSE (Mean Squared Error / Root MSE):** A penalty system
 - Big errors are penalized more

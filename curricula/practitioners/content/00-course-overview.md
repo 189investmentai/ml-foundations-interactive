@@ -1,5 +1,19 @@
 # ML for Practitioners: Course Overview
 
+## The Real Problem
+
+You've shipped ML models to production. Some worked. Some didn't. And when they failed, you weren't sure why.
+
+Was it the data? The features? The evaluation? Something else?
+
+**This uncertainty is expensive.** It leads to wasted sprints, missed deadlines, and the creeping fear that you're building on shaky foundations.
+
+This course exists because most ML problems aren't algorithm problems — they're pipeline problems. And debugging a pipeline requires understanding how the pieces fit together, where the boundaries leak, and what "good" actually looks like at each stage.
+
+**You'll learn to build ML systems you can trust — and debug the ones you can't.**
+
+---
+
 ## The Promise
 
 After completing this course, you will:
@@ -54,20 +68,56 @@ Build your mental map of ML and understand how things break.
 ### Core Supervised Learning (Modules 3-6)
 Master regression, classification, trees, and ensembles.
 
-### Evaluation & Features (Modules 7-10)
-Learn to debug models and engineer predictive features.
+### Optimization & Evaluation (Modules 7-11)
+Learn how models learn and how to evaluate and tune them systematically.
 
-### Modern ML (Modules 11-15)
-Understand embeddings, retrieval, and deep learning intuition.
+### Representations (Modules 12-14)
+Understand embeddings, retrieval, and modern ML beyond tabular data.
 
-### Agentic AI (Modules 16-19)
+### Deep Learning (Modules 15-16)
+Build intuition for neural networks and transformers.
+
+### Agentic AI (Modules 17-20)
 Build and evaluate tool-using agents with guardrails.
 
-### Production (Modules 20-21)
-Ship ML systems with monitoring and evaluation harnesses.
+### Production (Modules 21-22)
+Ship ML systems with MLOps, monitoring, and drift detection.
 
 ### Capstone
 Combine everything into a portfolio project.
+
+## Why This Order?
+
+The modules build on each other deliberately:
+
+1. **Foundation first (0-2):** You can't debug what you don't understand. The pipeline map and leakage concepts inform everything else.
+
+2. **Classic ML before deep learning (3-11):** Linear models teach you coefficients, trees teach you feature importance, ensembles teach you tradeoffs. These intuitions transfer to neural networks.
+
+3. **Evaluation before deployment (7-11):** Knowing *how* to measure lets you know *what* to optimize. Many production failures trace back to wrong metrics chosen early.
+
+4. **Representations before generation (12-16):** Embeddings and retrieval are the backbone of modern AI systems. Understanding similarity search makes RAG and agents click.
+
+5. **Agents after fundamentals (17-20):** Tool calling and guardrails make sense once you understand how models fail and how to evaluate them.
+
+6. **Production last (21-22):** MLOps patterns depend on understanding what you're monitoring and why.
+
+**Skip at your own risk:** Later modules assume you've internalized earlier concepts.
+
+## The Capstone Preview
+
+You'll build a **StreamCart AI Assistant** — an end-to-end ML system that:
+
+| Component | What You'll Build | Modules Used |
+|-----------|-------------------|--------------|
+| **Churn Prediction** | Model that identifies at-risk customers | 3-6, 8-11 |
+| **Knowledge Base** | Semantic search over support articles | 12-14 |
+| **Response Generation** | RAG pipeline with LLM | 15-17 |
+| **Guardrails** | Safety checks and human review triggers | 18-20 |
+
+The result: A portfolio-ready project demonstrating supervised learning, embeddings, retrieval, LLM integration, and production safety — all working together.
+
+**Estimated time:** 8-12 hours across multiple sessions.
 
 ## Time Commitment
 
