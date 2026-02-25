@@ -471,7 +471,7 @@
                         <div class="leakage-warning-icon">⚠️</div>
                         <div class="leakage-warning-text">
                             <strong>Data Leakage Detected!</strong> The "leaky" feature contains future information. 
-                            Notice how train AUC is nearly perfect but test AUC drops — the model learned a shortcut that doesn't generalize.
+                            Notice how train AUC is nearly perfect but test AUC drops - the model learned a shortcut that doesn't generalize.
                         </div>
                     </div>
 
@@ -734,7 +734,7 @@
             } else if (trans === 'log' && dist === 'skewed') {
                 insight = `Log transform reduced skewness from ${origSkew.toFixed(1)} to ${transSkew.toFixed(1)}. Great for right-skewed data like income or counts.`;
             } else if (trans === 'log') {
-                insight = `Log transform changed skewness from ${origSkew.toFixed(2)} to ${transSkew.toFixed(2)}. Most effective on right-skewed distributions — try "Right-Skewed" to see the big difference.`;
+                insight = `Log transform changed skewness from ${origSkew.toFixed(2)} to ${transSkew.toFixed(2)}. Most effective on right-skewed distributions - try "Right-Skewed" to see the big difference.`;
             } else if (trans === 'standardize') {
                 insight = 'Standardization centers data at mean=0, std=1. Essential for distance-based models (KNN, SVM) and neural networks. Does not change the shape.';
             } else if (trans === 'minmax') {
@@ -878,7 +878,7 @@
                 document.getElementById('leakageInsight').textContent = 'No features selected. Add features to train a model.';
             } else {
                 document.getElementById('leakageInsight').textContent = 
-                    'Valid features only. Train and test AUC are similar — the model generalizes well.';
+                    'Valid features only. Train and test AUC are similar - the model generalizes well.';
             }
         }
 

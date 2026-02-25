@@ -595,9 +595,9 @@
             } else if (token.toLowerCase() === 'bank') {
                 insight = `"Bank" is ambiguous. Notice how attention to "river" vs "money" would change meaning.`;
             } else if (maxIdx === selectedToken) {
-                insight = `"${token}" attends mostly to itself — common for content words.`;
+                insight = `"${token}" attends mostly to itself - common for content words.`;
             } else {
-                insight = `"${token}" attends most strongly to "${maxToken}" — these words are likely related in meaning or structure.`;
+                insight = `"${token}" attends most strongly to "${maxToken}" - these words are likely related in meaning or structure.`;
             }
             
             document.getElementById('insightText').textContent = insight;

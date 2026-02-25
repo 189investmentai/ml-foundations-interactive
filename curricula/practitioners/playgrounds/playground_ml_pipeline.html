@@ -277,7 +277,7 @@
         <header>
             <div>
                 <h1>ML Pipeline Playground</h1>
-                <div class="header-subtitle">Explore the standard ML workflow — click stages and scenarios to see what happens and what breaks</div>
+                <div class="header-subtitle">Explore the standard ML workflow - click stages and scenarios to see what happens and what breaks</div>
             </div>
             <button class="reset-btn" onclick="resetAll()">Reset</button>
         </header>
@@ -391,7 +391,7 @@
                         <li><strong>Target:</strong> Define the exact outcome variable</li>
                         <li><strong>Timing:</strong> When do you need the prediction?</li>
                         <li><strong>Granularity:</strong> User-level? Transaction-level? Daily?</li>
-                        <li><strong>Cost of errors:</strong> FP vs FN — which hurts more?</li>
+                        <li><strong>Cost of errors:</strong> FP vs FN - which hurts more?</li>
                     </ul>
                     <div class="highlight-box">
                         <strong>Key Question:</strong> "If the model is perfect, what decision would change?"
@@ -509,7 +509,7 @@
                     </div>
                 `,
                 stageDetail: {
-                    problem: '<p><strong>✅ Well-defined target.</strong> "Will this subscriber churn in the next 30 days?" — clear, actionable, time-bounded. FP/FN costs identified.</p>',
+                    problem: '<p><strong>✅ Well-defined target.</strong> "Will this subscriber churn in the next 30 days?" - clear, actionable, time-bounded. FP/FN costs identified.</p>',
                     data: '<p><strong>✅ Clean data.</strong> Labels verified against cancellation events. Feature timestamps confirmed available at prediction time. No survivorship bias.</p>',
                     features: '<p><strong>✅ No leakage.</strong> All features use data strictly before the prediction date. Aggregations use proper lookback windows.</p>',
                     split: '<p><strong>✅ Time-based split.</strong> Train on months 1–6, validate on month 7, test on month 8. Mirrors production deployment.</p>',
@@ -534,11 +534,11 @@
                     </div>
                 `,
                 stageDetail: {
-                    problem: '<p>✅ Problem framing is fine here. The target is well-defined — leakage enters downstream.</p>',
-                    data: '<p>✅ Raw data is correct. The issue isn't the data itself — it's how features get computed from it.</p>',
+                    problem: '<p>✅ Problem framing is fine here. The target is well-defined - leakage enters downstream.</p>',
+                    data: '<p>✅ Raw data is correct. The issue isn't the data itself - it's how features get computed from it.</p>',
                     features: '<p><strong>🔴 BUG HERE.</strong> A feature like <code>days_until_cancellation</code> or <code>total_future_orders</code> uses information from after the prediction point. The model effectively "sees the answer" hidden in a feature.</p><div class="highlight-box error">Ask for every feature: "At the moment I make this prediction, would this value be known?"</div>',
-                    split: '<p><strong>🔴 CONTAMINATED.</strong> Even though train/test are separated, the leaked feature exists in both sets. The split can\'t save you — the damage is in the features. Sometimes leakage also comes from fitting scalers on the full dataset before splitting.</p>',
-                    train: '<p>⚠️ Training succeeds — suspiciously well. The model latches onto the leaked feature because it's the strongest predictor. Everything looks perfect on paper.</p>',
+                    split: '<p><strong>🔴 CONTAMINATED.</strong> Even though train/test are separated, the leaked feature exists in both sets. The split can\'t save you - the damage is in the features. Sometimes leakage also comes from fitting scalers on the full dataset before splitting.</p>',
+                    train: '<p>⚠️ Training succeeds - suspiciously well. The model latches onto the leaked feature because it's the strongest predictor. Everything looks perfect on paper.</p>',
                     evaluate: '<p><strong>🔴 MISLEADING.</strong> Test metrics are 99%+ because the leaked feature is in the test set too. The evaluation gives false confidence. The model hasn't learned real patterns.</p>',
                     deploy: '<p><strong>🔴 CRASHES IN PRODUCTION.</strong> The leaked feature doesn't exist at prediction time. Model either errors out or performs at random. Stakeholders lose trust.</p>'
                 }
@@ -560,7 +560,7 @@
                 `,
                 stageDetail: {
                     problem: '<p><strong>🔴 ROOT CAUSE.</strong> The problem was framed as "maximize accuracy" without asking what decisions the model drives. With 5% churn rate, a model that always says "no churn" gets 95% accuracy and is completely useless.</p><div class="highlight-box error">Should have asked: "How many people can we call? What\'s the cost of a missed churner vs. wasted call?"</div>',
-                    data: '<p>✅ Data is fine. The bug isn't in the data — it's in what we're asking the model to optimize.</p>',
+                    data: '<p>✅ Data is fine. The bug isn't in the data - it's in what we're asking the model to optimize.</p>',
                     features: '<p>✅ Features are valid. No leakage. The features could support a useful model if the objective were right.</p>',
                     split: '<p>✅ Split is correct. Time-based, no contamination.</p>',
                     train: '<p>⚠️ Training succeeds, but the model learns to predict the majority class. It minimizes log-loss by outputting low probabilities for everyone, which maps to "no churn" at the default 0.5 threshold.</p>',
@@ -587,8 +587,8 @@
                     problem: '<p>✅ Problem is well-framed. Overfitting is a modeling issue, not a framing issue.</p>',
                     data: '<p>✅ Data is fine, though having more data would naturally help reduce overfitting.</p>',
                     features: '<p>⚠️ Features are valid, but too many features relative to sample size can contribute. Consider dimensionality reduction or feature selection.</p>',
-                    split: '<p>✅ Split is correct — and it's the split that reveals the problem. Without a held-out test set, you'd never know the model was overfitting.</p>',
-                    train: '<p><strong>🔴 ROOT CAUSE.</strong> Model is too complex: deep trees with no max_depth, no min_samples_leaf, no regularization. The model memorizes training noise — every quirk, every outlier gets its own decision path.</p><div class="highlight-box error">Train AUC: 0.99, Val AUC: 0.74. That 25-point gap is the red flag.</div>',
+                    split: '<p>✅ Split is correct - and it's the split that reveals the problem. Without a held-out test set, you'd never know the model was overfitting.</p>',
+                    train: '<p><strong>🔴 ROOT CAUSE.</strong> Model is too complex: deep trees with no max_depth, no min_samples_leaf, no regularization. The model memorizes training noise - every quirk, every outlier gets its own decision path.</p><div class="highlight-box error">Train AUC: 0.99, Val AUC: 0.74. That 25-point gap is the red flag.</div>',
                     evaluate: '<p><strong>🔴 BIG GAP.</strong> Test performance is far below training. The model doesn't generalize. If you only looked at training metrics, you'd think it was working.</p>',
                     deploy: '<p><strong>🔴 UNRELIABLE.</strong> Production performance matches test (poor), not train. Predictions are noisy and inconsistent. Worse than a simple baseline for many customer segments.</p>'
                 }
@@ -609,12 +609,12 @@
                     </div>
                 `,
                 stageDetail: {
-                    problem: '<p>✅ Problem framing was fine at training time. The definition of "churn" hasn't changed — but the underlying behavior has.</p>',
-                    data: '<p>✅ Training data was representative — of the world <em>at that time</em>. It's no longer representative of current customer behavior.</p>',
+                    problem: '<p>✅ Problem framing was fine at training time. The definition of "churn" hasn't changed - but the underlying behavior has.</p>',
+                    data: '<p>✅ Training data was representative - of the world <em>at that time</em>. It's no longer representative of current customer behavior.</p>',
                     features: '<p>⚠️ Feature distributions have shifted. Average order frequency dropped 40% after a pricing change. The model's learned thresholds no longer apply.</p>',
                     split: '<p>✅ Split was correct at training time. But the test set was also from the old distribution, so it couldn't warn about future drift.</p>',
-                    train: '<p>✅ Model was well-trained — for the data it had. It learned real patterns that were valid then.</p>',
-                    evaluate: '<p>✅ Offline evaluation was accurate — for that time window. The danger is trusting those numbers months later.</p>',
+                    train: '<p>✅ Model was well-trained - for the data it had. It learned real patterns that were valid then.</p>',
+                    evaluate: '<p>✅ Offline evaluation was accurate - for that time window. The danger is trusting those numbers months later.</p>',
                     deploy: '<p><strong>🔴 SILENT DEGRADATION.</strong> Precision dropped from 0.45 to 0.18 over 3 months. Without monitoring, nobody noticed. The retention team wasted budget on the wrong customers for weeks.</p><div class="highlight-box error">Prevention: Track prediction distribution weekly. Alert when mean score shifts >10%. Schedule re-training quarterly at minimum.</div>'
                 }
             }
@@ -655,10 +655,10 @@
 
             if (stageStatus === 'error') {
                 rightPanel.classList.add('highlight-error');
-                failureTitle.innerHTML = `🔴 ${scenario.name} — ${stageInfo[currentStage].title}`;
+                failureTitle.innerHTML = `🔴 ${scenario.name} - ${stageInfo[currentStage].title}`;
             } else if (stageStatus === 'success') {
                 rightPanel.classList.add('highlight-success');
-                failureTitle.innerHTML = `✅ ${scenario.name} — ${stageInfo[currentStage].title}`;
+                failureTitle.innerHTML = `✅ ${scenario.name} - ${stageInfo[currentStage].title}`;
             }
 
             failureContent.innerHTML = stageDetail || scenario.overview;
@@ -710,11 +710,11 @@
         const challenges = {
             leakage: {
                 question: "Which pipeline stages will turn RED? (Hint: Where does the bug originate, and where does it cascade?)",
-                answer: "Features (bug origin), Split (contaminated), Evaluate (misleading metrics), Deploy (crashes in production). The model training stage stays green because the bug isn't in the algorithm — it's in the data flowing into it."
+                answer: "Features (bug origin), Split (contaminated), Evaluate (misleading metrics), Deploy (crashes in production). The model training stage stays green because the bug isn't in the algorithm - it's in the data flowing into it."
             },
             wrong_metric: {
                 question: "The bug starts in Problem Framing. Which downstream stages will also turn RED?",
-                answer: "Evaluate (wrong metrics reported) and Deploy (no business impact). Notice that Data, Features, Split, and Train are all GREEN — the technical pipeline is fine, but we're optimizing for the wrong thing."
+                answer: "Evaluate (wrong metrics reported) and Deploy (no business impact). Notice that Data, Features, Split, and Train are all GREEN - the technical pipeline is fine, but we're optimizing for the wrong thing."
             },
             overfit: {
                 question: "Overfitting is a model complexity problem. Will any stages BEFORE training turn red?",
@@ -722,7 +722,7 @@
             },
             drift: {
                 question: "Data drift happens AFTER deployment. How many stages turn RED?",
-                answer: "Only ONE: Deploy. Everything else was correct at training time. This is why monitoring matters — the model was good when built, but the world changed."
+                answer: "Only ONE: Deploy. Everything else was correct at training time. This is why monitoring matters - the model was good when built, but the world changed."
             }
         };
 

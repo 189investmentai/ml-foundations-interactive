@@ -671,7 +671,7 @@
             const chat = document.getElementById('chatContainer');
             const systemMsg = document.createElement('div');
             systemMsg.className = 'message system';
-            systemMsg.textContent = `Context limit approaching — ${droppedCount} older messages summarized to free ${droppedTokens} tokens.`;
+            systemMsg.textContent = `Context limit approaching - ${droppedCount} older messages summarized to free ${droppedTokens} tokens.`;
 
             const firstChild = chat.querySelector('.message');
             if (firstChild) {
@@ -811,7 +811,7 @@
                     
                     if (isPlanComplete(plan)) {
                         document.getElementById('insightText').innerHTML =
-                            '<strong>Plan complete!</strong> All steps finished. The agent tracked progress across multiple turns — this is how multi-step tool-calling agents work in production.';
+                            '<strong>Plan complete!</strong> All steps finished. The agent tracked progress across multiple turns - this is how multi-step tool-calling agents work in production.';
                     } else if (!currentPlan || plan !== currentPlan) {
                         document.getElementById('insightText').textContent =
                             'Complex task detected! The agent breaks it into steps and tracks progress. Continue the conversation to see steps advance.';

@@ -770,11 +770,11 @@
             let insight = '';
             
             if (regType === 'none') {
-                insight = 'No regularization — model can overfit. Notice the gap between train and test error.';
+                insight = 'No regularization - model can overfit. Notice the gap between train and test error.';
             } else if (lambda < 0.01) {
                 insight = 'Very weak regularization. Model is almost unconstrained and may overfit.';
             } else if (lambda > 100) {
-                insight = 'Very strong regularization. All coefficients are shrunk toward zero — may underfit.';
+                insight = 'Very strong regularization. All coefficients are shrunk toward zero - may underfit.';
             } else if (regType === 'l1' && nonzero < nFeatures) {
                 insight = `L1 has zeroed out ${nFeatures - nonzero} coefficients. This is automatic feature selection!`;
             } else if (regType === 'l2') {

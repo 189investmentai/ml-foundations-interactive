@@ -401,7 +401,9 @@
                     <div class="chart-header">
                         <span class="chart-title">Tree Structure (Simplified View)</span>
                     </div>
-                    <canvas id="treeChart" height="180"></canvas>
+                    <div class="tree-scroll-wrapper" id="treeScrollWrapper">
+                        <canvas id="treeChart"></canvas>
+                    </div>
                 </div>
 
                 <div class="insight-bar">
@@ -838,32 +840,53 @@
         }
 
         function drawTreeStructure() {
-            const { width, height, ctx } = setupCanvas(treeCanvas);
-            ctx.clearRect(0, 0, width, height);
-            
-            if (!tree) return;
-            
+            if (!tree) {
+                const { width, height, ctx } = setupCanvas(treeCanvas);
+                ctx.clearRect(0, 0, width, height);
+                return;
+            }
+
             const nodeWidth = 80;
             const nodeHeight = 36;
             const levelHeight = 50;
-            
+            const padding = 20;
+            const depth = getActualDepth(tree);
+            const leaves = countLeaves(tree);
+
+            const neededWidth = Math.max(leaves * (nodeWidth + 16), 400);
+            const neededHeight = (depth + 1) * levelHeight + nodeHeight + padding * 2;
+
+            const wrapper = document.getElementById('treeScrollWrapper');
+            const displayWidth = Math.max(neededWidth, wrapper.clientWidth);
+            const displayHeight = Math.max(neededHeight, 180);
+
+            treeCanvas.style.width = displayWidth + 'px';
+            treeCanvas.style.height = displayHeight + 'px';
+            treeCanvas.width = displayWidth * dprCached;
+            treeCanvas.height = displayHeight * dprCached;
+
+            const ctx = treeCanvas.getContext('2d');
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dprCached, dprCached);
+            ctx.clearRect(0, 0, displayWidth, displayHeight);
+
             function drawNode(node, x, y, availableWidth) {
                 const boxX = x - nodeWidth/2;
                 const boxY = y;
-                
+
                 ctx.fillStyle = node.isLeaf ? (node.prediction === 1 ? '#fef2f2' : '#eff6ff') : '#f0fdf4';
                 ctx.strokeStyle = node.isLeaf ? (node.prediction === 1 ? '#ef4444' : '#3b82f6') : '#22c55e';
                 ctx.lineWidth = 2;
-                
+
                 ctx.beginPath();
                 ctx.roundRect(boxX, boxY, nodeWidth, nodeHeight, 6);
                 ctx.fill();
                 ctx.stroke();
-                
+
                 ctx.fillStyle = '#1e293b';
                 ctx.font = '10px -apple-system';
                 ctx.textAlign = 'center';
-                
+
                 if (node.isLeaf) {
                     ctx.fillText(node.prediction === 1 ? 'Class 1' : 'Class 0', x, y + 15);
                     ctx.fillStyle = '#64748b';
@@ -876,12 +899,12 @@
                     ctx.font = '9px -apple-system';
                     ctx.fillText(`gini=${node.gini.toFixed(2)}`, x, y + 28);
                 }
-                
+
                 if (!node.isLeaf && node.left && node.right) {
                     const childY = y + levelHeight;
                     const leftX = x - availableWidth/4;
                     const rightX = x + availableWidth/4;
-                    
+
                     ctx.strokeStyle = '#d1d5db';
                     ctx.lineWidth = 1;
                     ctx.beginPath();
@@ -890,21 +913,19 @@
                     ctx.moveTo(x, y + nodeHeight);
                     ctx.lineTo(rightX, childY);
                     ctx.stroke();
-                    
+
                     ctx.fillStyle = '#22c55e';
                     ctx.font = '9px -apple-system';
                     ctx.fillText('Yes', leftX + 10, childY - 8);
                     ctx.fillStyle = '#ef4444';
                     ctx.fillText('No', rightX - 10, childY - 8);
-                    
-                    if (childY + nodeHeight < height - 10) {
-                        drawNode(node.left, leftX, childY, availableWidth/2);
-                        drawNode(node.right, rightX, childY, availableWidth/2);
-                    }
+
+                    drawNode(node.left, leftX, childY, availableWidth/2);
+                    drawNode(node.right, rightX, childY, availableWidth/2);
                 }
             }
-            
-            drawNode(tree, width/2, 10, width);
+
+            drawNode(tree, displayWidth/2, padding, displayWidth - padding * 2);
         }
 
         // ============================================

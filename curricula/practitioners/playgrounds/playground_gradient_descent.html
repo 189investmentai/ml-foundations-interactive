@@ -609,7 +609,7 @@
                             <span class="control-value" id="lrValue">0.0500</span>
                         </div>
                         <input type="range" id="lrSlider" min="-3" max="0" step="0.1" value="-1.3">
-                        <div class="control-hint">Slider is 10<sup>x</sup> — small moves = big LR changes</div>
+                        <div class="control-hint">Slider is 10<sup>x</sup> - small moves = big LR changes</div>
                     </div>
                     <div class="control-group" id="momentumControl">
                         <div class="control-label">
@@ -726,7 +726,7 @@
                     </div>
                     <div class="help-item">
                         <span>🏔️</span>
-                        <span><strong>Ravine:</strong> Curvature differs across dimensions — causes oscillation. Momentum and Adam handle this well.</span>
+                        <span><strong>Ravine:</strong> Curvature differs across dimensions - causes oscillation. Momentum and Adam handle this well.</span>
                     </div>
                     <div class="help-item">
                         <span>🪑</span>
@@ -805,7 +805,7 @@
                 grad: (x, y) => ({ x: x, y: 20 * y }),
                 min: { x: 0, y: 0 },
                 name: 'narrow ravine',
-                lrHint: 'Sensitive — curvature differs 20× across axes. Try LR 0.001 – 0.01'
+                lrHint: 'Sensitive - curvature differs 20× across axes. Try LR 0.001 – 0.01'
             },
             saddle: {
                 fn: (x, y) => x * x - y * y + 0.1 * (x ** 4 + y ** 4),
@@ -832,7 +832,7 @@
                 },
                 min: { x: 0, y: 0 },
                 name: 'multiple minima',
-                lrHint: 'Multiple minima — result depends on start position'
+                lrHint: 'Multiple minima - result depends on start position'
             },
             rosenbrock: {
                 fn: (x, y) => (1 - x) ** 2 + 100 * (y - x * x) ** 2,
@@ -842,7 +842,7 @@
                 }),
                 min: { x: 1, y: 1 },
                 name: 'Rosenbrock banana',
-                lrHint: 'Very sensitive — try LR 0.0001 – 0.001'
+                lrHint: 'Very sensitive - try LR 0.0001 – 0.001'
             }
         };
 
@@ -1241,7 +1241,7 @@
             let insight = '';
             
             if (diverged || !isFinite(loss)) {
-                insight = '<strong>Diverged!</strong> Learning rate too high — the optimizer overshot the minimum and flew off. Try reducing LR.';
+                insight = '<strong>Diverged!</strong> Learning rate too high - the optimizer overshot the minimum and flew off. Try reducing LR.';
             } else if (stepCount > 0 && loss < 0.01 && distToMin < 0.1) {
                 if (compareMode) {
                     const loss2 = s.fn(pos2.x, pos2.y);
@@ -1257,12 +1257,12 @@
                 const recentChange = Math.abs(lossHistory[lossHistory.length - 1] - lossHistory[lossHistory.length - 10]);
                 if (!isNaN(recentChange) && recentChange < 0.001) {
                     if (surface === 'saddle') {
-                        insight = '<strong>Stuck near the saddle!</strong> Gradient is near zero but this is not a minimum. Adam\'s adaptive LR can escape — try switching.';
+                        insight = '<strong>Stuck near the saddle!</strong> Gradient is near zero but this is not a minimum. Adam\'s adaptive LR can escape - try switching.';
                     } else {
                         insight = '<strong>Plateau detected.</strong> Loss barely changing. Could be stuck at a saddle point or local minimum.';
                     }
                 } else {
-                    insight = `<strong>Descending...</strong> Current loss: ${loss.toFixed(4)}. ${optimizer === 'sgd' && surface === 'ravine' ? 'Notice the oscillation — momentum or Adam would smooth this.' : ''}`;
+                    insight = `<strong>Descending...</strong> Current loss: ${loss.toFixed(4)}. ${optimizer === 'sgd' && surface === 'ravine' ? 'Notice the oscillation - momentum or Adam would smooth this.' : ''}`;
                 }
             } else if (stepCount > 0) {
                 insight = `<strong>Step ${stepCount}:</strong> Loss = ${loss.toFixed(4)}. Distance to minimum: ${distToMin.toFixed(3)}`;
@@ -1536,7 +1536,7 @@
             saddle: {
                 surface: 'saddle', optimizer: 'sgd', lr: -1, start: 'near',
                 compare: true, optimizer2: 'adam',
-                hint: '<strong>Saddle point:</strong> Gradients vanish near the saddle — SGD crawls while Adam\'s adaptive LR escapes much faster.'
+                hint: '<strong>Saddle point:</strong> Gradients vanish near the saddle - SGD crawls while Adam\'s adaptive LR escapes much faster.'
             },
             ravine: {
                 surface: 'ravine', optimizer: 'sgd', lr: -1.5, start: 'topleft',

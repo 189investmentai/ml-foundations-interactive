@@ -593,7 +593,7 @@
                         const loss = -y * Math.log(output + 1e-7) - (1-y) * Math.log(1 - output + 1e-7);
                         totalLoss += loss;
                         
-                        // Backward — delta is a vector (one entry per neuron in current layer)
+                        // Backward - delta is a vector (one entry per neuron in current layer)
                         let delta = [output - y];
                         
                         for (let l = weights.length - 1; l >= 0; l--) {
