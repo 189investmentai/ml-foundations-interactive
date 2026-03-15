@@ -5,170 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Regularization Playground</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --accent: #f97316;
+            --accent-dim: rgba(249, 115, 22, 0.12);
         }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-        }
-
-        h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
-        .header-subtitle { font-size: 0.9rem; color: #64748b; }
-
-        .reset-btn {
-            background: white;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-        .reset-btn:hover { background: #f1f5f9; color: #475569; }
-
-        .start-banner {
-            background: linear-gradient(135deg, #f97316, #ea580c);
-            color: white;
-            border-radius: 16px;
-            padding: 24px 32px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-        .start-banner-icon { font-size: 2.5rem; flex-shrink: 0; }
-        .start-banner-content h2 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
-        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 12px; }
-        .start-banner-steps { display: flex; gap: 24px; flex-wrap: wrap; }
-        .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
-        .step-num {
-            background: rgba(255,255,255,0.2);
-            width: 24px; height: 24px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 600; font-size: 0.75rem;
-        }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 320px;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .charts-area { display: flex; flex-direction: column; gap: 12px; }
-
-        .chart-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .chart-card {
-            background: white;
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .chart-title { font-size: 0.75rem; font-weight: 600; color: #475569; }
-        .chart-badge {
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 10px;
-            background: #f1f5f9;
-            color: #64748b;
-        }
-
-        canvas { display: block; width: 100%; }
-
-        .sidebar { display: flex; flex-direction: column; gap: 12px; }
-
-        .sidebar-card {
-            background: white;
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .sidebar-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-        }
-
-        .control-group { margin-bottom: 12px; }
-        .control-group:last-child { margin-bottom: 0; }
-        .control-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #334155;
-            margin-bottom: 6px;
-        }
-        .control-value {
-            font-family: 'SF Mono', Monaco, monospace;
-            background: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            color: #f97316;
-        }
-
-        select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            background: white;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 5px;
-            border-radius: 3px;
-            background: #e2e8f0;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 14px; height: 14px;
-            border-radius: 50%;
-            background: #f97316;
-            cursor: pointer;
-        }
-
+    </style>
+    <link rel="stylesheet" href="playground-base.css">
+    <style>
         .coef-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -176,7 +19,7 @@
         }
         .coef-bar {
             height: 60px;
-            background: #e2e8f0;
+            background: var(--surface-hover);
             border-radius: 4px;
             position: relative;
             overflow: hidden;
@@ -189,73 +32,28 @@
             background: #0ea5e9;
             transition: height 0.3s;
         }
-        .coef-fill.negative { background: #ef4444; }
-        .coef-fill.zero { background: #94a3b8; }
+        .coef-fill.negative { background: var(--negative); }
+        .coef-fill.zero { background: var(--text-muted); }
         .coef-label {
             text-align: center;
             font-size: 0.6rem;
-            color: #64748b;
+            color: var(--text-muted);
             margin-top: 2px;
         }
         .coef-value {
             text-align: center;
             font-size: 0.65rem;
             font-weight: 600;
-            color: #1e293b;
+            color: var(--text-primary);
             font-family: 'SF Mono', Monaco, monospace;
         }
-
         .metrics-panel {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 8px;
         }
-        .metric-card {
-            padding: 10px;
-            background: #f8fafc;
-            border-radius: 6px;
-            text-align: center;
-        }
-        .metric-card.highlight {
-            background: #fff7ed;
-            border: 1px solid #fed7aa;
-        }
-        .metric-name {
-            font-size: 0.65rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-        }
-        .metric-value {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #ea580c;
-            font-family: 'SF Mono', Monaco, monospace;
-        }
-
-        .insight-bar {
-            background: linear-gradient(135deg, #fff7ed, #ffedd5);
-            border: 1px solid #fed7aa;
-            border-radius: 10px;
-            padding: 14px 16px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        .insight-icon { font-size: 1.2rem; }
-        .insight-content { flex: 1; }
-        .insight-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #c2410c;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-        .insight-text { font-size: 0.85rem; color: #9a3412; }
-
+        .metric-card.highlight .metric-value { color: var(--accent); }
         @media (max-width: 1000px) {
-            .start-banner { flex-direction: column; text-align: center; padding: 20px; }
-            .start-banner-steps { justify-content: center; }
             .main-grid { grid-template-columns: 1fr; }
             .chart-row { grid-template-columns: 1fr; }
         }
@@ -282,6 +80,15 @@
                     <div class="start-step"><span class="step-num">3</span> Find optimal λ</div>
                 </div>
             </div>
+        </div>
+
+        <div class="scenarios-bar">
+            <span class="scenarios-label">Scenarios:</span>
+            <button class="scenario-btn" onclick="loadRegPreset('overfit')">Overfit Baseline</button>
+            <button class="scenario-btn" onclick="loadRegPreset('l2')">L2 Sweet Spot</button>
+            <button class="scenario-btn" onclick="loadRegPreset('l1_sparse')">L1 Sparse</button>
+            <button class="scenario-btn" onclick="loadRegPreset('elastic')">Elastic Net</button>
+            <button class="scenario-btn" onclick="loadRegPreset('find_lambda')">Find Best Lambda</button>
         </div>
 
         <div class="main-grid">
@@ -401,6 +208,7 @@
         </div>
     </div>
 
+    <script src="playground-guided.js"></script>
     <script>
         const dpr = window.devicePixelRatio || 1;
         const nFeatures = 10;
@@ -525,7 +333,8 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
             
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
             
             const regType = document.getElementById('regType').value;
             const lambdas = [];
@@ -546,7 +355,7 @@
             const sx = i => pad.left + (i / (lambdas.length - 1)) * plotW;
             const sy = e => pad.top + (1 - (e - minError) / (maxError - minError)) * plotH;
             
-            ctx.strokeStyle = '#e2e8f0';
+            ctx.strokeStyle = '#3a3b3e';
             ctx.lineWidth = 1;
             for (let i = 0; i <= 4; i++) {
                 const y = pad.top + (i / 4) * plotH;
@@ -575,7 +384,7 @@
             
             const currentLambda = Math.pow(10, parseFloat(document.getElementById('lambdaSlider').value));
             const lambdaIdx = lambdas.findIndex(l => l >= currentLambda) || 0;
-            ctx.strokeStyle = '#1e293b';
+            ctx.strokeStyle = '#8b8d97';
             ctx.lineWidth = 1;
             ctx.setLineDash([5, 5]);
             ctx.beginPath();
@@ -584,7 +393,7 @@
             ctx.stroke();
             ctx.setLineDash([]);
             
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#5a5c66';
             ctx.font = '9px -apple-system';
             ctx.textAlign = 'center';
             ctx.fillText('λ (log scale)', width / 2, height - 5);
@@ -605,7 +414,8 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
             
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
             
             const regType = document.getElementById('regType').value;
             const paths = [];
@@ -625,7 +435,7 @@
             const sx = i => pad.left + (i / (paths[0].length - 1)) * plotW;
             const sy = c => pad.top + (1 - (c + maxCoef) / (2 * maxCoef)) * plotH;
             
-            ctx.strokeStyle = '#e2e8f0';
+            ctx.strokeStyle = '#3a3b3e';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(pad.left, sy(0));
@@ -646,7 +456,7 @@
             });
             
             const currentLambdaIdx = Math.floor((parseFloat(document.getElementById('lambdaSlider').value) + 3) / 0.3);
-            ctx.strokeStyle = '#1e293b';
+            ctx.strokeStyle = '#8b8d97';
             ctx.lineWidth = 1;
             ctx.setLineDash([5, 5]);
             ctx.beginPath();
@@ -655,7 +465,7 @@
             ctx.stroke();
             ctx.setLineDash([]);
             
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#8b8d97';
             ctx.font = '9px -apple-system';
             ctx.textAlign = 'center';
             ctx.fillText('λ →', width / 2, height - 5);
@@ -718,7 +528,8 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
             
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
             
             const y_pred = predict(X_test, currentCoefs);
             const allY = [...y_test, ...y_pred];
@@ -744,7 +555,7 @@
                 ctx.fill();
             }
             
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#8b8d97';
             ctx.font = '10px -apple-system';
             ctx.textAlign = 'center';
             ctx.fillText('Predicted', width / 2, height - 5);
@@ -815,6 +626,113 @@
             document.getElementById('trueFeatSlider').value = 5;
             updateAll();
         }
+
+        function loadRegPreset(name) {
+            const presets = {
+                overfit: { type: 'none', lambda: -3, noise: 0.8, trueFeatures: 3, samples: 30 },
+                l2: { type: 'l2', lambda: 0, noise: 0.5, trueFeatures: 5, samples: 100 },
+                l1_sparse: { type: 'l1', lambda: 0.3, noise: 0.5, trueFeatures: 3, samples: 100 },
+                elastic: { type: 'elastic', lambda: 0, noise: 0.5, trueFeatures: 5, samples: 100 },
+                find_lambda: { type: 'l2', lambda: -2, noise: 0.8, trueFeatures: 3, samples: 50 }
+            };
+            const p = presets[name];
+            if (!p) return;
+            const regSelect = document.getElementById('regType');
+            if (regSelect) regSelect.value = p.type;
+            const lambdaSlider = document.getElementById('lambdaSlider');
+            if (lambdaSlider) { lambdaSlider.value = p.lambda; }
+            document.getElementById('nSamplesSlider').value = p.samples;
+            document.getElementById('noiseSlider').value = p.noise;
+            document.getElementById('trueFeatSlider').value = p.trueFeatures;
+            if (typeof updateAll === 'function') updateAll();
+            else if (typeof update === 'function') update();
+        }
+
+        if (typeof PlaygroundGuided !== 'undefined') PlaygroundGuided.init({
+            key: 'regularization',
+            steps: [
+                {
+                    title: "Overfitting without regularization",
+                    context: "Set regularization to <strong>None</strong>, noise high, and few samples. The model fits training data perfectly but fails on test data.",
+                    question: "With no regularization and noisy data, the model will:",
+                    options: [
+                        { id: 'overfit', label: 'Overfit -- train error low, test error high' },
+                        { id: 'underfit', label: 'Underfit -- both errors high' },
+                        { id: 'fine', label: 'Perform well on both' }
+                    ],
+                    correctId: 'overfit',
+                    reveal: "Without regularization, the model fits the noise in training data. Coefficients grow large to chase every wiggle. The train-test gap is the hallmark of overfitting.",
+                    setup: {}
+                },
+                {
+                    title: "L2 (Ridge) shrinks all coefficients",
+                    context: "Switch to <strong>L2 (Ridge)</strong> and increase lambda. Watch the coefficient paths -- all coefficients shrink toward zero but never reach exactly zero.",
+                    question: "What does L2 regularization do to the coefficients?",
+                    options: [
+                        { id: 'shrink', label: 'Shrinks all coefficients proportionally toward zero' },
+                        { id: 'zero', label: 'Sets irrelevant coefficients exactly to zero' },
+                        { id: 'grow', label: 'Makes coefficients larger' }
+                    ],
+                    correctId: 'shrink',
+                    reveal: "L2 adds a penalty proportional to the <em>sum of squared</em> coefficients. This shrinks all coefficients but never forces them to exactly zero. It's best when you believe all features contribute somewhat.",
+                    setup: {}
+                },
+                {
+                    title: "L1 (Lasso) creates sparsity",
+                    context: "Switch to <strong>L1 (Lasso)</strong>. Increase lambda and watch coefficients. Some drop to exactly zero.",
+                    question: "What makes L1 different from L2?",
+                    options: [
+                        { id: 'sparse', label: 'L1 can force coefficients to exactly zero, performing feature selection' },
+                        { id: 'same', label: 'They produce identical results' },
+                        { id: 'bigger', label: 'L1 makes coefficients larger' }
+                    ],
+                    correctId: 'sparse',
+                    reveal: "The L1 penalty (sum of absolute values) has corners at zero, which means the optimization naturally lands on zero for weak features. L1 doubles as a <strong>feature selector</strong>: irrelevant features get zeroed out automatically.",
+                    setup: {}
+                },
+                {
+                    title: "Finding the right lambda",
+                    context: "Lambda controls the strength of regularization. Too low = overfitting. Too high = underfitting (all coefficients crushed to zero).",
+                    question: "How do you find the best lambda in practice?",
+                    options: [
+                        { id: 'cv', label: 'Cross-validation: try many lambda values, pick the one with lowest validation error' },
+                        { id: 'one', label: 'Always use lambda = 1.0' },
+                        { id: 'zero', label: 'Start with lambda = 0 and increase until train accuracy is 100%' }
+                    ],
+                    correctId: 'cv',
+                    reveal: "Cross-validation is the standard approach. Try a range of lambda values (often on a log scale: 0.001, 0.01, 0.1, 1, 10, 100), evaluate each on held-out folds, and pick the lambda that minimizes validation error.",
+                    setup: {}
+                }
+            ],
+            selfCheck: [
+                {
+                    prompt: "You're building a model with 200 features but suspect only 10 matter. Which regularization should you prefer?",
+                    options: [
+                        { id: 'a', label: 'L1 (Lasso) -- it will zero out the 190 irrelevant features' },
+                        { id: 'b', label: 'L2 (Ridge) -- it handles many features well' },
+                        { id: 'c', label: 'No regularization -- let the model figure it out' }
+                    ],
+                    correctId: 'a',
+                    explanation: "When you believe most features are irrelevant, L1 is the right choice because it performs automatic feature selection by zeroing out unimportant coefficients. L2 would shrink all 200 coefficients but keep them all non-zero."
+                },
+                {
+                    prompt: "Your Ridge regression has lambda=100 and both train and test errors are high. This is:",
+                    options: [
+                        { id: 'a', label: 'Overfitting -- reduce lambda' },
+                        { id: 'b', label: 'Underfitting -- lambda is too strong, crushing useful signal' },
+                        { id: 'c', label: 'Working correctly' }
+                    ],
+                    correctId: 'b',
+                    explanation: "When both train and test errors are high, the model is underfitting. A very large lambda crushes all coefficients toward zero, preventing the model from fitting even the real patterns in the data. Reduce lambda to let the model learn more."
+                }
+            ],
+            onStepEnter: function(idx, step) {
+                if (idx === 0) loadRegPreset('overfit');
+                else if (idx === 1) loadRegPreset('l2');
+                else if (idx === 2) loadRegPreset('l1_sparse');
+                else if (idx === 3) loadRegPreset('find_lambda');
+            }
+        });
 
         window.addEventListener('resize', updateAll);
         updateAll();

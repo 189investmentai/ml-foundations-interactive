@@ -5,267 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neural Networks Playground</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --accent: #f97316;
+            --accent-dim: rgba(249, 115, 22, 0.12);
         }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-        }
-
-        h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
-        .header-subtitle { font-size: 0.9rem; color: #64748b; }
-
-        .reset-btn {
-            background: white;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-        .reset-btn:hover { background: #f1f5f9; color: #475569; }
-
-        .start-banner {
-            background: linear-gradient(135deg, #f97316, #ea580c);
-            color: white;
-            border-radius: 16px;
-            padding: 24px 32px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-        .start-banner-icon { font-size: 2.5rem; flex-shrink: 0; }
-        .start-banner-content h2 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
-        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 12px; }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 300px 1fr 300px;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .sidebar { display: flex; flex-direction: column; gap: 12px; }
-
-        .sidebar-card {
-            background: white;
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .sidebar-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-        }
-
-        .control-group { margin-bottom: 12px; }
-        .control-group:last-child { margin-bottom: 0; }
-        .control-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #334155;
-            margin-bottom: 6px;
-        }
-        .control-value {
-            font-family: 'SF Mono', Monaco, monospace;
-            background: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            color: #f97316;
-        }
-
-        select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            background: white;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 5px;
-            border-radius: 3px;
-            background: #e2e8f0;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 14px; height: 14px;
-            border-radius: 50%;
-            background: #f97316;
-            cursor: pointer;
-        }
-
-        .btn {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-primary {
-            background: #f97316;
-            color: white;
-        }
-        .btn-primary:hover { background: #ea580c; }
-        .btn-secondary {
-            background: #e2e8f0;
-            color: #475569;
-        }
-        .btn-secondary:hover { background: #cbd5e1; }
-
-        .metrics-panel {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-        .metric-card {
-            padding: 10px;
-            background: #f8fafc;
-            border-radius: 6px;
-            text-align: center;
-        }
-        .metric-card.highlight {
-            background: #fff7ed;
-            border: 1px solid #fed7aa;
-        }
-        .metric-name {
-            font-size: 0.65rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-        }
-        .metric-value {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #ea580c;
-            font-family: 'SF Mono', Monaco, monospace;
-        }
-
-        .center-area {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .chart-card {
-            background: white;
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .chart-title { font-size: 0.75rem; font-weight: 600; color: #475569; }
-        .chart-badge {
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 10px;
-            background: #f1f5f9;
-            color: #64748b;
-        }
-
-        canvas { display: block; width: 100%; }
-
-        .network-viz {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            min-height: 180px;
-        }
-        .layer {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            margin: 0 30px;
-        }
-        .layer-label {
-            font-size: 0.65rem;
-            color: #64748b;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-        .neuron {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #f97316, #fb923c);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.6rem;
-            color: white;
-            font-weight: 600;
-        }
-        .neuron.input { background: linear-gradient(135deg, #0ea5e9, #38bdf8); }
-        .neuron.output { background: linear-gradient(135deg, #22c55e, #4ade80); }
-
-        .insight-bar {
-            background: linear-gradient(135deg, #fff7ed, #ffedd5);
-            border: 1px solid #fed7aa;
-            border-radius: 10px;
-            padding: 14px 16px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        .insight-icon { font-size: 1.2rem; }
-        .insight-content { flex: 1; }
-        .insight-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #c2410c;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-        .insight-text { font-size: 0.85rem; color: #9a3412; }
-
-        @media (max-width: 1200px) {
-            .start-banner { flex-direction: column; text-align: center; padding: 20px; }
-            .start-banner-steps { justify-content: center; }
-            .main-grid { grid-template-columns: 1fr; }
-        }
+    </style>
+    <link rel="stylesheet" href="playground-base.css">
+    <style>
+        /* playground-specific styles only */
+        .main-grid { grid-template-columns: 300px 1fr 300px; }
+        .center-area { display: flex; flex-direction: column; gap: 12px; }
+        .metrics-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .metric-card { padding: 10px; text-align: center; }
+        .metric-card.highlight { background: var(--accent-dim); border: 1px solid var(--accent); }
+        .metric-name { font-size: 0.65rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
+        .metric-value { font-size: 1rem; font-weight: 700; font-family: 'SF Mono', ui-monospace, monospace; }
+        .network-viz { display: flex; justify-content: center; align-items: center; padding: 20px; min-height: 180px; }
+        .layer { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 0 30px; }
+        .layer-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+        .neuron { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: #000; font-weight: 600; }
+        .neuron.input { background: #0ea5e9; color: #fff; }
+        .neuron.output { background: var(--positive); color: #000; }
+        .btn-secondary { background: var(--surface-hover); color: var(--text-secondary); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--surface-active); }
+        @media (max-width: 1200px) { .main-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -413,6 +176,7 @@
         </div>
     </div>
 
+    <script src="playground-guided.js"></script>
     <script>
         const dpr = window.devicePixelRatio || 1;
         let data = [];
@@ -658,7 +422,8 @@
             const plotW = width - 2 * pad;
             const plotH = height - 2 * pad;
             
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
             
             // Build prediction grid once, reuse for heatmap + contour
             const resolution = 50;
@@ -713,7 +478,7 @@
                 const py = pad + ((1 - data[i][1]) / 2) * plotH;
                 
                 ctx.fillStyle = labels[i] === 0 ? '#ef4444' : '#0ea5e9';
-                ctx.strokeStyle = 'white';
+                ctx.strokeStyle = '#f5f5f7';
                 ctx.lineWidth = 1.5;
                 ctx.beginPath();
                 ctx.arc(px, py, 5, 0, Math.PI * 2);
@@ -731,7 +496,8 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
             
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
             
             if (lossHistory.length < 2) return;
             
@@ -752,7 +518,7 @@
             ctx.stroke();
             
             // Axes
-            ctx.strokeStyle = '#e2e8f0';
+            ctx.strokeStyle = 'rgba(255,255,255,0.12)';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(pad.left, pad.top);
@@ -760,7 +526,7 @@
             ctx.lineTo(width - pad.right, height - pad.bottom);
             ctx.stroke();
             
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#8b8d97';
             ctx.font = '9px -apple-system';
             ctx.fillText('Loss', 5, pad.top + plotH / 2);
         }
@@ -769,14 +535,15 @@
             const canvas = document.getElementById('activationChart');
             const { width, height, ctx } = setupCanvas(canvas);
             
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
             
             const pad = 20;
             const plotW = width - 2 * pad;
             const plotH = height - 2 * pad;
             
             // Draw axes
-            ctx.strokeStyle = '#e2e8f0';
+            ctx.strokeStyle = 'rgba(255,255,255,0.12)';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(pad, height / 2);
@@ -806,7 +573,7 @@
             ctx.stroke();
             
             // Label
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#8b8d97';
             ctx.font = '10px -apple-system';
             ctx.fillText(activation.toUpperCase(), width - 50, 15);
         }
@@ -948,6 +715,111 @@
         updateNoise();
         updateLR();
         generateData();
+
+        if (typeof PlaygroundGuided !== 'undefined') PlaygroundGuided.init({
+            key: 'neural_nets',
+            steps: [
+                {
+                    title: "A linear model can't learn XOR",
+                    context: "Set the data pattern to <strong>XOR</strong> with 0 hidden layers. Press Train.",
+                    question: "Why does a model with no hidden layers fail on XOR?",
+                    options: [
+                        { id: 'linear', label: "No hidden layers = linear model, and XOR isn't linearly separable" },
+                        { id: 'data', label: 'Not enough training data' },
+                        { id: 'lr', label: 'Learning rate is wrong' }
+                    ],
+                    correctId: 'linear',
+                    reveal: "XOR requires classifying opposite corners together. A linear boundary (single line) can't do this. Hidden layers add the non-linearity needed to carve out complex decision regions.",
+                    setup: {}
+                },
+                {
+                    title: "Hidden layers add power",
+                    context: "Add 1-2 hidden layers with enough neurons. Train again on XOR.",
+                    question: "After adding hidden layers, the XOR pattern should be:",
+                    options: [
+                        { id: 'solved', label: 'Solved -- the network can now draw non-linear boundaries' },
+                        { id: 'same', label: 'Still unsolvable' },
+                        { id: 'worse', label: 'Worse -- more layers means more error' }
+                    ],
+                    correctId: 'solved',
+                    reveal: "Each hidden layer transforms the space. With enough neurons, even one hidden layer can approximate any continuous function (universal approximation theorem). Two layers handle XOR easily.",
+                    setup: {}
+                },
+                {
+                    title: "Activation functions matter",
+                    context: "Try different activation functions (ReLU, Sigmoid, Tanh) on the same problem.",
+                    question: "Why do modern networks prefer ReLU over Sigmoid?",
+                    options: [
+                        { id: 'gradient', label: "ReLU doesn't saturate for positive inputs, so gradients flow better" },
+                        { id: 'smooth', label: 'ReLU produces smoother decision boundaries' },
+                        { id: 'same', label: 'They perform identically' }
+                    ],
+                    correctId: 'gradient',
+                    reveal: "Sigmoid saturates (outputs near 0 or 1 have tiny gradients), causing the vanishing gradient problem in deep networks. ReLU has a constant gradient for positive inputs, allowing much deeper networks to train effectively.",
+                    setup: {}
+                },
+                {
+                    title: "Too much capacity overfits",
+                    context: "Set layers to 4, neurons to 16, and increase noise. Train and compare train vs test loss.",
+                    question: "A wide gap between train and test loss means:",
+                    options: [
+                        { id: 'overfit', label: "Overfitting -- the network memorized training noise" },
+                        { id: 'underfit', label: 'Underfitting' },
+                        { id: 'good', label: 'Good generalization' }
+                    ],
+                    correctId: 'overfit',
+                    reveal: "Deep networks have enormous capacity and can memorize any training set. Regularization (dropout, weight decay, early stopping) and more training data are the standard remedies. The loss curve showing diverging train/test lines is the classic overfitting signal.",
+                    setup: {}
+                }
+            ],
+            selfCheck: [
+                {
+                    prompt: "Your neural network has 10M parameters but only 10K training examples. What's the primary risk?",
+                    options: [
+                        { id: 'a', label: 'Severe overfitting -- far more parameters than data points' },
+                        { id: 'b', label: 'Underfitting -- the model is too large' },
+                        { id: 'c', label: 'No risk -- more parameters is always better' }
+                    ],
+                    correctId: 'a',
+                    explanation: "When parameters vastly outnumber data points, the network can memorize the training set. Use aggressive regularization (dropout, weight decay), data augmentation, or a smaller architecture."
+                }
+            ],
+            onStepEnter: function(idx, step) {
+                const patternSel = document.getElementById('dataPattern');
+                const layersSlider = document.getElementById('layersSlider');
+                const neuronsSlider = document.getElementById('neuronsSlider');
+                const noiseSlider = document.getElementById('noiseSlider');
+                if (!patternSel || !layersSlider) return;
+                if (idx === 0) {
+                    patternSel.value = 'xor';
+                    layersSlider.value = 1;
+                    neuronsSlider.value = 2;
+                    document.getElementById('layersValue').textContent = '1';
+                    document.getElementById('neuronsValue').textContent = '2';
+                    updateArchitecture();
+                    generateData();
+                } else if (idx === 1) {
+                    patternSel.value = 'xor';
+                    layersSlider.value = 2;
+                    neuronsSlider.value = 8;
+                    document.getElementById('layersValue').textContent = '2';
+                    document.getElementById('neuronsValue').textContent = '8';
+                    updateArchitecture();
+                    generateData();
+                } else if (idx === 3) {
+                    patternSel.value = 'xor';
+                    layersSlider.value = 4;
+                    neuronsSlider.value = 16;
+                    noiseSlider.value = 0.3;
+                    document.getElementById('layersValue').textContent = '4';
+                    document.getElementById('neuronsValue').textContent = '16';
+                    document.getElementById('noiseValue').textContent = '0.30';
+                    updateArchitecture();
+                    updateNoise();
+                    generateData();
+                }
+            }
+        });
     </script>
 </body>
 </html>

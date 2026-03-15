@@ -5,152 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gradient Descent Playground</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --accent: #f97316;
+            --accent-dim: rgba(249, 115, 22, 0.12);
         }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-        }
-
-        h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
-        .header-subtitle { font-size: 0.9rem; color: #64748b; }
-
-        .reset-btn {
-            background: white;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-        .reset-btn:hover { background: #f1f5f9; color: #475569; }
-
-        .start-banner {
-            background: linear-gradient(135deg, #f97316, #ea580c);
-            color: white;
-            border-radius: 16px;
-            padding: 24px 32px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-        .start-banner-icon { font-size: 2.5rem; flex-shrink: 0; }
-        .start-banner-content h2 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
-        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 12px; }
-        .start-banner-steps { display: flex; gap: 24px; flex-wrap: wrap; }
-        .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
-        .step-num {
-            background: rgba(255,255,255,0.2);
-            width: 24px; height: 24px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 600; font-size: 0.75rem;
-        }
-
-        .scenarios-bar {
-            background: white;
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            flex-wrap: wrap;
-        }
-        .scenarios-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-        }
-        .scenario-btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 16px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .scenario-btn.converge { background: #dcfce7; color: #166534; }
-        .scenario-btn.diverge { background: #fee2e2; color: #991b1b; }
-        .scenario-btn.stuck { background: #fef3c7; color: #92400e; }
-        .scenario-btn.compare { background: #f97316; color: white; }
-        .scenario-hint {
-            flex: 1;
-            min-width: 180px;
-            padding: 8px 12px;
-            background: #f8fafc;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            color: #475569;
-            display: none;
-            border-left: 3px solid #f97316;
-        }
-        .scenario-hint.visible { display: block; }
-
+    </style>
+    <link rel="stylesheet" href="playground-base.css">
+    <style>
+        /* Gradient Descent playground-specific */
         .main-grid {
-            display: grid;
             grid-template-columns: minmax(0, 600px) 340px;
-            gap: 16px;
-            margin-bottom: 24px;
             align-items: start;
             justify-content: center;
         }
-
-        .charts-area { display: flex; flex-direction: column; gap: 12px; }
-
-        .chart-card {
-            background: white;
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .chart-title { font-size: 0.75rem; font-weight: 600; color: #475569; }
-        .chart-badge {
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 10px;
-            background: #f1f5f9;
-            color: #64748b;
-        }
-
-        canvas { display: block; width: 100%; }
-
-        #lossChart {
-            aspect-ratio: 1;
-        }
-
+        #lossChart { aspect-ratio: 1; }
         .controls-row {
             display: flex;
             gap: 10px;
@@ -160,222 +28,59 @@
         .play-btn {
             flex: 1;
             padding: 12px;
-            background: #f97316;
-            color: white;
+            background: var(--accent);
+            color: #000;
             border: none;
             border-radius: 8px;
             font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
         }
-        .play-btn:hover { background: #ea580c; }
-        .play-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
-        .step-btn {
-            padding: 12px 20px;
-            background: white;
-            color: #475569;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-        .step-btn:hover { background: #f1f5f9; }
-
-        .speed-select {
-            padding: 10px 12px;
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            color: #475569;
-            cursor: pointer;
-        }
-
-        .sidebar { display: flex; flex-direction: column; gap: 12px; }
-
-        .sidebar-card {
-            background: white;
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .sidebar-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-        }
-
-        .control-group { margin-bottom: 12px; }
-        .control-group:last-child { margin-bottom: 0; }
-        .control-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #334155;
-            margin-bottom: 6px;
-        }
-        .control-value {
-            font-family: 'SF Mono', Monaco, monospace;
-            background: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            color: #f97316;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 5px;
-            border-radius: 3px;
-            background: #e2e8f0;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 14px; height: 14px;
-            border-radius: 50%;
-            background: #f97316;
-            cursor: pointer;
-        }
-
-        select {
-            width: 100%;
-            padding: 8px 10px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            color: #334155;
-            background: white;
-            cursor: pointer;
-        }
-
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px;
-        }
-        .metric-box {
-            text-align: center;
-            padding: 8px 6px;
-            background: #f8fafc;
-            border-radius: 6px;
-        }
-        .metric-label {
-            font-size: 0.6rem;
-            font-weight: 600;
-            color: #94a3b8;
-            text-transform: uppercase;
-        }
-        .metric-value {
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: #1e293b;
-            font-family: 'SF Mono', Monaco, monospace;
-        }
-        .metric-value.good { color: #16a34a; }
-        .metric-value.warn { color: #d97706; }
-        .metric-value.bad { color: #dc2626; }
+        .play-btn:hover { filter: brightness(1.1); }
+        .play-btn:disabled { background: var(--border-strong); cursor: not-allowed; color: var(--text-muted); }
+        .step-btn { padding: 12px 20px; border-radius: 8px; font-size: 0.9rem; cursor: pointer; }
 
         .optimizer-card {
             padding: 10px;
-            background: #fff7ed;
+            background: var(--accent-dim);
             border-radius: 8px;
-            border: 1px solid #fed7aa;
+            border: 1px solid var(--accent);
             margin-bottom: 8px;
         }
         .optimizer-card.secondary {
-            background: #eff6ff;
-            border-color: #bfdbfe;
+            background: rgba(14,165,233,0.12);
+            border-color: #0ea5e9;
         }
-        .optimizer-name {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #c2410c;
-            margin-bottom: 4px;
-        }
-        .optimizer-card.secondary .optimizer-name { color: #1d4ed8; }
-        .optimizer-desc {
-            font-size: 0.75rem;
-            color: #9a3412;
-            line-height: 1.4;
-        }
-        .optimizer-card.secondary .optimizer-desc { color: #1e40af; }
+        .optimizer-name { font-size: 0.85rem; font-weight: 600; color: var(--accent); margin-bottom: 4px; }
+        .optimizer-card.secondary .optimizer-name { color: #0ea5e9; }
+        .optimizer-desc { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4; }
 
-        .insight-bar {
-            background: linear-gradient(135deg, #fff7ed, #ffedd5);
-            border: 1px solid #fed7aa;
-            border-radius: 10px;
-            padding: 14px 16px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        .insight-icon { font-size: 1.2rem; }
-        .insight-content { flex: 1; }
-        .insight-title {
+        .surface-hint {
+            margin-top: 6px;
+            padding: 6px 8px;
+            background: var(--surface-hover);
+            border-radius: 4px;
             font-size: 0.7rem;
+            color: var(--text-muted);
+            border-left: 2px solid var(--accent);
+        }
+
+        .compare-section { display: none; }
+        .compare-section.visible { display: block; }
+        .compare-metrics { display: none; margin-top: 6px; }
+        .compare-metrics.visible { display: block; }
+        .compare-metrics-header {
+            font-size: 0.65rem;
             font-weight: 600;
-            color: #c2410c;
             text-transform: uppercase;
             margin-bottom: 4px;
-        }
-        .insight-text { font-size: 0.85rem; color: #9a3412; }
-
-        .help-panel {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            overflow: hidden;
-        }
-        .help-header {
-            padding: 10px 14px;
-            display: flex;
-            justify-content: space-between;
-            cursor: pointer;
-            background: #f8fafc;
-        }
-        .help-title { font-size: 0.8rem; font-weight: 600; color: #475569; }
-        .help-toggle { font-size: 0.7rem; color: #64748b; }
-        .help-content {
-            padding: 14px;
-            display: none;
-            border-top: 1px solid #e2e8f0;
-        }
-        .help-content.visible { display: block; }
-        .help-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 8px;
-        }
-        .help-item {
-            display: flex;
-            gap: 8px;
-            font-size: 0.75rem;
-            color: #475569;
+            color: #0ea5e9;
         }
 
-        .legend {
-            display: flex;
-            gap: 16px;
-            font-size: 0.7rem;
-            color: #64748b;
-            margin-top: 8px;
-            flex-wrap: wrap;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .legend-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
+        .control-hint {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            margin-top: 2px;
         }
 
         .toggle-row {
@@ -384,22 +89,17 @@
             justify-content: space-between;
             margin-bottom: 10px;
         }
-        .toggle-label {
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #334155;
-        }
         .toggle-switch {
             position: relative;
             width: 36px;
             height: 20px;
-            background: #e2e8f0;
+            background: var(--border-strong);
             border-radius: 10px;
             cursor: pointer;
             transition: background 0.2s;
             flex-shrink: 0;
         }
-        .toggle-switch.active { background: #f97316; }
+        .toggle-switch.active { background: var(--accent); }
         .toggle-switch::after {
             content: '';
             position: absolute;
@@ -407,67 +107,48 @@
             left: 2px;
             width: 16px;
             height: 16px;
-            background: white;
+            background: var(--text-primary);
             border-radius: 50%;
             transition: transform 0.2s;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
         }
         .toggle-switch.active::after { transform: translateX(16px); }
 
         .log-toggle-btn {
             padding: 2px 8px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
             border-radius: 4px;
-            background: white;
+            background: transparent;
             font-size: 0.65rem;
-            color: #64748b;
+            color: var(--text-muted);
             cursor: pointer;
             margin-left: 8px;
         }
         .log-toggle-btn.active {
-            background: #f97316;
-            color: white;
-            border-color: #f97316;
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
         }
 
-        .surface-hint {
-            margin-top: 6px;
-            padding: 6px 8px;
-            background: #f8fafc;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            color: #64748b;
-            border-left: 2px solid #f97316;
-        }
+        .legend { display: flex; gap: 16px; font-size: 0.7rem; margin-top: 8px; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 4px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .legend-accent { background: var(--accent); }
+        .legend-blue { background: #60a5fa; }
+        .legend-green { background: #4ade80; }
+        .legend-path { background: rgba(249,115,22,0.4); }
+        .toggle-label { font-size: 0.8rem; font-weight: 500; }
 
-        .compare-section { display: none; }
-        .compare-section.visible { display: block; }
-
-        .compare-metrics {
-            display: none;
-            margin-top: 6px;
-        }
-        .compare-metrics.visible { display: block; }
-        .compare-metrics-header {
-            font-size: 0.65rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-            color: #3b82f6;
-        }
-
-        .control-hint {
-            font-size: 0.65rem;
-            color: #94a3b8;
-            margin-top: 2px;
-        }
+        .scenario-btn.converge { background: rgba(0,200,5,0.15); color: var(--positive); }
+        .scenario-btn.converge:hover { background: rgba(0,200,5,0.25); }
+        .scenario-btn.diverge { background: rgba(255,80,0,0.15); color: var(--negative); }
+        .scenario-btn.diverge:hover { background: rgba(255,80,0,0.25); }
+        .scenario-btn.stuck { background: rgba(255,184,0,0.15); color: var(--warning); }
+        .scenario-btn.stuck:hover { background: rgba(255,184,0,0.25); }
+        .scenario-btn.compare { background: var(--accent); color: #000; }
+        .scenario-btn.compare:hover { filter: brightness(1.1); }
 
         @media (max-width: 900px) {
-            .start-banner { flex-direction: column; text-align: center; padding: 20px; }
-            .start-banner-steps { justify-content: center; }
             .main-grid { grid-template-columns: 1fr; justify-content: stretch; }
-            .sidebar { flex-direction: row; flex-wrap: wrap; }
-            .sidebar-card { flex: 1; min-width: 240px; }
             #lossChart { max-width: 500px; margin: 0 auto; }
         }
     </style>
@@ -515,19 +196,19 @@
                     <canvas id="lossChart"></canvas>
                     <div class="legend" id="legend">
                         <div class="legend-item">
-                            <div class="legend-dot" style="background: #f97316;"></div>
+                            <div class="legend-dot legend-accent"></div>
                             <span id="legendLabel1">Current position</span>
                         </div>
                         <div class="legend-item" id="legendCompare" style="display:none;">
-                            <div class="legend-dot" style="background: #3b82f6;"></div>
+                            <div class="legend-dot legend-blue"></div>
                             <span id="legendLabel2">Optimizer 2</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-dot" style="background: #22c55e;"></div>
+                            <div class="legend-dot legend-green"></div>
                             <span>Global minimum</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-dot" style="background: rgba(249,115,22,0.3);"></div>
+                            <div class="legend-dot legend-path"></div>
                             <span>Path taken</span>
                         </div>
                     </div>
@@ -737,6 +418,7 @@
         </div>
     </div>
 
+    <script src="playground-guided.js"></script>
     <script>
         // ============================================
         // STATE
@@ -954,7 +636,8 @@
             const plotLeft = pad.left + (availW - plotSize) / 2;
             const plotTop = pad.top + (availH - plotSize) / 2;
             
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
             
             const s = surfaces[surface];
             const res = 60;
@@ -996,7 +679,7 @@
             const inView = p => Math.abs(p.x) <= VIEW_RANGE && Math.abs(p.y) <= VIEW_RANGE;
             
             // Minimum marker
-            ctx.fillStyle = '#22c55e';
+            ctx.fillStyle = '#4ade80';
             ctx.beginPath();
             ctx.arc(sx(s.min.x), sy(s.min.y), 8, 0, Math.PI * 2);
             ctx.fill();
@@ -1057,7 +740,7 @@
                     // Off-screen indicator: draw arrow pointing toward the escaped position at the edge
                     const cx = Math.max(-VIEW_RANGE, Math.min(VIEW_RANGE, currentPos.x));
                     const cy = Math.max(-VIEW_RANGE, Math.min(VIEW_RANGE, currentPos.y));
-                    ctx.fillStyle = isDiverged ? '#dc2626' : color;
+                    ctx.fillStyle = isDiverged ? '#f87171' : color;
                     ctx.beginPath();
                     ctx.arc(sx(cx), sy(cy), 8, 0, Math.PI * 2);
                     ctx.fill();
@@ -1065,7 +748,7 @@
                     ctx.lineWidth = 2;
                     ctx.stroke();
                     // "escaped" label
-                    ctx.fillStyle = '#dc2626';
+                    ctx.fillStyle = '#f87171';
                     ctx.font = 'bold 10px -apple-system';
                     ctx.textAlign = 'center';
                     ctx.fillText('escaped', sx(cx), sy(cy) - 14);
@@ -1078,7 +761,7 @@
             }
             
             // Axes labels
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#5a5c66';
             ctx.font = '11px -apple-system';
             ctx.textAlign = 'center';
             ctx.fillText('θ₁', plotLeft + plotSize / 2, plotTop + plotSize + 18);
@@ -1096,13 +779,14 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
             
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
             
             const hasData1 = lossHistory.length >= 2;
             const hasData2 = compareMode && lossHistory2.length >= 2;
             
             if (!hasData1 && !hasData2) {
-                ctx.fillStyle = '#94a3b8';
+                ctx.fillStyle = '#8b8d97';
                 ctx.font = '12px -apple-system';
                 ctx.textAlign = 'center';
                 ctx.fillText('Loss history will appear here', width / 2, height / 2);
@@ -1134,7 +818,7 @@
             };
             
             // Grid
-            ctx.strokeStyle = '#e2e8f0';
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)';
             ctx.lineWidth = 1;
             for (let i = 0; i <= 4; i++) {
                 const y = pad.top + (i / 4) * plotH;
@@ -1176,7 +860,7 @@
             if (hasData2) drawCurve(lossHistory2, '#3b82f6');
             
             // Y-axis labels
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#5a5c66';
             ctx.font = '10px -apple-system';
             ctx.textAlign = 'right';
             if (logScale) {
@@ -1668,6 +1352,97 @@
         drawLossSurface();
         drawLossHistory();
         updateUI();
+
+        if (typeof PlaygroundGuided !== 'undefined') PlaygroundGuided.init({
+            key: 'gradient_descent',
+            steps: [
+                {
+                    title: "Learning rate too high",
+                    context: "The ball represents the model's parameters rolling downhill on the loss surface. Set the learning rate <strong>very high</strong> and watch what happens.",
+                    question: "With a very high learning rate, the optimization will:",
+                    options: [
+                        { id: 'diverge', label: 'Diverge -- the ball overshoots and bounces wildly' },
+                        { id: 'fast', label: 'Converge faster to the minimum' },
+                        { id: 'same', label: 'Behave the same as a moderate learning rate' }
+                    ],
+                    correctId: 'diverge',
+                    reveal: "A learning rate that's too large causes the parameter updates to <strong>overshoot</strong> the minimum. Instead of descending, the loss increases or oscillates. This is the most common training failure in practice.",
+                    setup: {}
+                },
+                {
+                    title: "Learning rate too low",
+                    context: "Now set the learning rate <strong>very low</strong>. Press Play and observe how slowly the ball moves.",
+                    question: "What's the practical problem with a very low learning rate?",
+                    options: [
+                        { id: 'slow', label: 'Training takes too long and may get stuck in local minima' },
+                        { id: 'diverge', label: 'It diverges just like a high learning rate' },
+                        { id: 'fine', label: "It's always safe -- no downsides" }
+                    ],
+                    correctId: 'slow',
+                    reveal: "A tiny learning rate means each step is very small. Training takes many more iterations, and the optimizer can get stuck in shallow local minima or saddle points instead of finding the global minimum. In practice, you need a learning rate that's <strong>just right</strong>.",
+                    setup: {}
+                },
+                {
+                    title: "Momentum helps escape flat regions",
+                    context: "Enable <strong>momentum</strong> and increase it. Momentum adds a fraction of the previous update to the current one, like a ball with inertia.",
+                    question: "Momentum helps most when the loss surface has:",
+                    options: [
+                        { id: 'ravines', label: 'Narrow ravines -- momentum builds speed along the ravine floor' },
+                        { id: 'smooth', label: 'A perfectly smooth bowl shape' },
+                        { id: 'random', label: 'Completely random terrain' }
+                    ],
+                    correctId: 'ravines',
+                    reveal: "In ravines (narrow valleys), vanilla gradient descent oscillates side-to-side. Momentum accumulates velocity along the consistent direction (the ravine floor) and damps oscillations. This is why virtually all modern optimizers include momentum.",
+                    setup: {}
+                },
+                {
+                    title: "Adam vs SGD",
+                    context: "Enable <strong>Compare Mode</strong> to see two optimizers race. Adam adapts the learning rate per-parameter using running averages of gradients.",
+                    question: "Why does Adam often converge faster than vanilla SGD?",
+                    options: [
+                        { id: 'adaptive', label: 'It adapts step size per parameter based on gradient history' },
+                        { id: 'bigger', label: 'It always uses a bigger learning rate' },
+                        { id: 'random', label: 'It uses more randomness' }
+                    ],
+                    correctId: 'adaptive',
+                    reveal: "Adam combines momentum <em>and</em> per-parameter learning rate scaling. Parameters with consistently large gradients get smaller steps (preventing overshoot), while parameters with small gradients get larger steps (preventing stalling). This adaptivity makes it robust to learning rate choice.",
+                    setup: {}
+                }
+            ],
+            selfCheck: [
+                {
+                    prompt: "Your model's training loss decreases for 10 epochs then suddenly spikes to infinity. The most likely cause is:",
+                    options: [
+                        { id: 'a', label: 'Learning rate is too high, causing gradient explosion' },
+                        { id: 'b', label: 'The model needs more layers' },
+                        { id: 'c', label: 'The dataset is too small' }
+                    ],
+                    correctId: 'a',
+                    explanation: "A sudden loss explosion after initial progress usually means the learning rate is too high. As the optimizer approaches a steep region, the large step size causes it to overshoot catastrophically. Fix: reduce learning rate or use gradient clipping."
+                },
+                {
+                    prompt: "You're training with Adam and lr=0.001 (the default). Loss plateaus after 50 epochs. What should you try first?",
+                    options: [
+                        { id: 'a', label: 'Switch to SGD with the same learning rate' },
+                        { id: 'b', label: 'Add a learning rate scheduler (e.g., reduce on plateau)' },
+                        { id: 'c', label: 'Increase learning rate to 0.1' }
+                    ],
+                    correctId: 'b',
+                    explanation: "A learning rate scheduler reduces the learning rate when progress stalls, allowing the optimizer to take smaller, more precise steps near the minimum. This is standard practice and usually the first thing to try when training plateaus."
+                }
+            ],
+            onStepEnter: function(idx, step) {
+                if (idx === 0) loadPreset('diverge');
+                else if (idx === 1) loadPreset('stuck');
+                else if (idx === 2) {
+                    document.getElementById('optimizerSelect').value = 'momentum';
+                    changeOptimizer();
+                    const mom = document.getElementById('momentumSlider');
+                    if (mom) { mom.value = 0.95; mom.dispatchEvent(new Event('input', {bubbles:true})); }
+                }
+                else if (idx === 3) loadPreset('ravine');
+            }
+        });
     </script>
 </body>
 </html>

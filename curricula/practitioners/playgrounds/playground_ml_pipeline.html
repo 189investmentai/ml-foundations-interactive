@@ -5,84 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ML Pipeline Playground</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --accent: #3b82f6;
+            --accent-dim: rgba(59, 130, 246, 0.12);
         }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-        }
-        h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
-        .header-subtitle { font-size: 0.9rem; color: #64748b; }
-
-        .reset-btn {
-            background: white;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            white-space: nowrap;
-            transition: all 0.2s;
-        }
-        .reset-btn:hover { background: #f1f5f9; color: #475569; }
-
-        /* Start Banner */
+    </style>
+    <link rel="stylesheet" href="playground-base.css">
+    <style>
+        /* playground-specific */
         .start-banner {
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-            color: white;
-            border-radius: 16px;
-            padding: 24px 32px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
+            background: var(--accent-dim);
+            border: 1px solid var(--accent);
+            color: var(--text-primary);
         }
-        .start-banner-icon { font-size: 2.5rem; flex-shrink: 0; }
-        .start-banner-content h2 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
-        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 12px; }
+        .start-banner-icon { display: block; font-size: 2.5rem; flex-shrink: 0; }
+        .start-banner-content h2 { display: block; font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
         .start-banner-steps { display: flex; gap: 24px; flex-wrap: wrap; }
         .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
         .step-num {
-            background: rgba(255,255,255,0.2);
+            background: var(--accent-dim);
+            border: 1px solid var(--accent);
             width: 24px; height: 24px;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             font-weight: 600; font-size: 0.75rem;
         }
 
-        /* Pipeline */
         .pipeline {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 24px;
             padding: 20px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
             overflow-x: auto;
         }
-
         .stage {
             display: flex;
             flex-direction: column;
@@ -95,13 +54,13 @@
             padding: 8px 4px;
         }
         .stage:hover { transform: scale(1.05); }
-        .stage:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
-
+        .stage:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
         .stage-icon {
             width: 60px;
             height: 60px;
-            background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
-            border-radius: 16px;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -110,13 +69,11 @@
             transition: all 0.3s;
             position: relative;
         }
-
-        .stage.active .stage-icon { box-shadow: 0 0 0 3px #3b82f6; }
-        .stage.error .stage-icon { background: linear-gradient(135deg, #fee2e2, #fecaca); }
-        .stage.success .stage-icon { background: linear-gradient(135deg, #dcfce7, #bbf7d0); }
-        .stage.active.error .stage-icon { box-shadow: 0 0 0 3px #ef4444; }
-        .stage.active.success .stage-icon { box-shadow: 0 0 0 3px #22c55e; }
-
+        .stage.active .stage-icon { box-shadow: 0 0 0 3px var(--accent); }
+        .stage.error .stage-icon { background: rgba(255,80,0,0.15); border-color: var(--negative); }
+        .stage.success .stage-icon { background: rgba(0,200,5,0.15); border-color: var(--positive); }
+        .stage.active.error .stage-icon { box-shadow: 0 0 0 3px var(--negative); }
+        .stage.active.success .stage-icon { box-shadow: 0 0 0 3px var(--positive); }
         .stage-status {
             position: absolute;
             top: -4px;
@@ -128,138 +85,103 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid white;
+            border: 2px solid var(--surface);
             opacity: 0;
             transform: scale(0);
             transition: all 0.3s;
         }
         .stage.error .stage-status {
-            background: #ef4444;
+            background: var(--negative);
             opacity: 1;
             transform: scale(1);
         }
         .stage.success .stage-status {
-            background: #22c55e;
+            background: var(--positive);
             opacity: 1;
             transform: scale(1);
         }
+        .stage-name { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); }
+        .arrow { font-size: 1.2rem; color: var(--text-muted); flex-shrink: 0; }
 
-        .stage-name { font-size: 0.8rem; font-weight: 600; color: #334155; }
-
-        .arrow {
-            font-size: 1.2rem;
-            color: #cbd5e1;
-            flex-shrink: 0;
-            transition: color 0.3s;
-        }
-
-        /* Scenarios Bar */
-        .scenarios-bar {
-            background: white;
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            flex-wrap: wrap;
-        }
-        .scenarios-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #64748b;
-            white-space: nowrap;
-        }
-        .scenario-btn {
-            padding: 6px 14px;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 6px;
-            background: white;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            color: #475569;
-        }
-        .scenario-btn:hover { border-color: #3b82f6; background: #eff6ff; color: #1e40af; }
-        .scenario-btn.active { border-color: #3b82f6; background: #3b82f6; color: white; }
-
-        /* Detail Panel */
         .detail-panel {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 16px;
             margin-bottom: 16px;
         }
-
         .panel-card {
-            background: white;
+            background: var(--surface);
+            border: 1px solid var(--border);
             border-radius: 12px;
             padding: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             transition: border-color 0.3s;
-            border: 2px solid transparent;
         }
-        .panel-card.highlight-error { border-color: #fca5a5; }
-        .panel-card.highlight-success { border-color: #86efac; }
-
-        .panel-title {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
+        .panel-card.highlight-error { border-color: var(--negative); }
+        .panel-card.highlight-success { border-color: var(--positive); }
         .panel-content {
             font-size: 0.88rem;
-            color: #475569;
+            color: var(--text-secondary);
             animation: fadeIn 0.25s ease-out;
         }
         .panel-content ul { padding-left: 20px; margin: 12px 0; }
         .panel-content li { margin-bottom: 8px; }
-
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(4px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
         .highlight-box {
-            background: #fef3c7;
-            border: 1px solid #fde047;
+            background: rgba(255,184,0,0.15);
+            border: 1px solid var(--warning);
             border-radius: 8px;
             padding: 12px 16px;
             margin-top: 16px;
             font-size: 0.83rem;
+            color: var(--text-secondary);
         }
         .highlight-box.error {
-            background: #fee2e2;
-            border-color: #fca5a5;
+            background: rgba(255,80,0,0.15);
+            border-color: var(--negative);
         }
         .highlight-box.success {
-            background: #dcfce7;
-            border-color: #86efac;
+            background: rgba(0,200,5,0.15);
+            border-color: var(--positive);
         }
-
         .empty-state {
-            color: #94a3b8;
+            color: var(--text-muted);
             font-style: italic;
             text-align: center;
             padding: 20px;
         }
-
-        /* Help */
         .help-text {
             text-align: center;
-            color: #94a3b8;
+            color: var(--text-muted);
             font-size: 0.8rem;
             margin-top: 16px;
         }
+        .challenge-banner { margin-bottom: 24px; }
+        .challenge-banner-inner {
+            background: var(--accent-dim);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 16px 24px;
+            color: var(--text-primary);
+        }
+        .challenge-banner-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .challenge-icon { font-size: 1.5rem; }
+        .challenge-question-wrap { flex: 1; }
+        .challenge-actions { display: flex; gap: 8px; }
+        .challenge-answer {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-strong);
+            display: none;
+        }
+        .challenge-answer.visible { display: block; }
 
         @media (max-width: 768px) {
             .start-banner { flex-direction: column; text-align: center; padding: 20px; }
@@ -297,18 +219,18 @@
 
         <!-- Predict Before Reveal Challenge -->
         <div class="challenge-banner" id="challengeBanner" style="display: none;">
-            <div style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border-radius: 12px; padding: 16px 24px; margin-bottom: 24px;">
-                <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
-                    <span style="font-size: 1.5rem;">🎯</span>
-                    <div style="flex: 1;">
+            <div class="challenge-banner-inner">
+                <div class="challenge-banner-row">
+                    <span class="challenge-icon">🎯</span>
+                    <div class="challenge-question-wrap">
                         <strong>Predict Before You Click:</strong> <span id="challengeQuestion"></span>
                     </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button onclick="revealAnswer()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500;">Reveal Answer</button>
-                        <button onclick="hideChallenge()" style="background: rgba(0,0,0,0.2); border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer;">Skip</button>
+                    <div class="challenge-actions">
+                        <button class="btn btn-primary" onclick="revealAnswer()">Reveal Answer</button>
+                        <button class="btn btn-outline" onclick="hideChallenge()">Skip</button>
                     </div>
                 </div>
-                <div id="challengeAnswer" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.3); display: none;"></div>
+                <div id="challengeAnswer" class="challenge-answer"></div>
             </div>
         </div>
 
@@ -381,6 +303,7 @@
         <p class="help-text">Most ML bugs occur at the boundaries between stages. Click through each scenario to build intuition for what breaks and why.</p>
     </div>
 
+    <script src="playground-guided.js"></script>
     <script>
         const stageInfo = {
             problem: {
@@ -733,7 +656,7 @@
                 currentChallenge = scenarioKey;
                 document.getElementById('challengeBanner').style.display = 'block';
                 document.getElementById('challengeQuestion').textContent = challenges[scenarioKey].question;
-                document.getElementById('challengeAnswer').style.display = 'none';
+                document.getElementById('challengeAnswer').classList.remove('visible');
                 document.getElementById('challengeAnswer').textContent = '';
             }
             loadScenario(scenarioKey);
@@ -742,7 +665,7 @@
         function revealAnswer() {
             if (currentChallenge && challenges[currentChallenge]) {
                 document.getElementById('challengeAnswer').textContent = '✅ ' + challenges[currentChallenge].answer;
-                document.getElementById('challengeAnswer').style.display = 'block';
+                document.getElementById('challengeAnswer').classList.add('visible');
             }
         }
 
@@ -758,6 +681,74 @@
                 hideChallenge();
                 loadScenarioWithChallenge(scenario);
             };
+        });
+
+        if (typeof PlaygroundGuided !== 'undefined') PlaygroundGuided.init({
+            key: 'ml_pipeline',
+            steps: [
+                {
+                    title: "Data flows through stages",
+                    context: "Watch the pipeline animation. Data enters raw, gets cleaned, features are engineered, the model trains, and predictions come out.",
+                    question: "Why is the order of pipeline stages important?",
+                    options: [
+                        { id: 'leak', label: 'Wrong order causes data leakage (e.g., scaling before splitting)' },
+                        { id: 'any', label: 'Any order works -- stages are independent' },
+                        { id: 'speed', label: 'Only for speed optimization' }
+                    ],
+                    correctId: 'leak',
+                    reveal: "Pipeline order prevents leakage. If you scale or impute using the full dataset before splitting, test statistics leak into training features. The correct order: split first, then fit transformers on training data only, then apply to test.",
+                    setup: {}
+                },
+                {
+                    title: "Missing values need a strategy",
+                    context: "Toggle <strong>Handle Missing</strong>. Watch how missing values affect downstream stages.",
+                    question: "Why must imputation happen inside the pipeline (not before splitting)?",
+                    options: [
+                        { id: 'inside', label: 'Imputing before split uses test data statistics (mean/median) -- that is leakage' },
+                        { id: 'before', label: 'Imputing before split is always fine' },
+                        { id: 'drop', label: 'You should always drop missing rows' }
+                    ],
+                    correctId: 'inside',
+                    reveal: "If you compute the column mean on the full dataset and use it to fill missing values, the test set mean leaks into training. Fit the imputer on training data only. sklearn Pipelines handle this automatically when you include the imputer as a step.",
+                    setup: {}
+                },
+                {
+                    title: "Evaluation must be honest",
+                    context: "Look at the evaluation stage. The pipeline reports both train and test metrics.",
+                    question: "A large gap between train and test metrics usually means:",
+                    options: [
+                        { id: 'overfit', label: 'Overfitting -- the model memorized training data' },
+                        { id: 'underfit', label: 'Underfitting' },
+                        { id: 'good', label: 'The model is well-calibrated' }
+                    ],
+                    correctId: 'overfit',
+                    reveal: "A train-test gap is the classic overfitting signal. The pipeline should include cross-validation (not just a single train/test split) for more reliable estimates. Common fixes: regularization, fewer features, more data, or simpler models.",
+                    setup: {}
+                }
+            ],
+            selfCheck: [
+                {
+                    prompt: "Your sklearn Pipeline has: StandardScaler -> PCA -> LogisticRegression. Where is the potential leakage risk?",
+                    options: [
+                        { id: 'a', label: "There's no leakage risk -- sklearn Pipeline handles fit/transform correctly" },
+                        { id: 'b', label: 'PCA should come before scaling' },
+                        { id: 'c', label: 'LogisticRegression is the wrong model' }
+                    ],
+                    correctId: 'a',
+                    explanation: "When using sklearn Pipeline, calling pipeline.fit(X_train) fits each step only on training data, then transforms. This prevents leakage automatically. The risk is when you do preprocessing OUTSIDE the pipeline before the split."
+                }
+            ],
+            onStepEnter: function(idx, step) {
+                if (idx === 0) resetAll();
+                else if (idx === 1) {
+                    loadScenario('leakage');
+                    selectStage('features');
+                }
+                else if (idx === 2) {
+                    loadScenario('overfit');
+                    selectStage('evaluate');
+                }
+            }
         });
     </script>
 </body>

@@ -5,302 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Regression Metrics Playground</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --accent: #0ea5e9;
+            --accent-dim: rgba(14, 165, 233, 0.12);
         }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-        }
-
-        h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
-        .header-subtitle { font-size: 0.9rem; color: #64748b; }
-
-        .reset-btn {
-            background: white;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-        .reset-btn:hover { background: #f1f5f9; color: #475569; }
-
-        .start-banner {
-            background: linear-gradient(135deg, #0ea5e9, #0284c7);
-            color: white;
-            border-radius: 16px;
-            padding: 24px 32px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-        .start-banner-icon { font-size: 2.5rem; flex-shrink: 0; }
-        .start-banner-content h2 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
-        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 12px; }
-        .start-banner-steps { display: flex; gap: 24px; flex-wrap: wrap; }
-        .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
-        .step-num {
-            background: rgba(255,255,255,0.2);
-            width: 24px; height: 24px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 600; font-size: 0.75rem;
-        }
-
-        .scenarios-bar {
-            background: white;
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            flex-wrap: wrap;
-        }
-        .scenarios-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-        }
-        .scenario-btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 16px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .scenario-btn.good { background: #dcfce7; color: #166534; }
-        .scenario-btn.outlier { background: #fee2e2; color: #991b1b; }
-        .scenario-btn.bias { background: #fef3c7; color: #92400e; }
-        .scenario-btn.pattern { background: #e0e7ff; color: #3730a3; }
-        .scenario-hint {
-            flex: 1;
-            min-width: 180px;
-            padding: 8px 12px;
-            background: #f8fafc;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            color: #475569;
-            display: none;
-            border-left: 3px solid #0ea5e9;
-        }
-        .scenario-hint.visible { display: block; }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 320px;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .charts-area { display: flex; flex-direction: column; gap: 12px; }
-
-        .chart-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .chart-card {
-            background: white;
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .chart-card.full { grid-column: 1 / -1; }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .chart-title { font-size: 0.75rem; font-weight: 600; color: #475569; }
-        .chart-badge {
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 10px;
-            background: #f1f5f9;
-            color: #64748b;
-        }
-
-        canvas { display: block; width: 100%; }
-
-        .sidebar { display: flex; flex-direction: column; gap: 12px; }
-
-        .sidebar-card {
-            background: white;
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .sidebar-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-        }
-
-        .control-group { margin-bottom: 12px; }
-        .control-group:last-child { margin-bottom: 0; }
-        .control-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #334155;
-            margin-bottom: 6px;
-        }
-        .control-value {
-            font-family: 'SF Mono', Monaco, monospace;
-            background: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            color: #0ea5e9;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 5px;
-            border-radius: 3px;
-            background: #e2e8f0;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 14px; height: 14px;
-            border-radius: 50%;
-            background: #0ea5e9;
-            cursor: pointer;
-        }
-
-        .metrics-panel {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-        .metric-card {
-            padding: 12px;
-            background: #f8fafc;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .metric-card.highlight {
-            background: #e0f2fe;
-            border: 1px solid #7dd3fc;
-        }
-        .metric-name {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-        .metric-value {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #0c4a6e;
-            font-family: 'SF Mono', Monaco, monospace;
-        }
-        .metric-desc {
-            font-size: 0.65rem;
-            color: #94a3b8;
-            margin-top: 2px;
-        }
-
-        .insight-bar {
-            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
-            border: 1px solid #7dd3fc;
-            border-radius: 10px;
-            padding: 14px 16px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        .insight-icon { font-size: 1.2rem; }
-        .insight-content { flex: 1; }
-        .insight-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #0369a1;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-        .insight-text { font-size: 0.85rem; color: #0c4a6e; }
-
-        .help-panel {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            overflow: hidden;
-        }
-        .help-header {
-            padding: 10px 14px;
-            display: flex;
-            justify-content: space-between;
-            cursor: pointer;
-            background: #f8fafc;
-        }
-        .help-title { font-size: 0.8rem; font-weight: 600; color: #475569; }
-        .help-toggle { font-size: 0.7rem; color: #64748b; }
-        .help-content {
-            padding: 14px;
-            display: none;
-            border-top: 1px solid #e2e8f0;
-        }
-        .help-content.visible { display: block; }
-        .help-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 8px;
-        }
-        .help-item {
-            display: flex;
-            gap: 8px;
-            font-size: 0.75rem;
-            color: #475569;
-        }
-
-        @media (max-width: 1000px) {
-            .start-banner { flex-direction: column; text-align: center; padding: 20px; }
-            .start-banner-steps { justify-content: center; }
-            .main-grid { grid-template-columns: 1fr; }
-            .sidebar { flex-direction: row; flex-wrap: wrap; }
-            .sidebar-card { flex: 1; min-width: 240px; }
-        }
-        @media (max-width: 650px) {
-            .chart-row { grid-template-columns: 1fr; }
-        }
+    </style>
+    <link rel="stylesheet" href="playground-base.css">
+    <style>
+        /* playground-specific: scenario preset buttons */
+        .scenario-btn.good { background: rgba(0,200,5,0.12); color: var(--positive); border: 1px solid var(--positive); }
+        .scenario-btn.outlier { background: rgba(255,80,0,0.12); color: var(--negative); border: 1px solid var(--negative); }
+        .scenario-btn.bias { background: rgba(255,184,0,0.12); color: var(--warning); border: 1px solid var(--warning); }
+        .scenario-btn.pattern { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent); }
+        .metrics-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .metric-card { padding: 12px; background: var(--surface-hover); border-radius: 8px; text-align: center; }
+        .metric-card.highlight { background: var(--accent-dim); border: 1px solid var(--accent); }
+        .metric-name { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+        .metric-desc { font-size: 0.65rem; color: var(--text-muted); margin-top: 2px; }
+        .start-banner-icon { display: block; font-size: 1.5rem; flex-shrink: 0; }
+        .start-banner-content h2 { display: block; font-size: 1rem; margin-bottom: 6px; font-weight: 600; color: var(--text-primary); }
+        .start-banner-steps { display: flex; gap: 16px; flex-wrap: wrap; }
+        .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-secondary); }
+        .step-num { background: var(--accent-dim); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.75rem; color: var(--accent); }
     </style>
 </head>
 <body>
@@ -495,6 +221,7 @@
         </div>
     </div>
 
+    <script src="playground-guided.js"></script>
     <script>
         // ============================================
         // STATE
@@ -618,7 +345,8 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
             
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
             
             // Find ranges
             const allVals = [...actual, ...predicted];
@@ -650,7 +378,7 @@
             }
             
             // Axes
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#8b8d97';
             ctx.font = '10px -apple-system';
             ctx.textAlign = 'center';
             ctx.fillText('Predicted', width / 2, height - 5);
@@ -668,7 +396,8 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
             
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
             
             const minPred = Math.min(...predicted) - 10;
             const maxPred = Math.max(...predicted) + 10;
@@ -700,7 +429,7 @@
             }
             
             // Axes
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#8b8d97';
             ctx.font = '10px -apple-system';
             ctx.textAlign = 'center';
             ctx.fillText('Predicted', width / 2, height - 5);
@@ -718,7 +447,8 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
             
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
             
             // Create bins
             const nBins = 20;
@@ -754,7 +484,7 @@
             ctx.stroke();
             
             // Labels
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#8b8d97';
             ctx.font = '10px -apple-system';
             ctx.textAlign = 'center';
             ctx.fillText('Residual Value', width / 2, height - 5);
@@ -767,7 +497,8 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
             
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
             
             const metrics = calcMetrics();
             const maxError = Math.max(metrics.mae, metrics.rmse) * 1.2;
@@ -780,11 +511,11 @@
             const maeH = (metrics.mae / maxError) * plotH;
             ctx.fillStyle = '#0ea5e9';
             ctx.fillRect(startX, pad.top + plotH - maeH, barWidth, maeH);
-            ctx.fillStyle = '#0c4a6e';
+            ctx.fillStyle = '#f5f5f7';
             ctx.font = 'bold 12px -apple-system';
             ctx.textAlign = 'center';
             ctx.fillText(metrics.mae.toFixed(1), startX + barWidth / 2, pad.top + plotH - maeH - 5);
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#8b8d97';
             ctx.font = '11px -apple-system';
             ctx.fillText('MAE', startX + barWidth / 2, height - 10);
             
@@ -792,16 +523,16 @@
             const rmseH = (metrics.rmse / maxError) * plotH;
             ctx.fillStyle = '#f97316';
             ctx.fillRect(startX + barWidth + gap, pad.top + plotH - rmseH, barWidth, rmseH);
-            ctx.fillStyle = '#9a3412';
+            ctx.fillStyle = '#f5f5f7';
             ctx.font = 'bold 12px -apple-system';
             ctx.fillText(metrics.rmse.toFixed(1), startX + barWidth + gap + barWidth / 2, pad.top + plotH - rmseH - 5);
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#8b8d97';
             ctx.font = '11px -apple-system';
             ctx.fillText('RMSE', startX + barWidth + gap + barWidth / 2, height - 10);
             
             // RMSE/MAE ratio
             const ratio = metrics.rmse / metrics.mae;
-            ctx.fillStyle = '#94a3b8';
+            ctx.fillStyle = '#5a5c66';
             ctx.font = '10px -apple-system';
             ctx.fillText(`RMSE/MAE = ${ratio.toFixed(2)}`, width / 2, height - 25);
         }
@@ -817,9 +548,9 @@
             document.getElementById('r2Value').textContent = m.r2.toFixed(3);
             document.getElementById('mapeValue').textContent = m.mape.toFixed(1) + '%';
             
-            // Color coding
+            // Color coding (use CSS vars for dark theme)
             const r2El = document.getElementById('r2Value');
-            r2El.style.color = m.r2 > 0.7 ? '#16a34a' : m.r2 > 0.4 ? '#d97706' : '#dc2626';
+            r2El.style.color = m.r2 > 0.7 ? 'var(--positive)' : m.r2 > 0.4 ? 'var(--warning)' : 'var(--negative)';
             
             // Insight
             updateInsight(m);
@@ -989,6 +720,92 @@
         // ============================================
         window.addEventListener('resize', updateAll);
         updateAll();
+
+        if (typeof PlaygroundGuided !== 'undefined') PlaygroundGuided.init({
+            key: 'regression_metrics',
+            steps: [
+                {
+                    title: "A good model baseline",
+                    context: "Start with the default settings: low noise, no bias. This is what a well-fitted regression looks like. Check the predicted-vs-actual scatter and residual plots.",
+                    question: "In the residual plot of a good model, the points should be:",
+                    options: [
+                        { id: 'random', label: 'Randomly scattered around zero -- no pattern' },
+                        { id: 'curved', label: 'Following a curved pattern' },
+                        { id: 'fanned', label: 'Fanning out (wider spread for larger predictions)' }
+                    ],
+                    correctId: 'random',
+                    reveal: "Good residuals are randomly scattered around zero with no visible pattern. Any structure in residuals means the model is systematically wrong in some way -- the model form may be wrong or something is missing.",
+                    setup: {}
+                },
+                {
+                    title: "Outliers hit RMSE harder than MAE",
+                    context: "Increase the <strong>Outlier %</strong> slider. Watch how RMSE and MAE change differently.",
+                    question: "Why does RMSE increase more than MAE when outliers are added?",
+                    options: [
+                        { id: 'squared', label: 'RMSE squares errors, so large errors from outliers get amplified' },
+                        { id: 'same', label: 'They increase equally' },
+                        { id: 'mae', label: 'MAE is actually more affected' }
+                    ],
+                    correctId: 'squared',
+                    reveal: "RMSE squares each error before averaging, so a single outlier with error 100 contributes 10,000 to the sum -- while MAE contributes just 100. If your data has outliers, MAE gives a more robust picture of typical performance.",
+                    setup: {}
+                },
+                {
+                    title: "Systematic bias in predictions",
+                    context: "Increase the <strong>Bias</strong> slider. The model consistently over- or under-predicts.",
+                    question: "Bias in predictions means:",
+                    options: [
+                        { id: 'shift', label: 'The model is consistently off in one direction -- predictions need a correction offset' },
+                        { id: 'random', label: 'Errors are just random noise' },
+                        { id: 'good', label: 'The model is well-calibrated' }
+                    ],
+                    correctId: 'shift',
+                    reveal: "Systematic bias means the model is consistently too high or too low. This shows up as residuals clustered above or below zero. It often indicates a missing feature or incorrect model form. In production, even a simple offset correction can help.",
+                    setup: {}
+                },
+                {
+                    title: "When the model shape is wrong",
+                    context: "Increase <strong>Non-linearity</strong>. The true relationship is curved but the model fits a line.",
+                    question: "The residual plot with a non-linear pattern shows:",
+                    options: [
+                        { id: 'curved', label: 'A U-shaped or curved pattern -- the model form is wrong' },
+                        { id: 'random', label: 'Random scatter' },
+                        { id: 'nothing', label: 'Nothing useful -- residuals are always noisy' }
+                    ],
+                    correctId: 'curved',
+                    reveal: "A curved residual pattern is the smoking gun for model misspecification. The model structure is wrong, not just the coefficients. Adding polynomial features or switching to a non-linear model (trees, splines) would fix this.",
+                    setup: {}
+                }
+            ],
+            selfCheck: [
+                {
+                    prompt: "Your regression model has MAE = 50 and RMSE = 200. What does the large gap tell you?",
+                    options: [
+                        { id: 'a', label: 'A few predictions have enormous errors (outlier predictions)' },
+                        { id: 'b', label: 'The model is well-calibrated' },
+                        { id: 'c', label: 'MAE and RMSE always differ by 4x' }
+                    ],
+                    correctId: 'a',
+                    explanation: "A large RMSE/MAE ratio means the error distribution has heavy tails -- a few predictions are very far off. RMSE amplifies these via squaring while MAE treats all errors linearly. Investigate the worst predictions to find data issues or edge cases."
+                },
+                {
+                    prompt: "MAPE (Mean Absolute Percentage Error) is 5% for high-value items but 50% for low-value items. Why?",
+                    options: [
+                        { id: 'a', label: 'MAPE divides by actual value, so small actuals produce huge percentages even for small absolute errors' },
+                        { id: 'b', label: 'The model is 10x worse at low-value items' },
+                        { id: 'c', label: 'MAPE is always unreliable' }
+                    ],
+                    correctId: 'a',
+                    explanation: "MAPE divides error by actual value. A $5 error on a $10 item is 50%, but the same $5 error on a $100 item is just 5%. MAPE is misleading when actual values vary widely or approach zero. Use MAE or RMSE with domain context instead."
+                }
+            ],
+            onStepEnter: function(idx, step) {
+                if (idx === 0) loadPreset('good');
+                else if (idx === 1) loadPreset('outliers');
+                else if (idx === 2) loadPreset('bias');
+                else if (idx === 3) loadPreset('nonlinear');
+            }
+        });
     </script>
 </body>
 </html>

@@ -5,410 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Embeddings Playground</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --accent: #6366f1;
+            --accent-dim: rgba(99, 102, 241, 0.12);
         }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-        }
-
-        h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
-        .header-subtitle { font-size: 0.9rem; color: #64748b; }
-
-        .reset-btn {
-            background: white;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-        .reset-btn:hover { background: #f1f5f9; color: #475569; }
-
-        .start-banner {
-            background: linear-gradient(135deg, #6366f1, #4f46e5);
-            color: white;
-            border-radius: 16px;
-            padding: 24px 32px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-        .start-banner-icon { font-size: 2.5rem; flex-shrink: 0; }
-        .start-banner-content h2 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
-        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 12px; }
-        .start-banner-steps { display: flex; gap: 24px; flex-wrap: wrap; }
-        .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
-        .step-num {
-            background: rgba(255,255,255,0.2);
-            width: 24px; height: 24px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 600; font-size: 0.75rem;
-        }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 360px;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .charts-area { display: flex; flex-direction: column; gap: 12px; }
-
-        .chart-card {
-            background: white;
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .chart-title { font-size: 0.75rem; font-weight: 600; color: #475569; }
-        .chart-badge {
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 10px;
-            background: #f1f5f9;
-            color: #64748b;
-        }
-
-        canvas { display: block; width: 100%; }
-
-        .sidebar { display: flex; flex-direction: column; gap: 12px; }
-
-        .sidebar-card {
-            background: white;
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .sidebar-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-        }
-
-        .control-group { margin-bottom: 12px; }
-        .control-group:last-child { margin-bottom: 0; }
-        .control-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #334155;
-            margin-bottom: 6px;
-        }
-        .control-value {
-            font-family: 'SF Mono', Monaco, monospace;
-            background: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            color: #6366f1;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 5px;
-            border-radius: 3px;
-            background: #e2e8f0;
-            outline: none;
-            appearance: none;
-            -webkit-appearance: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 14px; height: 14px;
-            border-radius: 50%;
-            background: #6366f1;
-            cursor: pointer;
-        }
-
-        input[type="text"], textarea, select {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-family: inherit;
-            background: white;
-        }
-        textarea { min-height: 80px; resize: vertical; }
-
-        .btn {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-primary {
-            background: #6366f1;
-            color: white;
-        }
-        .btn-primary:hover { background: #4f46e5; }
-
-        .results-list {
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        .result-item {
-            padding: 8px;
-            border-bottom: 1px solid #f1f5f9;
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            cursor: pointer;
-        }
-        .result-item:hover { background: #f8fafc; }
-        .result-item.active { background: #eef2ff; }
-        .result-item.empty {
-            cursor: default;
-            color: #64748b;
-            font-style: italic;
-        }
+    </style>
+    <link rel="stylesheet" href="playground-base.css">
+    <style>
+        /* playground-specific styles only */
+        .main-grid { grid-template-columns: 1fr 360px; }
+        .results-list { max-height: 200px; overflow-y: auto; }
+        .result-item { padding: 8px; border-bottom: 1px solid var(--border); font-size: 0.8rem; display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; }
+        .result-item:hover { background: var(--surface-hover); }
+        .result-item.active { background: var(--accent-dim); }
+        .result-item.empty { cursor: default; color: var(--text-muted); font-style: italic; }
         .result-item.empty:hover { background: transparent; }
         .result-item:last-child { border-bottom: none; }
-        .result-label {
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .result-score {
-            font-family: 'SF Mono', Monaco, monospace;
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            border-radius: 4px;
-            flex-shrink: 0;
-        }
-        .result-score.high { background: #dcfce7; color: #166534; }
-        .result-score.medium { background: #fef3c7; color: #92400e; }
-        .result-score.low { background: #f1f5f9; color: #64748b; }
-
-        .text-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .text-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 8px;
-            background: #f8fafc;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            border: 1px solid transparent;
-            cursor: pointer;
-        }
-        .text-item.active {
-            border-color: #c7d2fe;
-            background: #eef2ff;
-        }
-        .text-item.empty {
-            color: #64748b;
-            font-style: italic;
-            cursor: default;
-        }
-        .text-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
-        .text-content {
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .insight-bar {
-            background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
-            border: 1px solid #a5b4fc;
-            border-radius: 10px;
-            padding: 14px 16px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        .insight-icon { font-size: 1.2rem; }
-        .insight-content { flex: 1; }
-        .insight-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #3730a3;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-        .insight-text { font-size: 0.85rem; color: #4338ca; }
-        .input-hint {
-            margin-top: 6px;
-            font-size: 0.72rem;
-            color: #64748b;
-        }
-        .toggle-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.82rem;
-            color: #334155;
-            cursor: pointer;
-        }
-        .toggle-label input[type="checkbox"] {
-            accent-color: #6366f1;
-        }
+        .result-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .result-score { font-family: 'SF Mono', ui-monospace, monospace; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
+        .result-score.high { background: rgba(0,200,5,0.15); color: var(--positive); }
+        .result-score.medium { background: rgba(255,184,0,0.15); color: var(--warning); }
+        .result-score.low { background: var(--surface-hover); color: var(--text-muted); }
+        .text-list { display: flex; flex-direction: column; gap: 6px; }
+        .text-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; background: var(--surface-hover); border-radius: 6px; font-size: 0.75rem; border: 1px solid transparent; cursor: pointer; }
+        .text-item.active { border-color: var(--accent); background: var(--accent-dim); }
+        .text-item.empty { color: var(--text-muted); font-style: italic; cursor: default; }
+        .text-color { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+        .text-content { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .input-hint { margin-top: 6px; font-size: 0.72rem; color: var(--text-muted); }
+        .toggle-label { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--text-secondary); cursor: pointer; }
+        .toggle-label input[type="checkbox"] { accent-color: var(--accent); }
         .lens-section { margin-bottom: 12px; }
         .lens-section:last-child { margin-bottom: 0; }
-        .lens-subtitle {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            margin-bottom: 8px;
-        }
-        .signal-list {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .signal-row {
-            display: grid;
-            grid-template-columns: 92px 1fr 34px;
-            gap: 8px;
-            align-items: center;
-            font-size: 0.72rem;
-            color: #334155;
-        }
-        .signal-label {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .signal-bar {
-            height: 8px;
-            border-radius: 999px;
-            background: #e2e8f0;
-            overflow: hidden;
-        }
-        .signal-fill {
-            height: 100%;
-            border-radius: 999px;
-            background: linear-gradient(90deg, #818cf8, #4f46e5);
-            width: 0%;
-            transition: width 0.2s ease;
-        }
-        .signal-value {
-            text-align: right;
-            font-family: 'SF Mono', Monaco, monospace;
-            color: #475569;
-        }
-        .guide-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-        .guide-step {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.8rem;
-            color: #475569;
-        }
-        .guide-step.done { color: #166534; }
-        .guide-dot {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.68rem;
-            font-weight: 700;
-            background: #e2e8f0;
-            color: #475569;
-            flex-shrink: 0;
-        }
-        .guide-step.done .guide-dot {
-            background: #bbf7d0;
-            color: #166534;
-        }
-        .guide-message {
-            font-size: 0.78rem;
-            color: #334155;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 8px 10px;
-        }
-        .advanced-panel > summary {
-            list-style: none;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #334155;
-        }
+        .lens-subtitle { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px; }
+        .signal-list { display: flex; flex-direction: column; gap: 6px; }
+        .signal-row { display: grid; grid-template-columns: 92px 1fr 34px; gap: 8px; align-items: center; font-size: 0.72rem; color: var(--text-secondary); }
+        .signal-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .signal-bar { height: 8px; border-radius: 999px; background: var(--border-strong); overflow: hidden; }
+        .signal-fill { height: 100%; border-radius: 999px; background: var(--accent); width: 0%; transition: width 0.2s ease; }
+        .signal-value { text-align: right; font-family: 'SF Mono', ui-monospace, monospace; color: var(--text-muted); }
+        .guide-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+        .guide-step { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--text-secondary); }
+        .guide-step.done { color: var(--positive); }
+        .guide-dot { width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 700; background: var(--border-strong); color: var(--text-muted); flex-shrink: 0; }
+        .guide-step.done .guide-dot { background: rgba(0,200,5,0.2); color: var(--positive); }
+        .guide-message { font-size: 0.78rem; color: var(--text-secondary); background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+        .advanced-panel > summary { list-style: none; cursor: pointer; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); }
         .advanced-panel > summary::-webkit-details-marker { display: none; }
-        .advanced-panel > summary::after {
-            content: '▸';
-            float: right;
-            color: #6366f1;
-        }
+        .advanced-panel > summary::after { content: '▸'; float: right; color: var(--accent); }
         .advanced-panel[open] > summary::after { content: '▾'; }
         .advanced-content { margin-top: 12px; display: flex; flex-direction: column; gap: 14px; }
-        .advanced-section {
-            border-top: 1px solid #e2e8f0;
-            padding-top: 12px;
-        }
-        .advanced-section:first-child {
-            border-top: none;
-            padding-top: 0;
-        }
-
-        @media (max-width: 1000px) {
-            .start-banner { flex-direction: column; text-align: center; padding: 20px; }
-            .start-banner-steps { justify-content: center; }
-            .main-grid { grid-template-columns: 1fr; }
-        }
+        .advanced-section { border-top: 1px solid var(--border); padding-top: 12px; }
+        .advanced-section:first-child { border-top: none; padding-top: 0; }
+        textarea { min-height: 80px; }
     </style>
 </head>
 <body>
@@ -573,6 +222,7 @@
         </div>
     </div>
 
+    <script src="playground-guided.js"></script>
     <script>
         let texts = [];
         let embeddings = [];
@@ -894,7 +544,7 @@
                 const nx = pad.left + coords2d[neighbor.idx][0] * plotW;
                 const ny = pad.top + (1 - coords2d[neighbor.idx][1]) * plotH;
                 const strength = clamp((neighbor.score + 1) / 2, 0, 1);
-                ctx.strokeStyle = `rgba(15, 23, 42, ${0.18 + strength * 0.22})`;
+                ctx.strokeStyle = `rgba(245, 245, 247, ${0.18 + strength * 0.22})`;
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(px, py);
@@ -905,8 +555,8 @@
             
             ctx.save();
             ctx.translate(px, py);
-            ctx.fillStyle = '#0f172a';
-            ctx.strokeStyle = '#ffffff';
+            ctx.fillStyle = '#141518';
+            ctx.strokeStyle = '#f5f5f7';
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(0, -10);
@@ -916,13 +566,13 @@
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
-            ctx.fillStyle = '#ffffff';
+            ctx.fillStyle = '#f5f5f7';
             ctx.font = 'bold 9px -apple-system';
             ctx.textAlign = 'center';
             ctx.fillText('Q', 0, 3);
             ctx.restore();
             
-            ctx.fillStyle = '#334155';
+            ctx.fillStyle = '#8b8d97';
             ctx.font = '11px -apple-system';
             ctx.textAlign = 'left';
             ctx.fillText(
@@ -941,10 +591,11 @@
             renderedPoints = [];
             
             document.getElementById('nTexts').textContent = `${texts.length} ${texts.length === 1 ? 'text' : 'texts'}`;
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
             
             // Background grid
-            ctx.strokeStyle = '#e2e8f0';
+            ctx.strokeStyle = 'rgba(255,255,255,0.08)';
             ctx.lineWidth = 1;
             for (let i = 0; i <= 4; i++) {
                 const x = pad.left + (i / 4) * plotW;
@@ -960,7 +611,7 @@
             }
             
             if (coords2d.length === 0) {
-                ctx.fillStyle = '#94a3b8';
+                ctx.fillStyle = '#8b8d97';
                 ctx.font = '14px -apple-system';
                 ctx.textAlign = 'center';
                 ctx.fillText('Add texts to see their embeddings', width / 2, height / 2);
@@ -992,7 +643,7 @@
                 ctx.fill();
                 
                 // Label
-                ctx.fillStyle = '#1e293b';
+                ctx.fillStyle = '#f5f5f7';
                 ctx.font = '10px -apple-system';
                 ctx.textAlign = 'center';
                 ctx.fillText((idx + 1).toString(), x, y + radius + 12);
@@ -1499,6 +1150,77 @@
         renderSearchMessage('Search results will appear here.');
         renderBlendMessage('Blend neighbors will appear here.');
         updateLearningPath();
+
+        if (typeof PlaygroundGuided !== 'undefined') PlaygroundGuided.init({
+            key: 'embeddings',
+            steps: [
+                {
+                    title: "Text becomes a vector",
+                    context: "Type a sentence in the input box and click <strong>Add</strong>. Each text gets mapped to a point in embedding space.",
+                    question: "What does an embedding represent?",
+                    options: [
+                        { id: 'meaning', label: 'A dense numeric vector capturing semantic meaning' },
+                        { id: 'count', label: 'A word count' },
+                        { id: 'hash', label: 'A random hash of the text' }
+                    ],
+                    correctId: 'meaning',
+                    reveal: "Embeddings map text (or images, users, products) to dense vectors where <strong>similar items are nearby</strong>. Unlike bag-of-words, embeddings capture meaning: 'happy' and 'joyful' are close even though they share no letters.",
+                    setup: {}
+                },
+                {
+                    title: "Similar texts cluster together",
+                    context: "Add several related texts (e.g., 'order status', 'where is my package', 'track my order') and some unrelated ones ('reset password', 'change email'). Watch where they land.",
+                    question: "Texts about the same topic should:",
+                    options: [
+                        { id: 'close', label: 'Cluster together in the embedding space' },
+                        { id: 'far', label: 'Be spread across the space' },
+                        { id: 'random', label: 'Land in random positions' }
+                    ],
+                    correctId: 'close',
+                    reveal: "Good embeddings place semantically similar texts close together. This is the foundation for semantic search, clustering support tickets, and building RAG systems -- you find relevant content by finding nearby vectors.",
+                    setup: {}
+                },
+                {
+                    title: "Similarity threshold matters",
+                    context: "Adjust the <strong>Similarity Threshold</strong> slider and observe which texts get linked.",
+                    question: "Setting the similarity threshold too low will:",
+                    options: [
+                        { id: 'noise', label: 'Match unrelated texts -- too many false positives' },
+                        { id: 'miss', label: 'Miss related texts -- too few matches' },
+                        { id: 'perfect', label: 'Always give perfect results' }
+                    ],
+                    correctId: 'noise',
+                    reveal: "A low threshold means even loosely related texts match, creating false positives. A high threshold misses valid matches. The right threshold depends on your use case: search (moderate) vs deduplication (high) vs broad clustering (low).",
+                    setup: {}
+                }
+            ],
+            selfCheck: [
+                {
+                    prompt: "Two texts have cosine similarity 0.95. Does this guarantee they mean the same thing?",
+                    options: [
+                        { id: 'a', label: "No -- similar embeddings can mean related-but-different things" },
+                        { id: 'b', label: 'Yes -- 0.95 is very high' },
+                        { id: 'c', label: 'Only if the embedding model is perfect' }
+                    ],
+                    correctId: 'a',
+                    explanation: "High cosine similarity means the texts are semantically related, but 'How do I cancel?' and 'How do I subscribe?' might both be high-similarity customer service queries with opposite intents. Always validate with domain-specific examples."
+                }
+            ],
+            onStepEnter: function(idx, step) {
+                // Step 0: Add sample texts so learner has something to inspect. Step 1: no setup.
+                // Step 2: Set similarity threshold to demonstrate filtering effect.
+                if (idx === 0 && texts.length < 4) {
+                    addPreset('mixed');
+                } else if (idx === 2) {
+                    const slider = document.getElementById('thresholdSlider');
+                    if (slider) {
+                        slider.value = 0.7;
+                        document.getElementById('thresholdValue').textContent = '0.70';
+                        updateThreshold();
+                    }
+                }
+            }
+        });
     </script>
 </body>
 </html>

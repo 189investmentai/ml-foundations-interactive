@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNNs Playground</title>
+    <style>
+        :root {
+            --accent: #7c3aed;
+            --accent-dim: rgba(124, 58, 237, 0.12);
+        }
+    </style>
+    <link rel="stylesheet" href="playground-base.css">
+    <style>
+        .cnn-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--surface);
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+        .cnn-tab {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: all 0.15s;
+        }
+        .cnn-tab:hover:not(.active) {
+            background: var(--surface-hover);
+            color: var(--text-secondary);
+        }
+        .cnn-tab.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .cnn-panel {
+            display: none;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+        .cnn-panel.active { display: block; }
+
+        .cnn-panel-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+        .cnn-panel-desc {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 20px;
+        }
+
+        .step-grid {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .pixel-grid {
+            display: grid;
+            gap: 1px;
+            background: var(--border-strong);
+            padding: 1px;
+            border-radius: 4px;
+        }
+        .pixel {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            font-family: 'SF Mono', ui-monospace, monospace;
+            transition: all 0.15s;
+        }
+        .pixel.highlight {
+            outline: 3px solid var(--accent);
+            outline-offset: -1px;
+            z-index: 10;
+            position: relative;
+        }
+        .pixel.center {
+            outline: 3px solid var(--warning);
+            outline-offset: -1px;
+            z-index: 11;
+        }
+
+        .calculation-box {
+            background: var(--accent-dim);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 280px;
+        }
+        .calc-title {
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+        }
+        .calc-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-family: 'SF Mono', ui-monospace, monospace;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .calc-pixel {
+            background: var(--surface);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+        .calc-weight {
+            color: var(--accent);
+            font-weight: 600;
+        }
+        .calc-result {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--accent);
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        .output-grid {
+            display: grid;
+            gap: 1px;
+            background: var(--border-strong);
+            padding: 1px;
+            border-radius: 4px;
+            margin: 0 auto;
+        }
+        .output-pixel {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-family: 'SF Mono', ui-monospace, monospace;
+            transition: all 0.15s;
+        }
+        .output-pixel.current {
+            outline: 3px solid var(--positive);
+            outline-offset: -1px;
+            z-index: 10;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 8px 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            transition: all 0.15s;
+        }
+        .filter-btn:hover { border-color: var(--accent); color: var(--text-primary); }
+        .filter-btn.active {
+            border-color: var(--accent);
+            background: var(--accent-dim);
+            color: var(--accent);
+        }
+
+        .filter-display {
+            display: inline-grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            background: var(--bg);
+            padding: 2px;
+            border-radius: 6px;
+            margin-left: 16px;
+        }
+        .filter-cell {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'SF Mono', ui-monospace, monospace;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-radius: 3px;
+        }
+        .filter-positive { background: rgba(0,200,5,0.2); color: var(--positive); }
+        .filter-negative { background: rgba(255,80,0,0.2); color: var(--negative); }
+        .filter-zero { background: var(--surface-hover); color: var(--text-muted); }
+
+        .arrow-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+        .arrow { font-size: 2rem; color: var(--accent); }
+
+        .draw-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 24px;
+        }
+        .draw-section { text-align: center; }
+        .draw-section h3 {
+            font-size: 0.85rem;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+        }
+        .draw-canvas {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: crosshair;
+            image-rendering: pixelated;
+        }
+        .draw-tools {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            justify-content: center;
+        }
+        .tool-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: transparent;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            transition: all 0.15s;
+        }
+        .tool-btn:hover { background: var(--surface-hover); }
+        .tool-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+        .compare-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+        .compare-item {
+            text-align: center;
+            padding: 16px;
+            background: var(--surface-hover);
+            border-radius: 8px;
+        }
+        .compare-item h4 {
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        .compare-canvas {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            image-rendering: pixelated;
+        }
+        .compare-insight {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        .spatial-demo {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+        .spatial-side { text-align: center; }
+        .spatial-side h3 {
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+        .spatial-canvas {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            image-rendering: pixelated;
+        }
+        .prediction-bar {
+            margin-top: 16px;
+            background: var(--surface-hover);
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .pred-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        .pred-fill {
+            height: 8px;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        .pred-correct { background: var(--positive); }
+        .pred-wrong { background: var(--negative); }
+
+        .insight-box {
+            background: var(--accent-dim);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-top: 24px;
+        }
+        .insight-box h4 {
+            color: var(--accent);
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+        .insight-box p {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+
+        .position-indicator {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .position-indicator strong { color: var(--accent); }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+        .speed-control label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .speed-slider { width: 120px; }
+
+        @media (max-width: 900px) {
+            .step-grid { grid-template-columns: 1fr; }
+            .draw-container { grid-template-columns: 1fr; }
+            .compare-grid { grid-template-columns: repeat(2, 1fr); }
+            .spatial-demo { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>CNNs Playground</h1>
+                <span class="header-subtitle">Build intuition for how convolutions detect patterns</span>
+            </div>
+            <div class="header-actions">
+                <button class="reset-btn" onclick="resetAll()">Reset</button>
+            </div>
+        </header>
+
+        <div class="context-bar">
+            A convolution slides a small filter over an image, computing weighted sums at each position. Different filters detect different features -- edges, textures, shapes.
+        </div>
+
+        <div class="cnn-tabs">
+            <button class="cnn-tab active" onclick="showPanel(0)">Step by Step</button>
+            <button class="cnn-tab" onclick="showPanel(1)">Draw & Detect</button>
+            <button class="cnn-tab" onclick="showPanel(2)">Compare Filters</button>
+            <button class="cnn-tab" onclick="showPanel(3)">Why Spatial?</button>
+        </div>
+
+        <div class="cnn-panel active" id="panel0">
+            <div class="cnn-panel-title">Watch convolution happen, one step at a time</div>
+            <div class="cnn-panel-desc">The filter slides across the image. At each position, it multiplies overlapping pixels by filter weights and sums them up.</div>
+
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap;">
+                <span style="font-size:0.85rem;font-weight:500;color:var(--text-secondary)">Filter:</span>
+                <div class="filter-select">
+                    <button class="filter-btn active" onclick="setFilter('vertical')">Vertical Edge</button>
+                    <button class="filter-btn" onclick="setFilter('horizontal')">Horizontal Edge</button>
+                    <button class="filter-btn" onclick="setFilter('blur')">Blur</button>
+                </div>
+                <div class="filter-display" id="filterDisplay"></div>
+            </div>
+
+            <div class="step-grid">
+                <div class="image-area">
+                    <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:8px;text-align:center">Input Image (7x7)</div>
+                    <div class="pixel-grid" id="inputGrid" style="grid-template-columns:repeat(7,1fr)"></div>
+                </div>
+
+                <div class="arrow-label">
+                    <div class="arrow">&rarr;</div>
+                    <div id="calculationBox" class="calculation-box">
+                        <div class="calc-title">Calculation at this position:</div>
+                        <div id="calcContent"></div>
+                    </div>
+                </div>
+
+                <div class="output-area" style="text-align:center">
+                    <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:8px">Output (5x5)</div>
+                    <div class="output-grid" id="outputGrid" style="grid-template-columns:repeat(5,1fr)"></div>
+                </div>
+            </div>
+
+            <div class="position-indicator">
+                Filter position: <strong id="positionText">(0, 0)</strong>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-outline" onclick="prevStep()">Previous</button>
+                <button class="btn btn-primary" onclick="nextStep()">Next</button>
+                <button class="btn btn-outline" onclick="autoPlay()">Auto Play</button>
+            </div>
+
+            <div class="speed-control">
+                <label>Speed:</label>
+                <input type="range" class="speed-slider" min="100" max="1000" value="400" id="speedSlider">
+                <span id="speedLabel" style="font-size:0.8rem;color:var(--text-muted)">400ms</span>
+            </div>
+        </div>
+
+        <div class="cnn-panel" id="panel1">
+            <div class="cnn-panel-title">Draw your own image and see what filters detect</div>
+            <div class="cnn-panel-desc">Draw on the left canvas. Watch how different filters respond to edges you create.</div>
+
+            <div class="draw-container">
+                <div class="draw-section">
+                    <h3>Your Drawing</h3>
+                    <canvas id="drawCanvas" class="draw-canvas" width="224" height="224"></canvas>
+                    <div class="draw-tools">
+                        <button class="tool-btn active" onclick="setDrawTool('draw')">Draw</button>
+                        <button class="tool-btn" onclick="setDrawTool('erase')">Erase</button>
+                        <button class="tool-btn" onclick="clearDrawing()">Clear</button>
+                        <button class="tool-btn" onclick="loadPresetDrawing()">Load Sample</button>
+                    </div>
+                </div>
+                <div class="draw-section">
+                    <h3>Vertical Edge Filter</h3>
+                    <canvas id="drawOutputV" class="draw-canvas" width="224" height="224"></canvas>
+                    <div style="font-size:0.75rem;color:var(--text-muted);margin-top:8px">Bright = strong vertical edge detected</div>
+                </div>
+                <div class="draw-section">
+                    <h3>Horizontal Edge Filter</h3>
+                    <canvas id="drawOutputH" class="draw-canvas" width="224" height="224"></canvas>
+                    <div style="font-size:0.75rem;color:var(--text-muted);margin-top:8px">Bright = strong horizontal edge detected</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cnn-panel" id="panel2">
+            <div class="cnn-panel-title">Same image, different filters, different features</div>
+            <div class="cnn-panel-desc">Each filter extracts different information from the same image. CNNs learn which filters are useful for the task.</div>
+
+            <div class="compare-grid">
+                <div class="compare-item">
+                    <h4>Original</h4>
+                    <canvas id="compareOriginal" class="compare-canvas" width="112" height="112"></canvas>
+                    <div class="compare-insight">The input image</div>
+                </div>
+                <div class="compare-item">
+                    <h4>Vertical Edges</h4>
+                    <canvas id="compareVertical" class="compare-canvas" width="112" height="112"></canvas>
+                    <div class="compare-insight">Finds left-right transitions</div>
+                </div>
+                <div class="compare-item">
+                    <h4>Horizontal Edges</h4>
+                    <canvas id="compareHorizontal" class="compare-canvas" width="112" height="112"></canvas>
+                    <div class="compare-insight">Finds top-bottom transitions</div>
+                </div>
+                <div class="compare-item">
+                    <h4>All Edges (Sobel)</h4>
+                    <canvas id="compareSobel" class="compare-canvas" width="112" height="112"></canvas>
+                    <div class="compare-insight">Combines both directions</div>
+                </div>
+            </div>
+
+            <div style="margin-top:24px;text-align:center">
+                <span style="font-size:0.85rem;margin-right:12px;color:var(--text-secondary)">Try different images:</span>
+                <button class="filter-btn active" onclick="setCompareImage('digit')">Digit "7"</button>
+                <button class="filter-btn" onclick="setCompareImage('square')">Square</button>
+                <button class="filter-btn" onclick="setCompareImage('cross')">Cross</button>
+                <button class="filter-btn" onclick="setCompareImage('circle')">Circle</button>
+            </div>
+        </div>
+
+        <div class="cnn-panel" id="panel3">
+            <div class="cnn-panel-title">Why does spatial structure matter?</div>
+            <div class="cnn-panel-desc">A dense network treats each pixel independently. A CNN exploits the fact that nearby pixels are related.</div>
+
+            <div class="spatial-demo">
+                <div class="spatial-side">
+                    <h3>Original Image</h3>
+                    <canvas id="spatialOriginal" class="spatial-canvas" width="168" height="168"></canvas>
+                    <div class="prediction-bar">
+                        <div class="pred-label">
+                            <span>CNN Confidence: "7"</span>
+                            <span id="confOriginal">92%</span>
+                        </div>
+                        <div class="pred-fill pred-correct" style="width:92%"></div>
+                    </div>
+                    <div style="font-size:0.8rem;color:var(--text-muted);margin-top:8px">Spatial patterns preserved</div>
+                </div>
+                <div class="spatial-side">
+                    <h3>Scrambled Pixels</h3>
+                    <canvas id="spatialScrambled" class="spatial-canvas" width="168" height="168"></canvas>
+                    <div class="prediction-bar">
+                        <div class="pred-label">
+                            <span>CNN Confidence: "7"</span>
+                            <span id="confScrambled">8%</span>
+                        </div>
+                        <div class="pred-fill pred-wrong" style="width:8%"></div>
+                    </div>
+                    <div style="font-size:0.8rem;color:var(--text-muted);margin-top:8px">Same pixels, random positions</div>
+                </div>
+            </div>
+
+            <div style="text-align:center;margin-top:20px">
+                <button class="btn btn-primary" onclick="scrambleDemo()">Scramble Again</button>
+            </div>
+
+            <div class="insight-box">
+                <h4>The Key Insight</h4>
+                <p>Both images have exactly the same pixels and the same pixel values. But the scrambled version loses all spatial relationships. The "7" shape is destroyed. A CNN relies on detecting local patterns (edges, curves) that only make sense when pixels stay in their original positions. This is why CNNs work for images but not for tabular data where column order is arbitrary.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="playground-guided.js"></script>
+    <script>
+    let currentPanel = 0;
+    let stepPosition = 0;
+    let autoPlayInterval = null;
+    let drawTool = 'draw';
+    let isDrawing = false;
+    let currentFilter = 'vertical';
+    let currentCompareImage = 'digit';
+
+    const filters = {
+        vertical: [[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]],
+        horizontal: [[-1, -1, -1], [0, 0, 0], [1, 1, 1]],
+        blur: [[1/9, 1/9, 1/9], [1/9, 1/9, 1/9], [1/9, 1/9, 1/9]],
+        sobelX: [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]],
+        sobelY: [[-1, -2, -1], [0, 0, 0], [1, 2, 1]]
+    };
+
+    const sampleImage = [
+        [20, 20, 20, 200, 200, 200, 200],
+        [20, 20, 20, 200, 200, 200, 200],
+        [20, 20, 20, 200, 200, 200, 200],
+        [20, 20, 20, 200, 200, 200, 200],
+        [20, 20, 20, 200, 200, 200, 200],
+        [20, 20, 20, 200, 200, 200, 200],
+        [20, 20, 20, 200, 200, 200, 200]
+    ];
+
+    function showPanel(index) {
+        document.querySelectorAll('.cnn-panel').forEach((p, i) => {
+            p.classList.toggle('active', i === index);
+        });
+        document.querySelectorAll('.cnn-tab').forEach((t, i) => {
+            t.classList.toggle('active', i === index);
+        });
+        currentPanel = index;
+        if (index === 1) initDrawPanel();
+        if (index === 2) updateCompare();
+        if (index === 3) initSpatialDemo();
+    }
+
+    function initStepPanel() {
+        renderInputGrid();
+        renderOutputGrid();
+        updateFilterDisplay();
+        updateCalculation();
+    }
+
+    function renderInputGrid() {
+        const grid = document.getElementById('inputGrid');
+        grid.innerHTML = '';
+        for (let y = 0; y < 7; y++) {
+            for (let x = 0; x < 7; x++) {
+                const pixel = document.createElement('div');
+                pixel.className = 'pixel';
+                pixel.style.background = `rgb(${sampleImage[y][x]}, ${sampleImage[y][x]}, ${sampleImage[y][x]})`;
+                pixel.style.color = sampleImage[y][x] > 127 ? '#1e293b' : '#e2e8f0';
+                pixel.textContent = sampleImage[y][x];
+                pixel.dataset.x = x;
+                pixel.dataset.y = y;
+                grid.appendChild(pixel);
+            }
+        }
+        highlightCurrentRegion();
+    }
+
+    function renderOutputGrid() {
+        const grid = document.getElementById('outputGrid');
+        grid.innerHTML = '';
+        const output = computeFullOutput();
+        for (let y = 0; y < 5; y++) {
+            for (let x = 0; x < 5; x++) {
+                const pixel = document.createElement('div');
+                pixel.className = 'output-pixel';
+                const val = output[y][x];
+                const normalized = Math.min(255, Math.max(0, Math.abs(val)));
+                const hue = val >= 0 ? 142 : 0;
+                pixel.style.background = `hsl(${hue}, 70%, ${Math.max(8, 40 - normalized/8)}%)`;
+                pixel.style.color = normalized > 80 ? '#fff' : 'var(--text-muted)';
+                pixel.textContent = Math.round(val);
+                pixel.style.fontSize = Math.abs(val) > 99 ? '0.5rem' : '0.6rem';
+                pixel.dataset.x = x;
+                pixel.dataset.y = y;
+                grid.appendChild(pixel);
+            }
+        }
+        highlightCurrentOutput();
+    }
+
+    function computeFullOutput() {
+        const kernel = filters[currentFilter];
+        const output = [];
+        for (let y = 0; y < 5; y++) {
+            output[y] = [];
+            for (let x = 0; x < 5; x++) {
+                output[y][x] = computeConvolution(x, y, kernel);
+            }
+        }
+        return output;
+    }
+
+    function computeConvolution(px, py, kernel) {
+        let sum = 0;
+        for (let ky = 0; ky < 3; ky++) {
+            for (let kx = 0; kx < 3; kx++) {
+                sum += sampleImage[py + ky][px + kx] * kernel[ky][kx];
+            }
+        }
+        return sum;
+    }
+
+    function highlightCurrentRegion() {
+        const py = Math.floor(stepPosition / 5);
+        const px = stepPosition % 5;
+        document.querySelectorAll('#inputGrid .pixel').forEach(p => {
+            const x = parseInt(p.dataset.x);
+            const y = parseInt(p.dataset.y);
+            const inRegion = x >= px && x < px + 3 && y >= py && y < py + 3;
+            const isCenter = x === px + 1 && y === py + 1;
+            p.classList.toggle('highlight', inRegion);
+            p.classList.toggle('center', isCenter);
+        });
+        document.getElementById('positionText').textContent = `(${px}, ${py})`;
+    }
+
+    function highlightCurrentOutput() {
+        const py = Math.floor(stepPosition / 5);
+        const px = stepPosition % 5;
+        document.querySelectorAll('#outputGrid .output-pixel').forEach(p => {
+            const x = parseInt(p.dataset.x);
+            const y = parseInt(p.dataset.y);
+            p.classList.toggle('current', x === px && y === py);
+        });
+    }
+
+    function updateCalculation() {
+        const py = Math.floor(stepPosition / 5);
+        const px = stepPosition % 5;
+        const kernel = filters[currentFilter];
+        let html = '';
+        let total = 0;
+        for (let ky = 0; ky < 3; ky++) {
+            for (let kx = 0; kx < 3; kx++) {
+                const pixelVal = sampleImage[py + ky][px + kx];
+                const weight = kernel[ky][kx];
+                const product = pixelVal * weight;
+                total += product;
+                const weightStr = weight === 1/9 ? '0.11' : weight;
+                html += `<div class="calc-row">
+                    <span class="calc-pixel">${pixelVal}</span>
+                    <span>&times;</span>
+                    <span class="calc-weight">${weightStr}</span>
+                    <span>=</span>
+                    <span>${Math.round(product)}</span>
+                </div>`;
+            }
+        }
+        html += `<div class="calc-result">Sum = ${Math.round(total)}</div>`;
+        document.getElementById('calcContent').innerHTML = html;
+    }
+
+    function updateFilterDisplay() {
+        const kernel = filters[currentFilter];
+        const display = document.getElementById('filterDisplay');
+        display.innerHTML = '';
+        for (let y = 0; y < 3; y++) {
+            for (let x = 0; x < 3; x++) {
+                const cell = document.createElement('div');
+                cell.className = 'filter-cell';
+                const val = kernel[y][x];
+                cell.textContent = val === 1/9 ? '.11' : val;
+                if (val > 0) cell.classList.add('filter-positive');
+                else if (val < 0) cell.classList.add('filter-negative');
+                else cell.classList.add('filter-zero');
+                display.appendChild(cell);
+            }
+        }
+    }
+
+    function setFilter(name) {
+        currentFilter = name;
+        document.querySelectorAll('#panel0 .filter-btn').forEach(b => {
+            b.classList.toggle('active', b.textContent.toLowerCase().includes(name));
+        });
+        updateFilterDisplay();
+        renderOutputGrid();
+        updateCalculation();
+    }
+
+    function nextStep() {
+        stepPosition = (stepPosition + 1) % 25;
+        highlightCurrentRegion();
+        highlightCurrentOutput();
+        updateCalculation();
+    }
+
+    function prevStep() {
+        stepPosition = (stepPosition - 1 + 25) % 25;
+        highlightCurrentRegion();
+        highlightCurrentOutput();
+        updateCalculation();
+    }
+
+    function autoPlay() {
+        if (autoPlayInterval) {
+            clearInterval(autoPlayInterval);
+            autoPlayInterval = null;
+            return;
+        }
+        const speed = parseInt(document.getElementById('speedSlider').value);
+        autoPlayInterval = setInterval(() => {
+            nextStep();
+            if (stepPosition === 0) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+        }, speed);
+    }
+
+    document.getElementById('speedSlider').addEventListener('input', (e) => {
+        document.getElementById('speedLabel').textContent = e.target.value + 'ms';
+    });
+
+    let drawPanelInited = false;
+    function initDrawPanel() {
+        if (drawPanelInited) return;
+        drawPanelInited = true;
+        const canvas = document.getElementById('drawCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, 224, 224);
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', drawOnCanvas);
+        canvas.addEventListener('mouseup', endDraw);
+        canvas.addEventListener('mouseleave', endDraw);
+    }
+
+    function startDraw(e) { isDrawing = true; drawOnCanvas(e); }
+
+    function drawOnCanvas(e) {
+        if (!isDrawing) return;
+        const canvas = document.getElementById('drawCanvas');
+        const ctx = canvas.getContext('2d');
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        ctx.fillStyle = drawTool === 'draw' ? 'white' : 'black';
+        ctx.beginPath();
+        ctx.arc(x, y, 12, 0, Math.PI * 2);
+        ctx.fill();
+        updateDrawOutputs();
+    }
+
+    function endDraw() { isDrawing = false; }
+
+    function setDrawTool(tool) {
+        drawTool = tool;
+        document.querySelectorAll('.draw-tools .tool-btn').forEach(b => {
+            b.classList.toggle('active', b.textContent.toLowerCase() === tool);
+        });
+    }
+
+    function clearDrawing() {
+        const canvas = document.getElementById('drawCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, 224, 224);
+        updateDrawOutputs();
+    }
+
+    function loadPresetDrawing() {
+        const canvas = document.getElementById('drawCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, 224, 224);
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 20;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(50, 50);
+        ctx.lineTo(174, 50);
+        ctx.lineTo(100, 174);
+        ctx.stroke();
+        updateDrawOutputs();
+    }
+
+    function updateDrawOutputs() {
+        const inputCanvas = document.getElementById('drawCanvas');
+        const inputCtx = inputCanvas.getContext('2d');
+        const imageData = inputCtx.getImageData(0, 0, 224, 224);
+        const gray = [];
+        for (let y = 0; y < 224; y++) {
+            gray[y] = [];
+            for (let x = 0; x < 224; x++) {
+                const i = (y * 224 + x) * 4;
+                gray[y][x] = imageData.data[i];
+            }
+        }
+        applyFilterToCanvas(gray, filters.vertical, 'drawOutputV');
+        applyFilterToCanvas(gray, filters.horizontal, 'drawOutputH');
+    }
+
+    function applyFilterToCanvas(image, kernel, canvasId) {
+        const canvas = document.getElementById(canvasId);
+        const ctx = canvas.getContext('2d');
+        const output = ctx.createImageData(224, 224);
+        for (let y = 1; y < 223; y++) {
+            for (let x = 1; x < 223; x++) {
+                let sum = 0;
+                for (let ky = -1; ky <= 1; ky++) {
+                    for (let kx = -1; kx <= 1; kx++) {
+                        sum += image[y + ky][x + kx] * kernel[ky + 1][kx + 1];
+                    }
+                }
+                const val = Math.min(255, Math.abs(sum));
+                const i = (y * 224 + x) * 4;
+                output.data[i] = val;
+                output.data[i + 1] = val;
+                output.data[i + 2] = val;
+                output.data[i + 3] = 255;
+            }
+        }
+        ctx.putImageData(output, 0, 0);
+    }
+
+    const compareImages = {
+        digit: generateDigit7(),
+        square: generateSquare(),
+        cross: generateCross(),
+        circle: generateCircle()
+    };
+
+    function generateDigit7() {
+        const img = new Array(16).fill(0).map(() => new Array(16).fill(20));
+        for (let x = 3; x < 13; x++) { img[3][x] = 220; img[4][x] = 220; }
+        for (let i = 0; i < 10; i++) {
+            const x = 11 - Math.floor(i * 0.5);
+            const y = 5 + i;
+            if (y < 16 && x >= 0) { img[y][x] = 220; img[y][x-1] = 220; }
+        }
+        return img;
+    }
+
+    function generateSquare() {
+        const img = new Array(16).fill(0).map(() => new Array(16).fill(20));
+        for (let x = 3; x < 13; x++) { img[3][x] = 220; img[12][x] = 220; }
+        for (let y = 3; y < 13; y++) { img[y][3] = 220; img[y][12] = 220; }
+        return img;
+    }
+
+    function generateCross() {
+        const img = new Array(16).fill(0).map(() => new Array(16).fill(20));
+        for (let i = 2; i < 14; i++) { img[8][i] = 220; img[i][8] = 220; }
+        return img;
+    }
+
+    function generateCircle() {
+        const img = new Array(16).fill(0).map(() => new Array(16).fill(20));
+        const cx = 8, cy = 8, r = 5;
+        for (let y = 0; y < 16; y++) {
+            for (let x = 0; x < 16; x++) {
+                const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+                if (Math.abs(dist - r) < 1.2) img[y][x] = 220;
+            }
+        }
+        return img;
+    }
+
+    function setCompareImage(name) {
+        currentCompareImage = name;
+        document.querySelectorAll('#panel2 .filter-btn').forEach(b => {
+            b.classList.toggle('active', b.textContent.toLowerCase().includes(name));
+        });
+        updateCompare();
+    }
+
+    function updateCompare() {
+        const img = compareImages[currentCompareImage];
+        drawCompareImage('compareOriginal', img);
+        drawCompareFiltered('compareVertical', img, filters.vertical);
+        drawCompareFiltered('compareHorizontal', img, filters.horizontal);
+        drawCompareSobel('compareSobel', img);
+    }
+
+    function drawCompareImage(canvasId, img) {
+        const canvas = document.getElementById(canvasId);
+        const ctx = canvas.getContext('2d');
+        const scale = 7;
+        for (let y = 0; y < 16; y++) {
+            for (let x = 0; x < 16; x++) {
+                const val = img[y][x];
+                ctx.fillStyle = `rgb(${val}, ${val}, ${val})`;
+                ctx.fillRect(x * scale, y * scale, scale, scale);
+            }
+        }
+    }
+
+    function drawCompareFiltered(canvasId, img, kernel) {
+        const canvas = document.getElementById(canvasId);
+        const ctx = canvas.getContext('2d');
+        const scale = 7;
+        for (let y = 0; y < 16; y++) {
+            for (let x = 0; x < 16; x++) {
+                let val = 0;
+                if (y > 0 && y < 15 && x > 0 && x < 15) {
+                    for (let ky = -1; ky <= 1; ky++) {
+                        for (let kx = -1; kx <= 1; kx++) {
+                            val += img[y + ky][x + kx] * kernel[ky + 1][kx + 1];
+                        }
+                    }
+                }
+                val = Math.min(255, Math.abs(val));
+                ctx.fillStyle = `rgb(${val}, ${val}, ${val})`;
+                ctx.fillRect(x * scale, y * scale, scale, scale);
+            }
+        }
+    }
+
+    function drawCompareSobel(canvasId, img) {
+        const canvas = document.getElementById(canvasId);
+        const ctx = canvas.getContext('2d');
+        const scale = 7;
+        for (let y = 0; y < 16; y++) {
+            for (let x = 0; x < 16; x++) {
+                let gx = 0, gy = 0;
+                if (y > 0 && y < 15 && x > 0 && x < 15) {
+                    for (let ky = -1; ky <= 1; ky++) {
+                        for (let kx = -1; kx <= 1; kx++) {
+                            gx += img[y + ky][x + kx] * filters.sobelX[ky + 1][kx + 1];
+                            gy += img[y + ky][x + kx] * filters.sobelY[ky + 1][kx + 1];
+                        }
+                    }
+                }
+                const val = Math.min(255, Math.sqrt(gx * gx + gy * gy));
+                ctx.fillStyle = `rgb(${val}, ${val}, ${val})`;
+                ctx.fillRect(x * scale, y * scale, scale, scale);
+            }
+        }
+    }
+
+    function initSpatialDemo() {
+        const img = generateDigit7Large();
+        drawSpatialCanvas('spatialOriginal', img);
+        scrambleDemo();
+    }
+
+    function generateDigit7Large() {
+        const img = new Array(24).fill(0).map(() => new Array(24).fill(30));
+        for (let x = 4; x < 20; x++) {
+            img[4][x] = 230; img[5][x] = 230; img[6][x] = 230;
+        }
+        for (let i = 0; i < 15; i++) {
+            const x = 17 - Math.floor(i * 0.6);
+            const y = 7 + i;
+            if (y < 22 && x >= 2) {
+                img[y][x] = 230; img[y][x-1] = 230; img[y][x-2] = 230;
+            }
+        }
+        return img;
+    }
+
+    function drawSpatialCanvas(canvasId, img) {
+        const canvas = document.getElementById(canvasId);
+        const ctx = canvas.getContext('2d');
+        const scale = 7;
+        for (let y = 0; y < 24; y++) {
+            for (let x = 0; x < 24; x++) {
+                const val = img[y][x];
+                ctx.fillStyle = `rgb(${val}, ${val}, ${val})`;
+                ctx.fillRect(x * scale, y * scale, scale, scale);
+            }
+        }
+    }
+
+    function scrambleDemo() {
+        const img = generateDigit7Large();
+        const pixels = [];
+        for (let y = 0; y < 24; y++) {
+            for (let x = 0; x < 24; x++) {
+                pixels.push(img[y][x]);
+            }
+        }
+        for (let i = pixels.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [pixels[i], pixels[j]] = [pixels[j], pixels[i]];
+        }
+        const scrambled = new Array(24).fill(0).map(() => new Array(24).fill(0));
+        let idx = 0;
+        for (let y = 0; y < 24; y++) {
+            for (let x = 0; x < 24; x++) {
+                scrambled[y][x] = pixels[idx++];
+            }
+        }
+        drawSpatialCanvas('spatialScrambled', scrambled);
+        const conf = 5 + Math.floor(Math.random() * 15);
+        document.getElementById('confScrambled').textContent = conf + '%';
+        document.querySelector('#panel3 .pred-wrong').style.width = conf + '%';
+    }
+
+    function resetAll() {
+        stepPosition = 0;
+        currentFilter = 'vertical';
+        if (autoPlayInterval) {
+            clearInterval(autoPlayInterval);
+            autoPlayInterval = null;
+        }
+        initStepPanel();
+        if (drawPanelInited) clearDrawing();
+        setCompareImage('digit');
+    }
+
+    initStepPanel();
+
+    if (typeof PlaygroundGuided !== 'undefined') PlaygroundGuided.init({
+        key: 'cnns',
+        steps: [
+            {
+                title: "A filter detects one pattern",
+                context: "In the <strong>Step by Step</strong> tab, select the Vertical Edge filter. Watch it slide across the image.",
+                question: "The vertical edge filter produces large values when:",
+                options: [
+                    { id: 'edge', label: 'The pixel values change sharply left-to-right (an edge)' },
+                    { id: 'uniform', label: 'All pixels are the same color' },
+                    { id: 'random', label: 'Pixels are random' }
+                ],
+                correctId: 'edge',
+                reveal: "The vertical edge filter has weights [-1, 0, 1] across columns. When left pixels are dark and right pixels are bright (or vice versa), the weighted sum is large. Uniform regions produce zero output.",
+                setup: {}
+            },
+            {
+                title: "Different filters, different features",
+                context: "Switch to <strong>Compare Filters</strong> tab. See how vertical, horizontal, and Sobel filters extract different information from the same image.",
+                question: "A CNN learns these filters automatically. What determines which filters it learns?",
+                options: [
+                    { id: 'task', label: 'The task -- backpropagation finds filters useful for the prediction goal' },
+                    { id: 'random', label: 'They stay random after training' },
+                    { id: 'manual', label: 'Engineers design them by hand' }
+                ],
+                correctId: 'task',
+                reveal: "Unlike traditional computer vision where engineers design filters, CNNs learn them via backpropagation. Early layers learn edges and textures, deeper layers learn complex patterns (eyes, wheels, textures). The task objective drives what gets learned.",
+                setup: {}
+            },
+            {
+                title: "Spatial structure is everything",
+                context: "Go to <strong>Why Spatial?</strong> tab. Compare the original digit with its scrambled version.",
+                question: "Both images have identical pixel values. Why does scrambling destroy the CNN's prediction?",
+                options: [
+                    { id: 'spatial', label: 'CNNs rely on local spatial patterns (edges, curves) that scrambling destroys' },
+                    { id: 'pixels', label: 'Scrambling changes pixel values' },
+                    { id: 'colors', label: 'The colors are different' }
+                ],
+                correctId: 'spatial',
+                reveal: "A CNN recognizes the digit '7' by detecting local patterns: the horizontal stroke at the top, the diagonal stroke, the corner where they meet. Scrambling preserves every pixel value but destroys all spatial relationships. This is why CNNs work for images but not tabular data.",
+                setup: {}
+            }
+        ],
+        selfCheck: [
+            {
+                prompt: "A 3x3 convolution filter on a 32x32 image produces a 30x30 output (no padding). Why does the output shrink?",
+                options: [
+                    { id: 'a', label: "The filter can't center on edge pixels -- it needs neighbors on all sides" },
+                    { id: 'b', label: 'Information is lost' },
+                    { id: 'c', label: 'The filter compresses the image' }
+                ],
+                correctId: 'a',
+                explanation: "A 3x3 filter needs a 1-pixel border around the center pixel. The top-left pixel has no neighbors above or left, so the filter can't be applied there. Padding (adding zeros around the border) preserves output dimensions."
+            }
+        ],
+        onStepEnter: function(idx, step) {
+                if (idx === 0) {
+                    showPanel(0);
+                    setFilter('vertical');
+                } else if (idx === 1) {
+                    showPanel(2);
+                } else if (idx === 2) {
+                    showPanel(3);
+                }
+            }
+    });
+    </script>
+</body>
+</html>

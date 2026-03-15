@@ -5,164 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Prompting Playground</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --accent: #10b981;
+            --accent-dim: rgba(16, 185, 129, 0.12);
         }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-        }
-
-        h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
-        .header-subtitle { font-size: 0.9rem; color: #64748b; }
-
-        .reset-btn {
-            background: white;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-        .reset-btn:hover { background: #f1f5f9; color: #475569; }
-
-        .start-banner {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            border-radius: 16px;
-            padding: 24px 32px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-        .start-banner-icon { font-size: 2.5rem; flex-shrink: 0; }
-        .start-banner-content h2 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
-        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 12px; }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .panel {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .panel-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .panel-badge {
-            font-size: 0.65rem;
-            padding: 3px 8px;
-            border-radius: 10px;
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-family: 'SF Mono', Monaco, monospace;
-            resize: vertical;
-            min-height: 200px;
-        }
-        textarea:focus {
-            outline: none;
-            border-color: #10b981;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-primary {
-            background: #10b981;
-            color: white;
-        }
-        .btn-primary:hover { background: #059669; }
+    </style>
+    <link rel="stylesheet" href="playground-base.css">
+    <style>
+        /* Prompting playground-specific */
+        .main-grid { grid-template-columns: 1fr 1fr; }
         .btn-secondary {
-            background: #f1f5f9;
-            color: #475569;
+            background: var(--surface-hover);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
         }
-        .btn-secondary:hover { background: #e2e8f0; }
-
-        .btn-row {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-
-        .templates {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
+        .btn-secondary:hover { background: var(--surface-active); color: var(--text-primary); }
+        .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .templates { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
         .template-btn {
             padding: 6px 12px;
-            background: #f1f5f9;
-            border: 1px solid #e2e8f0;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
             border-radius: 20px;
             font-size: 0.75rem;
             cursor: pointer;
-            color: #475569;
+            color: var(--text-secondary);
+            transition: all 0.15s;
         }
-        .template-btn:hover { background: #e2e8f0; }
+        .template-btn:hover { background: var(--surface-active); color: var(--text-primary); }
         .template-btn.active {
-            background: #dcfce7;
-            border-color: #86efac;
-            color: #166534;
+            background: var(--accent-dim);
+            border-color: var(--accent);
+            color: var(--accent);
         }
-
         .output-box {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
             border-radius: 6px;
             padding: 12px;
             min-height: 200px;
             font-size: 0.85rem;
             white-space: pre-wrap;
+            color: var(--text-primary);
         }
-
         .comparison-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -170,70 +55,48 @@
             margin-top: 12px;
         }
         .comparison-card {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
             border-radius: 6px;
             padding: 10px;
         }
         .comparison-label {
             font-size: 0.7rem;
             font-weight: 600;
-            color: #64748b;
+            color: var(--text-muted);
             text-transform: uppercase;
             margin-bottom: 6px;
         }
-        .comparison-output {
-            font-size: 0.8rem;
-            color: #1e293b;
-        }
-
+        .comparison-output { font-size: 0.8rem; color: var(--text-primary); }
         .insight-bar {
-            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
-            border: 1px solid #86efac;
+            background: var(--accent-dim);
+            border: 1px solid var(--accent);
             border-radius: 10px;
             padding: 14px 16px;
             margin-top: 16px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
         }
-        .insight-icon { font-size: 1.2rem; }
-        .insight-content { flex: 1; }
-        .insight-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #166534;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-        .insight-text { font-size: 0.85rem; color: #15803d; }
-
+        .insight-text { color: var(--text-secondary); }
         .context-section {
             margin-top: 16px;
             padding-top: 16px;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid var(--border);
         }
         .context-label {
             font-size: 0.75rem;
             font-weight: 600;
-            color: #64748b;
+            color: var(--text-muted);
             margin-bottom: 6px;
         }
         .context-box {
-            background: #fef3c7;
-            border: 1px solid #fcd34d;
+            background: rgba(255, 184, 0, 0.12);
+            border: 1px solid var(--warning);
             border-radius: 6px;
             padding: 10px;
             font-size: 0.8rem;
-            color: #92400e;
+            color: var(--warning);
         }
-
-        @media (max-width: 900px) {
-            .start-banner { flex-direction: column; text-align: center; padding: 20px; }
-            .start-banner-steps { justify-content: center; }
-            .main-grid { grid-template-columns: 1fr; }
-            .comparison-grid { grid-template-columns: 1fr; }
-        }
+        textarea { min-height: 200px; font-family: 'SF Mono', ui-monospace, monospace; }
+        @media (max-width: 900px) { .comparison-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -329,6 +192,7 @@ Try different prompt styles to see how they affect the response.
         </div>
     </div>
 
+    <script src="playground-guided.js"></script>
     <script>
         const templates = {
             zeroshot: `Classify this support ticket as: billing, technical, or general.
@@ -483,6 +347,69 @@ Try different prompt styles to see how they affect the response.`;
 
         // Initialize
         updateInsight('zeroshot');
+
+        if (typeof PlaygroundGuided !== 'undefined') PlaygroundGuided.init({
+            key: 'prompting',
+            steps: [
+                {
+                    title: "Zero-shot: just ask",
+                    context: "Select the <strong>Zero-Shot</strong> template. The model gets only a task description, no examples.",
+                    question: "When does zero-shot prompting work well?",
+                    options: [
+                        { id: 'common', label: 'For common tasks the model was trained on (summarize, translate, classify)' },
+                        { id: 'always', label: 'Always -- examples are unnecessary' },
+                        { id: 'never', label: 'Never -- you always need examples' }
+                    ],
+                    correctId: 'common',
+                    reveal: "Zero-shot works for tasks well-represented in pretraining data. For domain-specific or unusual formats, the model needs examples to understand what you want. Start zero-shot, add examples only if quality is insufficient.",
+                    setup: {}
+                },
+                {
+                    title: "Few-shot: teach by example",
+                    context: "Switch to <strong>Few-Shot</strong>. The prompt includes 2-3 examples of input/output pairs before the actual query.",
+                    question: "What do few-shot examples primarily teach the model?",
+                    options: [
+                        { id: 'format', label: 'The output format and style you expect' },
+                        { id: 'knowledge', label: 'New factual knowledge' },
+                        { id: 'speed', label: 'To respond faster' }
+                    ],
+                    correctId: 'format',
+                    reveal: "Few-shot examples mainly teach the model the <strong>format, style, and pattern</strong> of desired outputs. They don't teach new facts -- the model already has its knowledge. Examples are most valuable when you need a specific output structure.",
+                    setup: {}
+                },
+                {
+                    title: "Chain-of-thought: think step by step",
+                    context: "Switch to <strong>Chain of Thought</strong>. The prompt asks the model to reason through the problem step by step.",
+                    question: "Chain-of-thought prompting helps most with:",
+                    options: [
+                        { id: 'reasoning', label: 'Multi-step reasoning tasks (math, logic, planning)' },
+                        { id: 'simple', label: 'Simple factual lookups' },
+                        { id: 'creative', label: 'Creative writing' }
+                    ],
+                    correctId: 'reasoning',
+                    reveal: "CoT forces the model to show intermediate reasoning, which improves accuracy on tasks requiring multiple logical steps. For simple tasks, it adds unnecessary verbosity. The key insight: the model 'thinks' in its output tokens, so more reasoning tokens = better reasoning.",
+                    setup: {}
+                }
+            ],
+            selfCheck: [
+                {
+                    prompt: "You want an LLM to classify support tickets into 15 custom categories. Best prompting approach?",
+                    options: [
+                        { id: 'a', label: 'Few-shot with 1-2 examples per category showing the expected format' },
+                        { id: 'b', label: 'Zero-shot with just the category names' },
+                        { id: 'c', label: 'Chain-of-thought' }
+                    ],
+                    correctId: 'a',
+                    explanation: "Custom categories need examples to disambiguate similar classes. 1-2 examples per category teach the model your specific taxonomy. Zero-shot might confuse similar categories; CoT is overkill for classification."
+                }
+            ],
+            onStepEnter: function(idx, step) {
+                const btns = document.querySelectorAll('.template-btn');
+                if (idx === 0) setTemplate('zeroshot', btns[0]);
+                else if (idx === 1) setTemplate('fewshot', btns[1]);
+                else if (idx === 2) setTemplate('cot', btns[2]);
+            }
+        });
     </script>
 </body>
 </html>

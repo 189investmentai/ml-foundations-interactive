@@ -5,567 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Linear Regression Playground</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --accent: #6366f1;
+            --accent-dim: rgba(99, 102, 241, 0.12);
         }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        /* ===== HEADER ===== */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-        }
-
-        h1 {
-            font-size: 1.5rem;
-            color: #0f172a;
-            margin-bottom: 4px;
-        }
-
-        .header-subtitle {
-            font-size: 0.9rem;
-            color: #64748b;
-        }
-
-        .reset-btn {
-            background: white;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-
-        .reset-btn:hover {
-            background: #f1f5f9;
-            color: #475569;
-        }
-
-        /* ===== START HERE BANNER ===== */
-        .start-banner {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            color: white;
-            border-radius: 16px;
-            padding: 24px 32px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-
-        .start-banner-icon {
-            font-size: 2.5rem;
-            flex-shrink: 0;
-        }
-
-        .start-banner-content h2 {
-            font-size: 1.1rem;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .start-banner-content p {
-            font-size: 0.9rem;
-            opacity: 0.9;
-            margin-bottom: 12px;
-        }
-
-        .start-banner-steps {
-            display: flex;
-            gap: 24px;
-            flex-wrap: wrap;
-        }
-
-        .start-step {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-        }
-
-        .step-num {
-            background: rgba(255,255,255,0.2);
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 0.75rem;
-        }
-
-        /* ===== QUICK SCENARIOS ===== */
-        .scenarios-bar {
-            background: white;
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            flex-wrap: wrap;
-        }
-
-        .scenarios-label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .scenario-btn {
-            padding: 8px 14px;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .scenario-btn.perfect { background: #dcfce7; color: #166534; }
-        .scenario-btn.perfect:hover { background: #bbf7d0; }
-        .scenario-btn.outlier { background: #fef3c7; color: #92400e; }
-        .scenario-btn.outlier:hover { background: #fde68a; }
-        .scenario-btn.nonlinear { background: #fce7f3; color: #9d174d; }
-        .scenario-btn.nonlinear:hover { background: #fbcfe8; }
-        .scenario-btn.noise { background: #e0e7ff; color: #3730a3; }
-        .scenario-btn.noise:hover { background: #c7d2fe; }
-        .scenario-btn.challenge { background: #6366f1; color: white; }
-        .scenario-btn.challenge:hover { background: #4f46e5; }
-
-        .scenario-hint {
-            flex: 1;
-            min-width: 200px;
-            padding: 10px 14px;
-            background: #f8fafc;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            color: #475569;
-            display: none;
-            border-left: 3px solid #6366f1;
-        }
-
-        .scenario-hint.visible {
-            display: block;
-        }
-
-        /* ===== MAIN LAYOUT ===== */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 340px;
-            gap: 24px;
-            margin-bottom: 24px;
-        }
-
-        /* ===== CHARTS ===== */
-        .charts-area {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .chart-row {
-            display: grid;
-            grid-template-columns: 1.1fr 1fr;
-            gap: 20px;
-        }
-
-        .chart-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .chart-title {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #475569;
-        }
-
-        .chart-legend {
-            display: flex;
-            gap: 12px;
-            font-size: 0.7rem;
-            color: #64748b;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .legend-dot {
-            width: 10px;
-            height: 3px;
-            border-radius: 2px;
-        }
-
-        .legend-dot.data { background: #3b82f6; width: 6px; height: 6px; border-radius: 50%; }
-        .legend-dot.your-line { background: #ef4444; }
-        .legend-dot.true-line { background: #22c55e; }
-        .legend-dot.fitted-line { background: #f59e0b; }
-
-        canvas {
-            display: block;
-            width: 100%;
-        }
-
-        /* ===== SIDEBAR ===== */
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .sidebar-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .sidebar-title {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 16px;
-        }
-
-        /* Controls */
-        .control-group {
-            margin-bottom: 20px;
-        }
-
-        .control-group:last-child {
-            margin-bottom: 0;
-        }
-
-        .control-label {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: #334155;
-            margin-bottom: 8px;
-        }
-
-        .control-value {
-            font-family: 'SF Mono', Monaco, monospace;
-            background: #f1f5f9;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            color: #6366f1;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: #e2e8f0;
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #6366f1;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
-        }
-
-        .toggle-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .toggle-chip {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 10px;
-            background: #f1f5f9;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .toggle-chip:hover {
-            background: #e2e8f0;
-        }
-
-        .toggle-chip input {
-            width: 14px;
-            height: 14px;
-            cursor: pointer;
-        }
-
-        .toggle-chip.active {
-            background: #6366f1;
-            color: white;
-        }
-
-        .fit-btn {
-            width: 100%;
-            padding: 10px;
-            background: #6366f1;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .fit-btn:hover {
-            background: #4f46e5;
-        }
-
-        .fit-btn.fitted {
-            background: #22c55e;
-        }
-
-        /* Metrics */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .metric-box {
-            text-align: center;
-            padding: 12px 8px;
-            background: #f8fafc;
-            border-radius: 8px;
-        }
-
-        .metric-label {
-            font-size: 0.65rem;
-            font-weight: 600;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .metric-value {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #1e293b;
-            font-family: 'SF Mono', Monaco, monospace;
-            margin: 4px 0;
-        }
-
-        .metric-help {
-            font-size: 0.65rem;
-            color: #94a3b8;
-        }
-
-        /* Prediction */
-        .prediction-input {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .prediction-input label {
-            font-size: 0.85rem;
-            color: #475569;
-        }
-
-        .prediction-input input {
-            width: 80px;
-            padding: 8px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-family: 'SF Mono', Monaco, monospace;
-        }
-
+    </style>
+    <link rel="stylesheet" href="playground-base.css">
+    <style>
+        /* Linear Regression playground-specific */
+        .chart-row { grid-template-columns: 1.1fr 1fr; }
+        .chart-legend { display: flex; gap: 12px; font-size: 0.7rem; }
+        .legend-dot.data { background: #60a5fa; width: 6px; height: 6px; border-radius: 50%; }
+        .legend-dot.your-line { background: #f87171; }
+        .legend-dot.true-line { background: #4ade80; }
+        .legend-dot.fitted-line { background: #fbbf24; }
+        .metric-box { text-align: center; padding: 12px 8px; }
+        .metric-help { font-size: 0.65rem; color: var(--text-muted); }
+        .prediction-input { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
         .prediction-result {
-            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+            background: var(--accent-dim);
+            border: 1px solid var(--accent);
             border-radius: 8px;
             padding: 14px;
             text-align: center;
         }
-
-        .prediction-amount {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #166534;
-        }
-
-        .prediction-range {
-            font-size: 0.75rem;
-            color: #64748b;
-            margin-top: 4px;
-        }
-
-        /* ===== BUSINESS INSIGHT ===== */
-        .insight-bar {
-            background: linear-gradient(135deg, #fefce8, #fef9c3);
-            border: 1px solid #fde047;
-            border-radius: 12px;
-            padding: 16px 20px;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
-        .insight-icon {
-            font-size: 1.3rem;
-            flex-shrink: 0;
-        }
-
-        .insight-content {
-            flex: 1;
-        }
-
-        .insight-title {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #a16207;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-        }
-
-        .insight-text {
-            font-size: 0.9rem;
-            color: #854d0e;
-        }
-
-        /* ===== HELP PANEL (Collapsible) ===== */
-        .help-panel {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            overflow: hidden;
-        }
-
-        .help-header {
-            padding: 14px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            background: #f8fafc;
-        }
-
-        .help-header:hover {
-            background: #f1f5f9;
-        }
-
-        .help-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #475569;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .help-toggle {
-            font-size: 0.75rem;
-            color: #64748b;
-        }
-
-        .help-content {
-            padding: 16px 20px;
-            display: none;
-            border-top: 1px solid #e2e8f0;
-        }
-
-        .help-content.visible {
-            display: block;
-        }
-
-        .help-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 12px;
-        }
-
-        .help-item {
-            display: flex;
-            gap: 10px;
-            font-size: 0.85rem;
-            color: #475569;
-        }
-
-        .help-item-icon {
-            flex-shrink: 0;
-        }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 1100px) {
-            .start-banner { flex-direction: column; text-align: center; padding: 20px; }
-            .start-banner-steps { justify-content: center; }
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-            .sidebar {
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-            .sidebar-card {
-                flex: 1;
-                min-width: 280px;
-            }
-        }
-
-        @media (max-width: 700px) {
-            .chart-row {
-                grid-template-columns: 1fr;
-            }
-            .start-banner {
-                flex-direction: column;
-                text-align: center;
-            }
-            .start-banner-steps {
-                justify-content: center;
-            }
-        }
+        .prediction-amount { font-size: 1.3rem; font-weight: 700; color: var(--positive); }
+        .prediction-range { font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px; }
+        .fit-btn { width: 100%; padding: 10px; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 500; cursor: pointer; }
+        .fit-btn.fitted { background: var(--positive); color: #000; }
+        .toggle-row { display: flex; flex-wrap: wrap; gap: 8px; }
+        .toggle-chip input { width: 14px; height: 14px; cursor: pointer; }
+        .scenario-btn.perfect { background: rgba(0,200,5,0.15); color: var(--positive); }
+        .scenario-btn.perfect:hover { background: rgba(0,200,5,0.25); }
+        .scenario-btn.outlier { background: rgba(255,184,0,0.15); color: var(--warning); }
+        .scenario-btn.outlier:hover { background: rgba(255,184,0,0.25); }
+        .scenario-btn.nonlinear { background: rgba(255,80,0,0.12); color: var(--negative); }
+        .scenario-btn.nonlinear:hover { background: rgba(255,80,0,0.2); }
+        .scenario-btn.noise { background: var(--accent-dim); color: var(--accent); }
+        .scenario-btn.noise:hover { background: rgba(99,102,241,0.2); }
+        .scenario-btn.challenge { background: var(--accent); color: #000; }
+        .scenario-btn.challenge:hover { filter: brightness(1.1); }
+        .control-hint-inline { color: var(--text-muted); }
     </style>
 </head>
 <body>
@@ -647,7 +127,7 @@
                     
                     <div class="control-group">
                         <div class="control-label">
-                            <span>Slope <span style="color:#94a3b8">($ per sqft)</span></span>
+                            <span>Slope <span class="control-hint-inline">($ per sqft)</span></span>
                             <span class="control-value" id="slopeValue">1.50</span>
                         </div>
                         <input type="range" id="slopeSlider" min="0" max="4" step="0.05" value="1.5">
@@ -655,7 +135,7 @@
 
                     <div class="control-group">
                         <div class="control-label">
-                            <span>Intercept <span style="color:#94a3b8">(base $)</span></span>
+                            <span>Intercept <span class="control-hint-inline">(base $)</span></span>
                             <span class="control-value" id="interceptValue">500</span>
                         </div>
                         <input type="range" id="interceptSlider" min="0" max="1500" step="10" value="500">
@@ -752,6 +232,7 @@
         </div>
     </div>
 
+    <script src="playground-guided.js"></script>
     <script>
         // ============================================
         // STATE
@@ -913,7 +394,8 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
 
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
 
             const slope = parseFloat(slopeSlider.value);
             const intercept = parseFloat(interceptSlider.value);
@@ -925,7 +407,7 @@
             const sy = y => pad.top + plotH - (y - yMin) / (yMax - yMin) * plotH;
 
             // Grid
-            ctx.strokeStyle = '#f1f5f9';
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)';
             ctx.lineWidth = 1;
             for (let x = 500; x <= 2500; x += 500) {
                 ctx.beginPath(); ctx.moveTo(sx(x), pad.top); ctx.lineTo(sx(x), height - pad.bottom); ctx.stroke();
@@ -935,7 +417,7 @@
             }
 
             // Axes
-            ctx.strokeStyle = '#cbd5e1';
+            ctx.strokeStyle = '#8b8d97';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(pad.left, pad.top);
@@ -944,7 +426,7 @@
             ctx.stroke();
 
             // Labels
-            ctx.fillStyle = '#94a3b8';
+            ctx.fillStyle = '#8b8d97';
             ctx.font = '10px -apple-system, sans-serif';
             ctx.textAlign = 'center';
             for (let x = 500; x <= 2500; x += 500) {
@@ -956,7 +438,7 @@
             }
 
             // Axis titles
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#5a5c66';
             ctx.font = '11px -apple-system, sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('Square Feet', pad.left + plotW/2, height - 6);
@@ -973,7 +455,7 @@
             if (showResidualsCheckbox.checked) {
                 data.forEach((p, i) => {
                     const pred = slope * p.x + intercept;
-                    ctx.strokeStyle = p.y > pred ? 'rgba(239,68,68,0.3)' : 'rgba(59,130,246,0.3)';
+                    ctx.strokeStyle = p.y > pred ? 'rgba(248,113,113,0.4)' : 'rgba(96,165,250,0.4)';
                     ctx.lineWidth = 1;
                     ctx.setLineDash([3, 3]);
                     ctx.beginPath();
@@ -986,7 +468,7 @@
 
             // True line
             if (showTrueLineCheckbox.checked) {
-                ctx.strokeStyle = '#22c55e';
+                ctx.strokeStyle = '#4ade80';
                 ctx.lineWidth = 2;
                 ctx.setLineDash([6, 4]);
                 ctx.beginPath();
@@ -1001,7 +483,7 @@
 
             // Fitted line
             if (showFittedLineCheckbox.checked && fittedSlope !== null) {
-                ctx.strokeStyle = '#f59e0b';
+                ctx.strokeStyle = '#fbbf24';
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(sx(xMin), sy(fittedIntercept + fittedSlope * xMin));
@@ -1013,7 +495,7 @@
             }
 
             // Your line
-            ctx.strokeStyle = '#ef4444';
+            ctx.strokeStyle = '#f87171';
             ctx.lineWidth = 2.5;
             ctx.beginPath();
             ctx.moveTo(sx(xMin), sy(intercept + slope * xMin));
@@ -1022,7 +504,7 @@
 
             // Points
             data.forEach(p => {
-                ctx.fillStyle = '#3b82f6';
+                ctx.fillStyle = '#60a5fa';
                 ctx.beginPath();
                 ctx.arc(sx(p.x), sy(p.y), 4, 0, Math.PI * 2);
                 ctx.fill();
@@ -1037,7 +519,8 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
 
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
 
             const maxR = Math.max(...residuals.map(Math.abs), 200);
             const xMin = 300, xMax = 2600;
@@ -1046,14 +529,14 @@
             const sy = r => pad.top + plotH/2 - (r / maxR) * (plotH/2 - 10);
 
             // Grid
-            ctx.strokeStyle = '#f1f5f9';
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)';
             ctx.lineWidth = 1;
             for (let x = 500; x <= 2500; x += 500) {
                 ctx.beginPath(); ctx.moveTo(sx(x), pad.top); ctx.lineTo(sx(x), height - pad.bottom); ctx.stroke();
             }
 
             // Zero line
-            ctx.strokeStyle = '#94a3b8';
+            ctx.strokeStyle = '#8b8d97';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(pad.left, sy(0));
@@ -1061,14 +544,14 @@
             ctx.stroke();
 
             // Y axis
-            ctx.strokeStyle = '#cbd5e1';
+            ctx.strokeStyle = '#8b8d97';
             ctx.beginPath();
             ctx.moveTo(pad.left, pad.top);
             ctx.lineTo(pad.left, height - pad.bottom);
             ctx.stroke();
 
             // Labels
-            ctx.fillStyle = '#94a3b8';
+            ctx.fillStyle = '#8b8d97';
             ctx.font = '10px -apple-system, sans-serif';
             ctx.textAlign = 'center';
             for (let x = 500; x <= 2500; x += 500) {
@@ -1080,7 +563,7 @@
             });
 
             // Axis titles
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#5a5c66';
             ctx.font = '11px -apple-system, sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('Square Feet', pad.left + plotW/2, height - 6);
@@ -1092,7 +575,7 @@
 
             // Pattern warning
             if (currentPreset === 'nonlinear') {
-                ctx.fillStyle = '#dc2626';
+                ctx.fillStyle = '#f87171';
                 ctx.font = 'bold 10px -apple-system, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText('⚠ Pattern detected - model is systematically wrong', pad.left + plotW/2, pad.top + 12);
@@ -1104,10 +587,10 @@
                 const y = sy(r);
                 const y0 = sy(0);
                 
-                ctx.fillStyle = r > 0 ? 'rgba(239,68,68,0.25)' : 'rgba(59,130,246,0.25)';
+                ctx.fillStyle = r > 0 ? 'rgba(248,113,113,0.3)' : 'rgba(96,165,250,0.3)';
                 ctx.fillRect(x - 2, Math.min(y, y0), 4, Math.abs(y - y0));
                 
-                ctx.fillStyle = r > 0 ? '#ef4444' : '#3b82f6';
+                ctx.fillStyle = r > 0 ? '#f87171' : '#60a5fa';
                 ctx.beginPath();
                 ctx.arc(x, y, 3, 0, Math.PI * 2);
                 ctx.fill();
@@ -1240,6 +723,96 @@
 
         generateData();
         drawAll();
+
+        if (typeof PlaygroundGuided !== 'undefined') PlaygroundGuided.init({
+            key: 'linear_regression',
+            steps: [
+                {
+                    title: "Fit a line to noisy data",
+                    context: "50 customers plotted by <strong>monthly spend</strong> (x) and <strong>lifetime value</strong> (y). The true relationship is linear, but noise obscures it. Try dragging the slope and intercept sliders.",
+                    question: "Can you get the line close to the true pattern just by eye?",
+                    options: [
+                        { id: 'hard', label: "It's hard -- too much noise to tell exactly" },
+                        { id: 'easy', label: 'Easy -- the pattern is obvious' },
+                        { id: 'no', label: 'There is no pattern' }
+                    ],
+                    correctId: 'hard',
+                    reveal: "Exactly. Human eye-fitting is unreliable with noise. That's why we use <strong>least-squares regression</strong> -- it finds the line that minimizes the sum of squared residuals, giving a mathematically optimal fit.",
+                    setup: { scenario: 'default' }
+                },
+                {
+                    title: "What residuals reveal",
+                    context: "Residuals are the vertical gaps between each point and the line. Enable <strong>Show Residuals</strong> to see them. Large residuals mean the model is far off for those points.",
+                    question: "After fitting, where do you expect the largest residuals?",
+                    options: [
+                        { id: 'outliers', label: 'Near outlier points far from the cluster' },
+                        { id: 'center', label: 'Near the center of the data' },
+                        { id: 'ends', label: 'Only at the ends of the x-axis' }
+                    ],
+                    correctId: 'outliers',
+                    reveal: "Correct. Outliers produce the largest residuals. Because OLS minimizes <em>squared</em> errors, a single outlier can pull the entire line toward it. This is why outlier detection matters before fitting.",
+                    setup: { scenario: 'default' }
+                },
+                {
+                    title: "Outliers distort the fit",
+                    context: "Switch to the <strong>Outliers</strong> scenario. Notice how a few extreme points shift the best-fit line away from where most data lives.",
+                    question: "How does the best-fit line change with outliers present?",
+                    options: [
+                        { id: 'pulled', label: 'The line tilts toward the outliers' },
+                        { id: 'same', label: 'The line stays the same' },
+                        { id: 'ignores', label: 'OLS automatically ignores outliers' }
+                    ],
+                    correctId: 'pulled',
+                    reveal: "OLS gives <em>disproportionate</em> influence to points far from the line because it squares the errors. A single outlier can shift the slope significantly. Robust alternatives (like Huber regression) down-weight extreme residuals.",
+                    setup: { scenario: 'outliers' }
+                },
+                {
+                    title: "When R-squared misleads",
+                    context: "Switch to <strong>Non-Linear</strong>. The data follows a curve, not a line. Check the R² value after fitting.",
+                    question: "A moderate R² on curved data means:",
+                    options: [
+                        { id: 'ok', label: 'The linear model is good enough' },
+                        { id: 'wrong', label: 'The model form is wrong -- need polynomial or other features' },
+                        { id: 'more', label: 'We just need more data' }
+                    ],
+                    correctId: 'wrong',
+                    reveal: "R² tells you how much variance the line captures, but it can't tell you the <em>shape</em> is wrong. Always check the residual plot: if residuals show a pattern (curved, fanned), the model structure needs to change, not just the coefficients.",
+                    setup: { scenario: 'nonlinear' }
+                }
+            ],
+            selfCheck: [
+                {
+                    prompt: "OLS regression minimizes the sum of squared residuals. Why squared, not absolute values?",
+                    options: [
+                        { id: 'a', label: 'Squaring is computationally cheaper' },
+                        { id: 'b', label: 'Squaring penalizes large errors more, and the math gives a closed-form solution' },
+                        { id: 'c', label: 'Absolute values would give the same result' }
+                    ],
+                    correctId: 'b',
+                    explanation: "Squaring does two things: it penalizes large errors disproportionately (making outliers very influential), and it makes the optimization smooth and differentiable, yielding a closed-form solution (the normal equation). MAE lacks this closed form."
+                },
+                {
+                    prompt: "Your linear model has R² = 0.85. Your colleague says 'the model explains 85% of the variance.' What's missing from that statement?",
+                    options: [
+                        { id: 'a', label: "Nothing -- that's exactly what R² means" },
+                        { id: 'b', label: "It doesn't tell you if the residuals have structure (patterns)" },
+                        { id: 'c', label: 'R² only works for classification' }
+                    ],
+                    correctId: 'b',
+                    explanation: "R² measures variance explained, but a model with structured residuals (e.g. a curve fit with a line) can still have decent R² while being fundamentally wrong. Always check residual plots for patterns."
+                }
+            ],
+            onStepEnter: function(idx, step) {
+                if (step.setup && step.setup.scenario) {
+                    const scenarios = document.querySelectorAll('.scenario-btn');
+                    scenarios.forEach(btn => {
+                        if (step.setup.scenario === 'default' && btn.textContent.includes('Perfect')) btn.click();
+                        else if (step.setup.scenario === 'outliers' && btn.textContent.includes('Outlier')) btn.click();
+                        else if (step.setup.scenario === 'nonlinear' && btn.textContent.includes('Non-Linear')) btn.click();
+                    });
+                }
+            }
+        });
     </script>
 </body>
 </html>

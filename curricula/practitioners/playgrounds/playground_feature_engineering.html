@@ -5,246 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feature Engineering Playground</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --accent: #8b5cf6;
+            --accent-dim: rgba(139, 92, 246, 0.12);
         }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-        }
-
-        h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
-        .header-subtitle { font-size: 0.9rem; color: #64748b; }
-
-        .reset-btn {
-            background: white;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-        .reset-btn:hover { background: #f1f5f9; color: #475569; }
-
-        .start-banner {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-            border-radius: 16px;
-            padding: 24px 32px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-        .start-banner-icon { font-size: 2.5rem; flex-shrink: 0; }
-        .start-banner-content h2 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
-        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 12px; }
-        .start-banner-steps { display: flex; gap: 24px; flex-wrap: wrap; }
-        .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
-        .step-num {
-            background: rgba(255,255,255,0.2);
-            width: 24px; height: 24px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 600; font-size: 0.75rem;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 4px;
-            background: white;
-            padding: 6px;
-            border-radius: 10px;
-            margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .tab {
-            padding: 8px 16px;
-            border: none;
-            background: transparent;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: #64748b;
-            transition: all 0.2s;
-        }
-        .tab.active {
-            background: #8b5cf6;
-            color: white;
-        }
-        .tab:hover:not(.active) { background: #f1f5f9; }
-
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 320px;
-            gap: 16px;
-        }
-
-        .charts-area { display: flex; flex-direction: column; gap: 12px; }
-
-        .chart-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .chart-card {
-            background: white;
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .chart-title { font-size: 0.75rem; font-weight: 600; color: #475569; }
-        .chart-badge {
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 10px;
-            background: #f1f5f9;
-            color: #64748b;
-        }
-
-        canvas { display: block; width: 100%; }
-
-        .sidebar { display: flex; flex-direction: column; gap: 12px; }
-
-        .sidebar-card {
-            background: white;
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .sidebar-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-        }
-
-        .control-group { margin-bottom: 12px; }
-        .control-group:last-child { margin-bottom: 0; }
-        .control-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #334155;
-            margin-bottom: 6px;
-        }
-        .control-value {
-            font-family: 'SF Mono', Monaco, monospace;
-            background: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            color: #8b5cf6;
-        }
-
-        select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            background: white;
-            color: #334155;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 5px;
-            border-radius: 3px;
-            background: #e2e8f0;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 14px; height: 14px;
-            border-radius: 50%;
-            background: #8b5cf6;
-            cursor: pointer;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-        .stat-item {
-            padding: 8px;
-            background: #f8fafc;
-            border-radius: 6px;
-            text-align: center;
-        }
-        .stat-name {
-            font-size: 0.65rem;
-            color: #64748b;
-            text-transform: uppercase;
-        }
-        .stat-value {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #1e293b;
-            font-family: 'SF Mono', Monaco, monospace;
-        }
-
-        .insight-bar {
-            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
-            border: 1px solid #c4b5fd;
-            border-radius: 10px;
-            padding: 14px 16px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            margin-top: 12px;
-        }
-        .insight-icon { font-size: 1.2rem; }
-        .insight-content { flex: 1; }
-        .insight-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #6d28d9;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-        .insight-text { font-size: 0.85rem; color: #5b21b6; }
-
+    </style>
+    <link rel="stylesheet" href="playground-base.css">
+    <style>
         .leakage-warning {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
+            background: rgba(255, 80, 0, 0.12);
+            border: 1px solid var(--negative);
             border-radius: 8px;
             padding: 12px;
             margin-top: 12px;
@@ -252,11 +22,9 @@
         }
         .leakage-warning.visible { display: flex; gap: 10px; }
         .leakage-warning-icon { font-size: 1.2rem; }
-        .leakage-warning-text { font-size: 0.85rem; color: #991b1b; }
-
+        .leakage-warning-text { font-size: 0.85rem; color: var(--negative); }
+        .leaky-feat-label { color: var(--negative); }
         @media (max-width: 1000px) {
-            .start-banner { flex-direction: column; text-align: center; padding: 20px; }
-            .start-banner-steps { justify-content: center; }
             .main-grid { grid-template-columns: 1fr; }
             .chart-row { grid-template-columns: 1fr; }
         }
@@ -500,7 +268,7 @@
                             </label>
                         </div>
                         <div class="control-group">
-                            <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; color: #dc2626;">
+                            <label class="leaky-feat-label" style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer;">
                                 <input type="checkbox" id="leakyFeat" onchange="updateLeakage()">
                                 <span>future_activity (LEAKY!)</span>
                             </label>
@@ -529,6 +297,7 @@
         </div>
     </div>
 
+    <script src="playground-guided.js"></script>
     <script>
         const dpr = window.devicePixelRatio || 1;
         let origData = [];
@@ -642,7 +411,8 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
             
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
             
             const nBins = 30;
             const minVal = Math.min(...data);
@@ -664,7 +434,7 @@
                 ctx.fillRect(pad.left + i * barW, pad.top + plotH - barH, barW - 1, barH);
             });
             
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#8b8d97';
             ctx.font = '10px -apple-system';
             ctx.textAlign = 'left';
             ctx.fillText(minVal.toFixed(1), pad.left, height - 5);
@@ -679,7 +449,8 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
             
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
             
             const xMin = Math.min(...xData);
             const xMax = Math.max(...xData);
@@ -757,7 +528,8 @@
             const canvas = document.getElementById('encodingChart');
             const { width, height, ctx } = setupCanvas(canvas);
             
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
             
             const categories = ['A', 'B', 'C', 'D', 'E'];
             const targetMeans = [0.2, 0.35, 0.5, 0.65, 0.8];
@@ -767,7 +539,7 @@
             const plotH = height - pad.top - pad.bottom;
             const barW = plotW / categories.length;
             
-            ctx.strokeStyle = '#e2e8f0';
+            ctx.strokeStyle = '#3a3b3e';
             ctx.lineWidth = 1;
             ctx.fillStyle = '#94a3b8';
             ctx.font = '10px -apple-system';
@@ -799,7 +571,7 @@
                     const barH = targetMeans[i] * plotH;
                     ctx.fillRect(pad.left + i * barW + 10, pad.top + plotH - barH, barW - 20, barH);
                     
-                    ctx.fillStyle = '#64748b';
+                    ctx.fillStyle = '#8b8d97';
                     ctx.font = '11px -apple-system';
                     ctx.textAlign = 'center';
                     ctx.fillText(`[${categories.map((_, j) => i === j ? 1 : 0).join(',')}]`, 
@@ -813,7 +585,7 @@
                     const barH = targetMeans[i] * plotH;
                     ctx.fillRect(pad.left + i * barW + 10, pad.top + plotH - barH, barW - 20, barH);
                     
-                    ctx.fillStyle = '#64748b';
+                    ctx.fillStyle = '#8b8d97';
                     ctx.font = '11px -apple-system';
                     ctx.textAlign = 'center';
                     ctx.fillText(`${i + 1}`, pad.left + i * barW + barW/2, height - 10);
@@ -826,7 +598,7 @@
                     const barH = targetMeans[i] * plotH;
                     ctx.fillRect(pad.left + i * barW + 10, pad.top + plotH - barH, barW - 20, barH);
                     
-                    ctx.fillStyle = '#64748b';
+                    ctx.fillStyle = '#8b8d97';
                     ctx.font = '11px -apple-system';
                     ctx.textAlign = 'center';
                     ctx.fillText(targetMeans[i].toFixed(2), pad.left + i * barW + barW/2, height - 10);
@@ -886,13 +658,14 @@
             const canvas = document.getElementById(canvasId);
             const { width, height, ctx } = setupCanvas(canvas);
             
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
             
             const cx = width / 2;
             const cy = height - 20;
             const r = Math.min(width, height) * 0.6;
             
-            ctx.strokeStyle = '#e2e8f0';
+            ctx.strokeStyle = '#3a3b3e';
             ctx.lineWidth = 20;
             ctx.beginPath();
             ctx.arc(cx, cy, r, Math.PI, 0);
@@ -903,12 +676,12 @@
             ctx.arc(cx, cy, r, Math.PI, Math.PI + (value - 0.5) * 2 * Math.PI);
             ctx.stroke();
             
-            ctx.fillStyle = '#1e293b';
+            ctx.fillStyle = '#f5f5f7';
             ctx.font = 'bold 24px -apple-system';
             ctx.textAlign = 'center';
             ctx.fillText(value.toFixed(2), cx, cy - 20);
             
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#8b8d97';
             ctx.font = '10px -apple-system';
             ctx.fillText('0.5', cx - r - 10, cy + 15);
             ctx.fillText('1.0', cx + r + 10, cy + 15);
@@ -948,6 +721,83 @@
         });
 
         updateTransforms();
+
+        if (typeof PlaygroundGuided !== 'undefined') PlaygroundGuided.init({
+            key: 'feature_engineering',
+            steps: [
+                {
+                    title: "Skewed distributions need transforms",
+                    context: "Look at the <strong>Transformations</strong> tab. Generate a right-skewed distribution and apply a log transform. Compare the histograms.",
+                    question: "Why do many ML models prefer roughly normal features?",
+                    options: [
+                        { id: 'grad', label: 'Gradient-based models converge faster with scaled, symmetric features' },
+                        { id: 'irrelevant', label: 'Distribution shape never matters for ML' },
+                        { id: 'trees', label: 'Tree models require normal features' }
+                    ],
+                    correctId: 'grad',
+                    reveal: "Linear models, neural nets, and SVMs all benefit from features that are roughly centered and symmetric. Extreme skew means a few outliers dominate the learned weights. Trees are robust to skew, but transforms still help with interpretability.",
+                    setup: {}
+                },
+                {
+                    title: "Encoding categorical variables",
+                    context: "Switch to the <strong>Encoding</strong> tab. See how different encoding methods (one-hot, ordinal, target) represent categories.",
+                    question: "When should you avoid one-hot encoding?",
+                    options: [
+                        { id: 'high_card', label: 'When the categorical feature has many unique values (high cardinality)' },
+                        { id: 'always', label: 'Always -- ordinal is always better' },
+                        { id: 'never', label: 'Never -- one-hot is always the right choice' }
+                    ],
+                    correctId: 'high_card',
+                    reveal: "One-hot encoding with 1000 categories creates 1000 columns. This causes high dimensionality, sparsity, and slow training. For high-cardinality features, use target encoding, frequency encoding, or embeddings instead.",
+                    setup: {}
+                },
+                {
+                    title: "Feature leakage destroys models",
+                    context: "Switch to the <strong>Leakage Demo</strong> tab. Enable the leaky feature and compare train/test AUC.",
+                    question: "A feature that perfectly predicts the target on training data but fails in production is likely:",
+                    options: [
+                        { id: 'leak', label: 'A leaky feature -- it uses information not available at prediction time' },
+                        { id: 'great', label: 'A great feature -- use it in production' },
+                        { id: 'overfit', label: 'Just overfitting to noise' }
+                    ],
+                    correctId: 'leak',
+                    reveal: "Leaky features carry information from the future or from the label itself. Common leaks: features computed from the target variable, timestamps after the event, or aggregates that include the test period. They inflate metrics during training but fail in production.",
+                    setup: {}
+                }
+            ],
+            selfCheck: [
+                {
+                    prompt: "You standardize features using the mean and std of the entire dataset (train + test). This is a form of:",
+                    options: [
+                        { id: 'a', label: 'Data leakage -- test statistics leak into the training process' },
+                        { id: 'b', label: 'Good practice -- it ensures consistent scaling' },
+                        { id: 'c', label: 'No impact either way' }
+                    ],
+                    correctId: 'a',
+                    explanation: "Computing statistics on the full dataset means test data influences the training features. Always fit the scaler on training data only, then transform both train and test. This is preprocessing leakage -- subtle but real."
+                },
+                {
+                    prompt: "Your target-encoded feature has near-perfect correlation with the label. Should you celebrate?",
+                    options: [
+                        { id: 'a', label: 'No -- target encoding computed on the same data is circular and will overfit' },
+                        { id: 'b', label: 'Yes -- strong features are always good' },
+                        { id: 'c', label: 'Only if the feature is numeric' }
+                    ],
+                    correctId: 'a',
+                    explanation: "Target encoding on training data without proper out-of-fold calculation creates leakage. Each row's encoding implicitly includes its own label. Use leave-one-out or k-fold target encoding to prevent this."
+                }
+            ],
+            onStepEnter: function(idx, step) {
+                const tabBtns = document.querySelectorAll('.tab');
+                if (idx === 0 && tabBtns[0]) {
+                    showTab('transforms', tabBtns[0]);
+                } else if (idx === 1 && tabBtns[1]) {
+                    showTab('encoding', tabBtns[1]);
+                } else if (idx === 2 && tabBtns[2]) {
+                    showTab('leakage', tabBtns[2]);
+                }
+            }
+        });
     </script>
 </body>
 </html>

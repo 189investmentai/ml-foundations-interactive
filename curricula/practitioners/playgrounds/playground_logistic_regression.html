@@ -5,150 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Logistic Regression Playground</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --accent: #0ea5e9;
+            --accent-dim: rgba(14, 165, 233, 0.12);
         }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-        }
-
-        h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
-        .header-subtitle { font-size: 0.9rem; color: #64748b; }
-
-        .reset-btn {
-            background: white;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-        .reset-btn:hover { background: #f1f5f9; color: #475569; }
-
-        /* Start Banner */
-        .start-banner {
-            background: linear-gradient(135deg, #0ea5e9, #06b6d4);
-            color: white;
-            border-radius: 16px;
-            padding: 24px 32px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-        .start-banner-icon { font-size: 2.5rem; flex-shrink: 0; }
-        .start-banner-content h2 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
-        .start-banner-content p { font-size: 0.9rem; opacity: 0.9; margin-bottom: 12px; }
-        .start-banner-steps { display: flex; gap: 24px; margin-top: 12px; flex-wrap: wrap; }
-        .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
-        .step-num {
-            background: rgba(255,255,255,0.2);
-            width: 24px; height: 24px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 600; font-size: 0.75rem;
-        }
-
-        /* Scenarios */
-        .scenarios-bar {
-            background: white;
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            flex-wrap: wrap;
-        }
-        .scenarios-label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-        }
-        .scenario-btn {
-            padding: 8px 14px;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .scenario-btn.balanced { background: #dcfce7; color: #166534; }
-        .scenario-btn.imbalanced { background: #fef3c7; color: #92400e; }
-        .scenario-btn.overlap { background: #fce7f3; color: #9d174d; }
-        .scenario-btn.separable { background: #e0e7ff; color: #3730a3; }
-        .scenario-btn.challenge { background: #0ea5e9; color: white; }
-        .scenario-hint {
-            flex: 1;
-            min-width: 200px;
-            padding: 10px 14px;
-            background: #f8fafc;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            color: #475569;
-            display: none;
-            border-left: 3px solid #0ea5e9;
-        }
-        .scenario-hint.visible { display: block; }
-
-        /* Main Grid */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 380px;
-            gap: 24px;
-            margin-bottom: 24px;
-        }
-
-        .charts-area { display: flex; flex-direction: column; gap: 20px; }
-
-        .chart-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .chart-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        .chart-title { font-size: 0.8rem; font-weight: 600; color: #475569; }
-
-        canvas { display: block; width: 100%; }
-
-        /* Confusion Matrix */
+    </style>
+    <link rel="stylesheet" href="playground-base.css">
+    <style>
+        /* Logistic Regression playground-specific */
+        .main-grid { grid-template-columns: 1fr 380px; }
         .confusion-grid {
             display: grid;
             grid-template-columns: auto 1fr 1fr;
@@ -162,7 +27,7 @@
             justify-content: center;
             padding: 8px;
             font-weight: 600;
-            color: #64748b;
+            color: var(--text-muted);
         }
         .confusion-label.vertical {
             writing-mode: vertical-rl;
@@ -173,242 +38,88 @@
             text-align: center;
             border-radius: 8px;
         }
-        .confusion-cell.tp { background: #dcfce7; }
-        .confusion-cell.tn { background: #dbeafe; }
-        .confusion-cell.fp { background: #fef3c7; }
-        .confusion-cell.fn { background: #fee2e2; }
+        .confusion-cell.tp { background: rgba(0,200,5,0.15); }
+        .confusion-cell.tn { background: rgba(14,165,233,0.12); }
+        .confusion-cell.fp { background: rgba(255,184,0,0.15); }
+        .confusion-cell.fn { background: rgba(255,80,0,0.15); }
         .confusion-value { font-size: 1.3rem; font-weight: 700; }
-        .confusion-name { font-size: 0.65rem; color: #64748b; margin-top: 2px; }
-
-        /* Sidebar */
-        .sidebar { display: flex; flex-direction: column; gap: 20px; }
-
-        .sidebar-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .sidebar-title {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 16px;
-        }
-
-        .control-group { margin-bottom: 20px; }
-        .control-group:last-child { margin-bottom: 0; }
-        .control-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            font-weight: 500;
-            color: #334155;
-            margin-bottom: 8px;
-        }
-        .control-value {
-            font-family: 'SF Mono', Monaco, monospace;
-            background: #f1f5f9;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            color: #0ea5e9;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: #e2e8f0;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px; height: 16px;
-            border-radius: 50%;
-            background: #0ea5e9;
-            cursor: pointer;
-        }
+        .confusion-name { font-size: 0.65rem; color: var(--text-muted); margin-top: 2px; }
 
         .threshold-scale {
             display: flex;
             justify-content: space-between;
             font-size: 0.7rem;
-            color: #94a3b8;
+            color: var(--text-muted);
             margin-top: 4px;
         }
 
-        /* Metrics */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        .metric-box {
-            text-align: center;
-            padding: 10px 8px;
-            background: #f8fafc;
-            border-radius: 8px;
-        }
-        .metric-label {
-            font-size: 0.65rem;
-            font-weight: 600;
-            color: #94a3b8;
-            text-transform: uppercase;
-        }
-        .metric-value {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #1e293b;
-            font-family: 'SF Mono', Monaco, monospace;
-        }
-        .metric-value.good { color: #16a34a; }
-        .metric-value.warn { color: #d97706; }
-        .metric-value.bad { color: #dc2626; }
+        .metric-box { text-align: center; padding: 10px 8px; }
 
-        /* Cost optimal badge */
         .cost-optimal {
             margin-top: 12px;
             padding: 10px 12px;
-            background: linear-gradient(135deg, #dcfce7, #d1fae5);
-            border: 1px solid #86efac;
+            background: rgba(0,200,5,0.12);
+            border: 1px solid var(--positive);
             border-radius: 8px;
             font-size: 0.8rem;
         }
         .cost-optimal-label {
             font-size: 0.65rem;
             font-weight: 600;
-            color: #166534;
+            color: var(--positive);
             text-transform: uppercase;
             margin-bottom: 4px;
         }
         .cost-optimal-value {
             font-weight: 700;
-            color: #15803d;
+            color: var(--positive);
             font-family: 'SF Mono', Monaco, monospace;
         }
 
-        /* Insight */
-        .insight-bar {
-            background: linear-gradient(135deg, #fefce8, #fef9c3);
-            border: 1px solid #fde047;
-            border-radius: 12px;
-            padding: 16px 20px;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-        .insight-icon { font-size: 1.3rem; }
-        .insight-content { flex: 1; }
-        .insight-title {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #a16207;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-        }
-        .insight-text { font-size: 0.9rem; color: #854d0e; }
-
-        /* Model fit button */
         .fit-btn {
             width: 100%;
             padding: 10px 16px;
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
+            background: var(--accent);
+            color: #000;
             border: none;
             border-radius: 8px;
             font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
             margin-bottom: 12px;
-            transition: all 0.2s;
         }
-        .fit-btn:hover { background: linear-gradient(135deg, #7c3aed, #6d28d9); transform: translateY(-1px); }
-        .fit-btn:active { transform: translateY(0); }
+        .fit-btn:hover { filter: brightness(1.1); }
 
         .model-params {
             padding: 10px 12px;
-            background: #f8fafc;
+            background: var(--surface-hover);
             border-radius: 8px;
             font-size: 0.75rem;
             font-family: 'SF Mono', Monaco, monospace;
-            color: #64748b;
+            color: var(--text-secondary);
         }
 
-        /* Help */
-        .help-panel {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            overflow: hidden;
-        }
-        .help-header {
-            padding: 14px 20px;
-            display: flex;
-            justify-content: space-between;
-            cursor: pointer;
-            background: #f8fafc;
-        }
-        .help-header:hover { background: #f1f5f9; }
-        .help-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #475569;
-        }
-        .help-toggle { font-size: 0.75rem; color: #64748b; }
-        .help-content {
-            padding: 16px 20px;
-            display: none;
-            border-top: 1px solid #e2e8f0;
-        }
-        .help-content.visible { display: block; }
-        .help-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 12px;
-        }
-        .help-item {
-            display: flex;
-            gap: 10px;
-            font-size: 0.85rem;
-            color: #475569;
-        }
+        .chart-legend { display: flex; gap: 16px; font-size: 0.7rem; margin-top: 8px; }
+        .chart-legend-item { display: flex; align-items: center; gap: 4px; }
+        .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .legend-dot.blue { background: #60a5fa; }
+        .legend-dot.red { background: #f87171; }
+        .legend-dot.orange { background: #fbbf24; }
 
-        /* Chart legend inline */
-        .chart-legend {
-            display: flex;
-            gap: 16px;
-            font-size: 0.7rem;
-            color: #64748b;
-            margin-top: 8px;
-        }
-        .chart-legend-item {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .legend-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-        }
-        .legend-dot.blue { background: #3b82f6; }
-        .legend-dot.red { background: #ef4444; }
-        .legend-dot.orange { background: #f59e0b; }
-
-        @media (max-width: 1100px) {
-            .start-banner { flex-direction: column; text-align: center; padding: 20px; }
-            .start-banner-steps { justify-content: center; }
-            .main-grid { grid-template-columns: 1fr; }
-            .sidebar { flex-direction: row; flex-wrap: wrap; }
-            .sidebar-card { flex: 1; min-width: 280px; }
-        }
-        @media (max-width: 700px) {
-            .chart-row { grid-template-columns: 1fr; }
-        }
+        .scenario-btn.balanced { background: rgba(0,200,5,0.15); color: var(--positive); }
+        .scenario-btn.balanced:hover { background: rgba(0,200,5,0.25); }
+        .scenario-btn.imbalanced { background: rgba(255,184,0,0.15); color: var(--warning); }
+        .scenario-btn.imbalanced:hover { background: rgba(255,184,0,0.25); }
+        .scenario-btn.overlap { background: rgba(255,80,0,0.12); color: var(--negative); }
+        .scenario-btn.overlap:hover { background: rgba(255,80,0,0.2); }
+        .scenario-btn.separable { background: var(--accent-dim); color: var(--accent); }
+        .scenario-btn.separable:hover { background: rgba(14,165,233,0.2); }
+        .scenario-btn.challenge { background: var(--accent); color: #000; }
+        .scenario-btn.challenge:hover { filter: brightness(1.1); }
+        .threshold-hint { font-size: 0.8rem; color: var(--text-muted); margin-top: 12px; }
+        .metric-precision { background: rgba(0,200,5,0.12); }
+        .metric-recall { background: var(--accent-dim); }
+        .metric-cost { background: rgba(255,184,0,0.12); }
     </style>
 </head>
 <body>
@@ -555,7 +266,7 @@
                             <span>→ More Yes's</span>
                         </div>
                     </div>
-                    <p style="font-size:0.8rem; color:#64748b; margin-top:12px;">
+                    <p class="threshold-hint">
                         If P(churn) ≥ threshold → Predict "Yes"<br>
                         Lower threshold = catch more churners (but more false alarms)
                     </p>
@@ -594,11 +305,11 @@
                             <div class="metric-label">AUC</div>
                             <div class="metric-value" id="aucValue">--</div>
                         </div>
-                        <div class="metric-box" style="background:#dcfce7;">
+                        <div class="metric-box metric-precision">
                             <div class="metric-label">Precision</div>
                             <div class="metric-value" id="precisionValue">--</div>
                         </div>
-                        <div class="metric-box" style="background:#dbeafe;">
+                        <div class="metric-box metric-recall">
                             <div class="metric-label">Recall</div>
                             <div class="metric-value" id="recallValue">--</div>
                         </div>
@@ -606,7 +317,7 @@
                             <div class="metric-label">F1 Score</div>
                             <div class="metric-value" id="f1Value">--</div>
                         </div>
-                        <div class="metric-box" style="background:#fef3c7;">
+                        <div class="metric-box metric-cost">
                             <div class="metric-label">Total Cost</div>
                             <div class="metric-value" id="totalCostValue">--</div>
                         </div>
@@ -677,6 +388,7 @@
         </div>
     </div>
 
+    <script src="playground-guided.js"></script>
     <script>
         // ============================================
         // STATE
@@ -978,7 +690,8 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
 
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
 
             const threshold = parseFloat(thresholdSlider.value);
             
@@ -990,7 +703,7 @@
             const xMin = -5, xMax = 5;
             const sx = x => pad.left + (x - xMin) / (xMax - xMin) * plotW;
 
-            ctx.strokeStyle = '#f1f5f9';
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)';
             ctx.lineWidth = 1;
             for (let x = -4; x <= 4; x += 2) {
                 ctx.beginPath();
@@ -1000,7 +713,7 @@
             }
 
             if (modelFitted && thresholdX > xMin && thresholdX < xMax) {
-                ctx.strokeStyle = '#f59e0b';
+                ctx.strokeStyle = '#fbbf24';
                 ctx.lineWidth = 2;
                 ctx.setLineDash([6, 4]);
                 ctx.beginPath();
@@ -1009,25 +722,25 @@
                 ctx.stroke();
                 ctx.setLineDash([]);
                 
-                ctx.fillStyle = '#f59e0b';
+                ctx.fillStyle = '#fbbf24';
                 ctx.font = 'bold 10px -apple-system';
                 ctx.textAlign = 'center';
                 ctx.fillText(`T=${threshold.toFixed(2)}`, sx(thresholdX), pad.top + 12);
 
-                ctx.fillStyle = 'rgba(59, 130, 246, 0.08)';
+                ctx.fillStyle = 'rgba(96, 165, 250, 0.12)';
                 ctx.fillRect(pad.left, pad.top, sx(thresholdX) - pad.left, plotH);
-                ctx.fillStyle = 'rgba(239, 68, 68, 0.08)';
+                ctx.fillStyle = 'rgba(248, 113, 113, 0.12)';
                 ctx.fillRect(sx(thresholdX), pad.top, width - pad.right - sx(thresholdX), plotH);
             }
 
-            ctx.strokeStyle = '#cbd5e1';
+            ctx.strokeStyle = '#8b8d97';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(pad.left, height - pad.bottom);
             ctx.lineTo(width - pad.right, height - pad.bottom);
             ctx.stroke();
 
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#5a5c66';
             ctx.font = '10px -apple-system';
             ctx.textAlign = 'center';
             ctx.fillText('← Low Risk', pad.left + 40, height - 8);
@@ -1040,7 +753,7 @@
                 const pred = d.prob >= threshold ? 1 : 0;
                 const correct = pred === d.label;
                 
-                ctx.fillStyle = d.label === 1 ? '#ef4444' : '#3b82f6';
+                ctx.fillStyle = d.label === 1 ? '#f87171' : '#60a5fa';
                 ctx.globalAlpha = modelFitted ? (correct ? 1 : 0.4) : 0.7;
                 ctx.beginPath();
                 ctx.arc(sx(d.x), yPos, 4, 0, Math.PI * 2);
@@ -1054,7 +767,7 @@
                 ctx.globalAlpha = 1;
             });
 
-            ctx.fillStyle = '#94a3b8';
+            ctx.fillStyle = '#8b8d97';
             ctx.font = '9px -apple-system';
             ctx.textAlign = 'left';
             ctx.fillText('Churn', pad.left + 5, pad.top + plotH * 0.65 - 20);
@@ -1067,7 +780,8 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
 
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
 
             const threshold = parseFloat(thresholdSlider.value);
             
@@ -1080,7 +794,7 @@
             const sx = x => pad.left + (x - xMin) / (xMax - xMin) * plotW;
             const sy = y => pad.top + plotH - y * plotH;
 
-            ctx.strokeStyle = '#f1f5f9';
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)';
             ctx.lineWidth = 1;
             [0.25, 0.5, 0.75].forEach(y => {
                 ctx.beginPath();
@@ -1090,7 +804,7 @@
             });
 
             if (!modelFitted) {
-                ctx.fillStyle = '#94a3b8';
+                ctx.fillStyle = '#8b8d97';
                 ctx.font = '12px -apple-system';
                 ctx.textAlign = 'center';
                 ctx.fillText('Fit model to see the learned curve', width/2, height/2);
@@ -1112,7 +826,7 @@
             ctx.stroke();
 
             if (thresholdX > xMin && thresholdX < xMax) {
-                ctx.strokeStyle = '#f59e0b';
+                ctx.strokeStyle = '#fbbf24';
                 ctx.lineWidth = 2;
                 ctx.setLineDash([6, 4]);
                 ctx.beginPath();
@@ -1126,25 +840,25 @@
                 ctx.stroke();
                 ctx.setLineDash([]);
 
-                ctx.fillStyle = '#f59e0b';
+                ctx.fillStyle = '#fbbf24';
                 ctx.beginPath();
                 ctx.arc(sx(thresholdX), sy(threshold), 6, 0, Math.PI * 2);
                 ctx.fill();
                 
-                ctx.fillStyle = '#f59e0b';
+                ctx.fillStyle = '#fbbf24';
                 ctx.textAlign = 'left';
                 ctx.font = '10px -apple-system';
                 ctx.fillText(`P = ${threshold.toFixed(2)}`, sx(thresholdX) + 8, sy(threshold) - 5);
             }
 
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#5a5c66';
             ctx.font = '10px -apple-system';
             ctx.textAlign = 'right';
             ctx.fillText('1.0', pad.left - 6, sy(1) + 3);
             ctx.fillText('0.5', pad.left - 6, sy(0.5) + 3);
             ctx.fillText('0', pad.left - 6, sy(0) + 3);
 
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#5a5c66';
             ctx.font = '11px -apple-system';
             ctx.textAlign = 'center';
             ctx.fillText('Risk Score (x)', pad.left + plotW/2, height - 6);
@@ -1155,9 +869,9 @@
             ctx.restore();
 
             ctx.font = '10px -apple-system';
-            ctx.fillStyle = '#3b82f6';
+            ctx.fillStyle = '#60a5fa';
             ctx.fillText('Predict: No', pad.left + 30, height - pad.bottom - 10);
-            ctx.fillStyle = '#ef4444';
+            ctx.fillStyle = '#f87171';
             ctx.textAlign = 'right';
             ctx.fillText('Predict: Yes', width - pad.right - 10, height - pad.bottom - 10);
         }
@@ -1168,10 +882,11 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
 
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
 
             if (!modelFitted) {
-                ctx.fillStyle = '#94a3b8';
+                ctx.fillStyle = '#8b8d97';
                 ctx.font = '11px -apple-system';
                 ctx.textAlign = 'center';
                 ctx.fillText('Fit model to see probability distribution', width/2, height/2);
@@ -1201,10 +916,10 @@
                 const h0 = (dens0[i] / maxDens) * plotH * 0.85;
                 const h1 = (dens1[i] / maxDens) * plotH * 0.85;
                 
-                ctx.fillStyle = 'rgba(59, 130, 246, 0.6)';
+                ctx.fillStyle = 'rgba(96, 165, 250, 0.6)';
                 ctx.fillRect(x + 1, height - pad.bottom - h0, barW/2 - 1, h0);
                 
-                ctx.fillStyle = 'rgba(239, 68, 68, 0.6)';
+                ctx.fillStyle = 'rgba(248, 113, 113, 0.6)';
                 ctx.fillRect(x + barW/2, height - pad.bottom - h1, barW/2 - 1, h1);
             }
 
@@ -1218,14 +933,14 @@
             ctx.stroke();
             ctx.setLineDash([]);
 
-            ctx.strokeStyle = '#cbd5e1';
+            ctx.strokeStyle = '#8b8d97';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(pad.left, height - pad.bottom);
             ctx.lineTo(width - pad.right, height - pad.bottom);
             ctx.stroke();
 
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#5a5c66';
             ctx.font = '10px -apple-system';
             ctx.textAlign = 'center';
             ctx.fillText('0', pad.left, height - 8);
@@ -1239,10 +954,11 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
 
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
 
             if (!modelFitted || prCurveData.length === 0) {
-                ctx.fillStyle = '#94a3b8';
+                ctx.fillStyle = '#8b8d97';
                 ctx.font = '11px -apple-system';
                 ctx.textAlign = 'center';
                 ctx.fillText('Fit model to see PR curve', width/2, height/2);
@@ -1252,7 +968,7 @@
             const sx = r => pad.left + r * plotW;
             const sy = p => pad.top + plotH - p * plotH;
 
-            ctx.strokeStyle = '#f1f5f9';
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)';
             ctx.lineWidth = 1;
             [0.25, 0.5, 0.75].forEach(v => {
                 ctx.beginPath();
@@ -1286,7 +1002,7 @@
             ctx.lineWidth = 2;
             ctx.stroke();
 
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#5a5c66';
             ctx.font = '10px -apple-system';
             ctx.textAlign = 'center';
             ctx.fillText('Recall', pad.left + plotW/2, height - 6);
@@ -1310,10 +1026,11 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
 
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
 
             if (!modelFitted) {
-                ctx.fillStyle = '#94a3b8';
+                ctx.fillStyle = '#8b8d97';
                 ctx.font = '11px -apple-system';
                 ctx.textAlign = 'center';
                 ctx.fillText('Fit model to see calibration', width/2, height/2);
@@ -1323,7 +1040,7 @@
             const sx = v => pad.left + v * plotW;
             const sy = v => pad.top + plotH - v * plotH;
 
-            ctx.strokeStyle = '#e2e8f0';
+            ctx.strokeStyle = 'rgba(255,255,255,0.12)';
             ctx.lineWidth = 1;
             ctx.setLineDash([4, 4]);
             ctx.beginPath();
@@ -1345,7 +1062,7 @@
                 if (d.label === 1) bins[binIdx].positives++;
             });
 
-            ctx.fillStyle = '#8b5cf6';
+            ctx.fillStyle = '#a78bfa';
             bins.forEach((bin, i) => {
                 if (bin.count >= 3) {
                     const avgPred = bin.sum / bin.count;
@@ -1358,7 +1075,7 @@
                 }
             });
 
-            ctx.strokeStyle = '#cbd5e1';
+            ctx.strokeStyle = '#8b8d97';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(pad.left, height - pad.bottom);
@@ -1369,7 +1086,7 @@
             ctx.lineTo(pad.left, pad.top);
             ctx.stroke();
 
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#5a5c66';
             ctx.font = '10px -apple-system';
             ctx.textAlign = 'center';
             ctx.fillText('Predicted P(Churn)', pad.left + plotW/2, height - 6);
@@ -1520,6 +1237,97 @@
 
         generateData();
         drawAll();
+
+        if (typeof PlaygroundGuided !== 'undefined') PlaygroundGuided.init({
+            key: 'logistic_regression',
+            steps: [
+                {
+                    title: "The threshold changes everything",
+                    context: "The model outputs a <strong>probability</strong> of churn for each customer. The threshold determines the cutoff: above it we predict 'churn.' Start with threshold = 0.5.",
+                    question: "If you lower the threshold from 0.5 to 0.3, what happens?",
+                    options: [
+                        { id: 'more', label: 'More customers flagged as churners (more positives)' },
+                        { id: 'fewer', label: 'Fewer customers flagged' },
+                        { id: 'same', label: 'No change -- the model predictions are fixed' }
+                    ],
+                    correctId: 'more',
+                    reveal: "Lowering the threshold means more customers exceed the cutoff, so you predict more positives. This increases <strong>recall</strong> (you catch more true churners) but decreases <strong>precision</strong> (more false alarms). The threshold is a business decision, not a model parameter.",
+                    setup: {}
+                },
+                {
+                    title: "Reading the confusion matrix",
+                    context: "The confusion matrix shows four outcomes: true positives (caught churners), false positives (false alarms), true negatives (correct non-churn), false negatives (missed churners).",
+                    question: "For a churn prevention campaign with limited budget, which error is worse?",
+                    options: [
+                        { id: 'fn', label: 'False negatives -- missing real churners who then leave' },
+                        { id: 'fp', label: 'False positives -- wasting offers on non-churners' },
+                        { id: 'equal', label: 'Both are equally bad' }
+                    ],
+                    correctId: 'fn',
+                    reveal: "With limited budget, missing a real churner (false negative) means lost revenue. A false positive just wastes an offer. This means you'd prefer <strong>higher recall</strong> even at the cost of some precision -- which means lowering the threshold.",
+                    setup: {}
+                },
+                {
+                    title: "Cost-based thresholding",
+                    context: "Adjust the <strong>FP Cost</strong> and <strong>FN Cost</strong> sliders. The playground calculates the cost-optimal threshold automatically.",
+                    question: "If FN cost is 10x FP cost, the optimal threshold will:",
+                    options: [
+                        { id: 'lower', label: 'Move lower (catch more churners, accept more false alarms)' },
+                        { id: 'higher', label: 'Move higher (be more conservative)' },
+                        { id: 'no', label: 'Stay at 0.5 regardless of costs' }
+                    ],
+                    correctId: 'lower',
+                    reveal: "When false negatives are expensive, the optimal strategy is to cast a wider net (lower threshold). The cost-optimal threshold minimizes <strong>total business cost</strong>, not classification accuracy. This is why 0.5 is rarely the right threshold in practice.",
+                    setup: {}
+                },
+                {
+                    title: "Imbalanced classes",
+                    context: "Switch to the <strong>Imbalanced (5% churn)</strong> scenario. Only 5% of customers actually churn.",
+                    question: "A model that predicts 'no churn' for everyone gets 95% accuracy. Is that useful?",
+                    options: [
+                        { id: 'no', label: "No -- it catches zero churners (recall = 0)" },
+                        { id: 'yes', label: 'Yes -- 95% accuracy is great' },
+                        { id: 'maybe', label: 'Depends on the AUC' }
+                    ],
+                    correctId: 'no',
+                    reveal: "Accuracy is misleading with imbalanced classes. A model predicting the majority class always gets high accuracy but is useless for the rare event you care about. Use <strong>precision, recall, and PR-AUC</strong> instead. The PR curve is more informative than ROC when the positive class is rare.",
+                    setup: { scenario: 'imbalanced' }
+                }
+            ],
+            selfCheck: [
+                {
+                    prompt: "Your churn model has AUC-ROC = 0.92 but PR-AUC = 0.35 on a dataset with 3% churn rate. What does this tell you?",
+                    options: [
+                        { id: 'a', label: 'The model is excellent -- 0.92 AUC is great' },
+                        { id: 'b', label: 'ROC is inflated by the large negative class; PR-AUC reveals poor performance on the rare positives' },
+                        { id: 'c', label: 'The metrics contradict each other so the model is broken' }
+                    ],
+                    correctId: 'b',
+                    explanation: "ROC-AUC can look good even when the model struggles with the minority class, because it credits true negatives heavily. PR-AUC focuses on positive predictions only, making it a better gauge when positives are rare."
+                },
+                {
+                    prompt: "You deploy a churn model at threshold 0.5. The business team says they have budget to call 100 customers/week. What should you actually do?",
+                    options: [
+                        { id: 'a', label: 'Keep 0.5 threshold and call whoever exceeds it' },
+                        { id: 'b', label: 'Rank all customers by predicted probability and call the top 100' },
+                        { id: 'c', label: 'Lower the threshold until exactly 100 customers are flagged' }
+                    ],
+                    correctId: 'b',
+                    explanation: "With a fixed capacity, you should rank by probability and take the top-K, not use a fixed threshold. This maximizes the expected value of each call. Threshold-based deployment is for unlimited-capacity scenarios."
+                }
+            ],
+            onStepEnter: function(idx, step) {
+                if (idx === 0) {
+                    const th = document.getElementById('thresholdSlider');
+                    if (th) { th.value = 0.5; th.dispatchEvent(new Event('input', {bubbles:true})); }
+                    document.getElementById('thresholdValue').textContent = '0.50';
+                }
+                if (step.setup && step.setup.scenario === 'imbalanced') {
+                    const btn = document.querySelector('.scenario-btn.imbalanced');
+                    if (btn) btn.click();
+                }
+            }
+        });
     </script>
 </body>
 </html>

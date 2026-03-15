@@ -5,60 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Drift Detection Playground</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --accent: #f97316;
+            --accent-dim: rgba(249, 115, 22, 0.12);
         }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-        }
-
-        h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
-        .header-subtitle { font-size: 0.9rem; color: #64748b; }
-
-        .reset-btn {
-            background: white;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-        .reset-btn:hover { background: #f1f5f9; color: #475569; }
-
+    </style>
+    <link rel="stylesheet" href="playground-base.css">
+    <style>
+        /* playground-specific */
         .start-banner {
-            background: linear-gradient(135deg, #f97316, #ea580c);
-            color: white;
-            border-radius: 16px;
-            padding: 24px 32px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
+            background: var(--accent-dim);
+            border: 1px solid var(--accent);
+            color: var(--text-primary);
         }
-        .start-banner-icon { font-size: 2.5rem; flex-shrink: 0; }
-        .start-banner-content h2 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
-        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 12px; }
+        .start-banner-icon { display: block; font-size: 2.5rem; flex-shrink: 0; }
+        .start-banner-content h2 { display: block; font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
 
         .controls {
             display: flex;
@@ -71,78 +32,19 @@
             align-items: center;
             gap: 8px;
         }
-        .control-label {
-            font-size: 0.8rem;
-            color: #64748b;
-        }
-        input[type="range"] {
-            width: 150px;
-        }
-        .control-value {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #1e293b;
-            min-width: 40px;
-        }
-
-        .btn {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-primary {
-            background: #f97316;
-            color: white;
-        }
-        .btn-primary:hover { background: #ea580c; }
-        .btn-secondary {
-            background: #f1f5f9;
-            color: #475569;
-        }
-        .btn-secondary:hover { background: #e2e8f0; }
+        .control-label { font-size: 0.8rem; color: var(--text-secondary); }
+        .control-group input[type="range"] { width: 150px; }
+        .control-value { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); min-width: 40px; }
 
         .main-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 16px;
         }
-
-        .panel {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .panel-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .panel-badge {
-            font-size: 0.65rem;
-            padding: 3px 8px;
-            border-radius: 10px;
-        }
-        .badge-healthy { background: #dcfce7; color: #166534; }
-        .badge-warning { background: #fef3c7; color: #92400e; }
-        .badge-critical { background: #fee2e2; color: #991b1b; }
-
         .chart-container {
             position: relative;
             height: 200px;
             margin-bottom: 16px;
-        }
-        canvas {
-            width: 100%;
-            height: 100%;
         }
 
         .metric-grid {
@@ -151,84 +53,56 @@
             gap: 12px;
         }
         .metric-card {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
             border-radius: 8px;
             padding: 12px;
             text-align: center;
         }
         .metric-card.alert {
-            background: #fef2f2;
-            border-color: #fecaca;
+            background: rgba(255,80,0,0.15);
+            border-color: var(--negative);
         }
         .metric-card.warning {
-            background: #fef3c7;
-            border-color: #fcd34d;
-        }
-        .metric-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1e293b;
-        }
-        .metric-value.good { color: #10b981; }
-        .metric-value.warning { color: #f59e0b; }
-        .metric-value.bad { color: #ef4444; }
-        .metric-label {
-            font-size: 0.75rem;
-            color: #64748b;
-            margin-top: 4px;
+            background: rgba(255,184,0,0.15);
+            border-color: var(--warning);
         }
 
-        .alert-list {
-            max-height: 200px;
-            overflow-y: auto;
-        }
+        .alert-list { max-height: 200px; overflow-y: auto; }
         .alert-item {
             display: flex;
             align-items: center;
             gap: 10px;
             padding: 10px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
             border-radius: 6px;
             margin-bottom: 8px;
             font-size: 0.85rem;
+            color: var(--text-secondary);
         }
         .alert-item.warning {
-            background: #fef3c7;
-            border-color: #fcd34d;
+            background: rgba(255,184,0,0.15);
+            border-color: var(--warning);
         }
         .alert-item.critical {
-            background: #fee2e2;
-            border-color: #fecaca;
+            background: rgba(255,80,0,0.15);
+            border-color: var(--negative);
         }
         .alert-icon { font-size: 1.2rem; }
-        .alert-time { font-size: 0.7rem; color: #64748b; }
+        .alert-time { font-size: 0.7rem; color: var(--text-muted); }
 
         .insight-bar {
-            background: linear-gradient(135deg, #ffedd5, #fed7aa);
-            border: 1px solid #fdba74;
-            border-radius: 10px;
-            padding: 14px 16px;
-            margin-top: 16px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
+            background: var(--accent-dim);
+            border: 1px solid var(--accent);
         }
-        .insight-icon { font-size: 1.2rem; }
-        .insight-content { flex: 1; }
-        .insight-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #9a3412;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-        .insight-text { font-size: 0.85rem; color: #7c2d12; }
+        .insight-title { display: block; }
+        .alert-list .empty-state { color: var(--text-muted); }
+        .badge-healthy { background: rgba(0,200,5,0.15); color: var(--positive); }
+        .badge-critical { background: rgba(255,80,0,0.15); color: var(--negative); }
 
         @media (max-width: 900px) {
             .start-banner { flex-direction: column; text-align: center; padding: 20px; }
-            .start-banner-steps { justify-content: center; }
             .main-grid { grid-template-columns: 1fr; }
         }
     </style>
@@ -316,7 +190,7 @@
                     </div>
                     
                     <div class="alert-list" id="alertList">
-                        <div style="text-align: center; color: #64748b; padding: 20px; font-size: 0.85rem;">
+                        <div class="empty-state" style="text-align: center; padding: 20px; font-size: 0.85rem;">
                             No alerts yet. Increase drift to trigger alerts.
                         </div>
                     </div>
@@ -333,6 +207,7 @@
         </div>
     </div>
 
+    <script src="playground-guided.js"></script>
     <script>
         let day = 0;
         let accuracyHistory = [0.85];
@@ -455,7 +330,7 @@
         function renderAlerts() {
             const list = document.getElementById('alertList');
             if (alerts.length === 0) {
-                list.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px; font-size: 0.85rem;">No alerts yet.</div>';
+                list.innerHTML = '<div class="empty-state" style="text-align: center; padding: 20px; font-size: 0.85rem;">No alerts yet.</div>';
                 return;
             }
             
@@ -481,11 +356,12 @@
             const width = accCanvas.offsetWidth;
             const height = accCanvas.offsetHeight;
             
-            accCtx.clearRect(0, 0, width, height);
+            accCtx.fillStyle = '#141518';
+            accCtx.fillRect(0, 0, width, height);
             
             // Draw accuracy line
             accCtx.beginPath();
-            accCtx.strokeStyle = '#10b981';
+            accCtx.strokeStyle = '#00c805';
             accCtx.lineWidth = 2;
             
             const xStep = width / Math.max(accuracyHistory.length - 1, 1);
@@ -499,7 +375,7 @@
             
             // Threshold line
             accCtx.beginPath();
-            accCtx.strokeStyle = '#ef4444';
+            accCtx.strokeStyle = '#ff5000';
             accCtx.setLineDash([5, 5]);
             const thresholdY = height - (0.75 - 0.5) * height / 0.5;
             accCtx.moveTo(0, thresholdY);
@@ -508,7 +384,7 @@
             accCtx.setLineDash([]);
             
             // Labels
-            accCtx.fillStyle = '#64748b';
+            accCtx.fillStyle = '#8b8d97';
             accCtx.font = '10px sans-serif';
             accCtx.fillText('Accuracy', 5, 12);
             accCtx.fillText('75% threshold', 5, thresholdY - 5);
@@ -523,7 +399,8 @@
             const psiWidth = psiCanvas.offsetWidth;
             const psiHeight = psiCanvas.offsetHeight;
             
-            psiCtx.clearRect(0, 0, psiWidth, psiHeight);
+            psiCtx.fillStyle = '#141518';
+            psiCtx.fillRect(0, 0, psiWidth, psiHeight);
             
             // Draw PSI bars
             const barWidth = Math.max(1, psiWidth / Math.max(psiHistory.length, 1) - 2);
@@ -532,27 +409,27 @@
                 const barHeight = val * psiHeight / 0.5;
                 const y = psiHeight - barHeight;
                 
-                psiCtx.fillStyle = val > 0.25 ? '#ef4444' : val > 0.1 ? '#f59e0b' : '#10b981';
+                psiCtx.fillStyle = val > 0.25 ? '#ff5000' : val > 0.1 ? '#ffb800' : '#00c805';
                 psiCtx.fillRect(x, y, barWidth, barHeight);
             });
             
             // Threshold lines
             psiCtx.beginPath();
-            psiCtx.strokeStyle = '#f59e0b';
+            psiCtx.strokeStyle = '#ffb800';
             psiCtx.setLineDash([5, 5]);
             const warn = psiHeight - 0.1 * psiHeight / 0.5;
             psiCtx.moveTo(0, warn);
             psiCtx.lineTo(psiWidth, warn);
             psiCtx.stroke();
             
-            psiCtx.strokeStyle = '#ef4444';
+            psiCtx.strokeStyle = '#ff5000';
             const crit = psiHeight - 0.25 * psiHeight / 0.5;
             psiCtx.moveTo(0, crit);
             psiCtx.lineTo(psiWidth, crit);
             psiCtx.stroke();
             psiCtx.setLineDash([]);
             
-            psiCtx.fillStyle = '#64748b';
+            psiCtx.fillStyle = '#8b8d97';
             psiCtx.fillText('PSI (Drift)', 5, 12);
         }
 
@@ -615,6 +492,75 @@
         
         // Handle window resize
         window.addEventListener('resize', drawCharts);
+
+        if (typeof PlaygroundGuided !== 'undefined') PlaygroundGuided.init({
+            key: 'drift',
+            steps: [
+                {
+                    title: "Feature drift: inputs change",
+                    context: "Select <strong>Feature Drift</strong> type. Gradually shift the distribution of an input feature and watch the drift score increase.",
+                    question: "Feature drift means:",
+                    options: [
+                        { id: 'input', label: 'The distribution of input features has changed since training' },
+                        { id: 'output', label: 'The model predictions changed' },
+                        { id: 'label', label: 'The labels changed' }
+                    ],
+                    correctId: 'input',
+                    reveal: "Feature drift (covariate shift) means the input distribution P(X) has changed. The model was trained on data that looked different from what it now sees. Even if the relationship P(Y|X) is the same, the model may perform poorly on the new distribution.",
+                    setup: {}
+                },
+                {
+                    title: "Concept drift: the rules change",
+                    context: "Switch to <strong>Concept Drift</strong>. The relationship between features and labels shifts.",
+                    question: "Concept drift is harder to detect because:",
+                    options: [
+                        { id: 'hidden', label: 'Inputs look the same but the correct answers have changed' },
+                        { id: 'obvious', label: "It's always obvious from input distributions" },
+                        { id: 'rare', label: 'It never happens in practice' }
+                    ],
+                    correctId: 'hidden',
+                    reveal: "With concept drift, the inputs look normal (no feature drift detected) but the mapping from inputs to outputs has changed. Example: customer churn patterns shift after a competitor launches. You need labeled feedback data to detect this, which is often delayed.",
+                    setup: {}
+                },
+                {
+                    title: "Statistical tests detect drift",
+                    context: "Watch the PSI (Population Stability Index) and KS test values as drift increases.",
+                    question: "PSI > 0.25 typically means:",
+                    options: [
+                        { id: 'significant', label: 'Significant distribution shift -- investigate and potentially retrain' },
+                        { id: 'fine', label: 'Normal variation -- ignore it' },
+                        { id: 'broken', label: 'The test is broken' }
+                    ],
+                    correctId: 'significant',
+                    reveal: "PSI < 0.1 is stable, 0.1-0.25 is moderate shift, >0.25 is significant. But PSI alone doesn't tell you if the drift <em>matters</em> for model performance. Always correlate drift metrics with actual prediction quality when labels become available.",
+                    setup: {}
+                }
+            ],
+            selfCheck: [
+                {
+                    prompt: "Your model monitoring shows no feature drift but prediction quality has dropped 10%. What type of drift is this?",
+                    options: [
+                        { id: 'a', label: 'Concept drift -- the relationship between features and target has changed' },
+                        { id: 'b', label: 'Feature drift that the test missed' },
+                        { id: 'c', label: 'Not drift -- must be a code bug' }
+                    ],
+                    correctId: 'a',
+                    explanation: "When inputs look the same but performance drops, the underlying relationship P(Y|X) has likely shifted. This is concept drift. A competitor launched, customer behavior changed, or seasonal patterns shifted. You need recent labeled data to confirm and retrain."
+                }
+            ],
+            onStepEnter: function(idx, step) {
+                const driftSlider = document.getElementById('driftSlider');
+                const conceptSlider = document.getElementById('conceptSlider');
+                if (idx === 0) {
+                    driftSlider.value = 60;
+                    conceptSlider.value = 0;
+                } else if (idx === 1) {
+                    driftSlider.value = 0;
+                    conceptSlider.value = 60;
+                }
+                updateDrift();
+            }
+        });
     </script>
 </body>
 </html>

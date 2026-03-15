@@ -5,401 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ensemble Methods Playground</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --accent: #8b5cf6;
+            --accent-dim: rgba(139, 92, 246, 0.12);
         }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-        }
-
-        h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
-        .header-subtitle { font-size: 0.9rem; color: #64748b; }
-
-        .reset-btn {
-            background: white;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-        .reset-btn:hover { background: #f1f5f9; color: #475569; }
-
-        /* Start Banner */
-        .start-banner {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-            border-radius: 16px;
-            padding: 24px 32px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-        .start-banner-icon { font-size: 2.5rem; flex-shrink: 0; }
-        .start-banner-content h2 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
-        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 12px; }
-        .start-banner-steps { display: flex; gap: 24px; flex-wrap: wrap; }
-        .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
-        .step-num {
-            background: rgba(255,255,255,0.2);
-            width: 24px; height: 24px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 600; font-size: 0.75rem;
-        }
-
-        /* Mode Tabs */
-        .mode-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-        .mode-tab {
-            padding: 10px 20px;
-            background: white;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .mode-tab:hover { border-color: #8b5cf6; }
-        .mode-tab.active {
-            background: #8b5cf6;
-            border-color: #8b5cf6;
-            color: white;
-        }
-
-        /* Scenarios */
-        .scenarios-bar {
-            background: white;
-            border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            flex-wrap: wrap;
-        }
-        .scenarios-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-        }
-        .scenario-btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 16px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-        .scenario-btn.stable { background: #dbeafe; color: #1e40af; }
-        .scenario-btn.bias { background: #fef3c7; color: #92400e; }
-        .scenario-btn.variance { background: #fce7f3; color: #9d174d; }
-        .scenario-btn.challenge { background: #8b5cf6; color: white; }
-        .scenario-hint {
-            flex: 1;
-            min-width: 180px;
-            padding: 8px 12px;
-            background: #f8fafc;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            color: #475569;
-            display: none;
-            border-left: 3px solid #8b5cf6;
-        }
-        .scenario-hint.visible { display: block; }
-
-        /* Main Grid */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 320px;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .charts-area { display: flex; flex-direction: column; gap: 12px; }
-
-        .chart-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .chart-card {
-            background: white;
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .chart-card.full { grid-column: 1 / -1; }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .chart-title { font-size: 0.75rem; font-weight: 600; color: #475569; }
-        .chart-badge {
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 10px;
-            background: #f1f5f9;
-            color: #64748b;
-        }
-
-        canvas { display: block; width: 100%; }
-
-        /* Sidebar */
-        .sidebar { display: flex; flex-direction: column; gap: 12px; }
-
-        .sidebar-card {
-            background: white;
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .sidebar-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-        }
-
-        .control-group { margin-bottom: 12px; }
-        .control-group:last-child { margin-bottom: 0; }
-        .control-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #334155;
-            margin-bottom: 6px;
-        }
-        .control-value {
-            font-family: 'SF Mono', Monaco, monospace;
-            background: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            color: #8b5cf6;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 5px;
-            border-radius: 3px;
-            background: #e2e8f0;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 14px; height: 14px;
-            border-radius: 50%;
-            background: #8b5cf6;
-            cursor: pointer;
-        }
-
-        /* Metrics */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px;
-        }
-        .metric-box {
-            text-align: center;
-            padding: 8px 6px;
-            background: #f8fafc;
-            border-radius: 6px;
-        }
-        .metric-label {
-            font-size: 0.6rem;
-            font-weight: 600;
-            color: #94a3b8;
-            text-transform: uppercase;
-        }
-        .metric-value {
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: #1e293b;
-            font-family: 'SF Mono', Monaco, monospace;
-        }
-        .metric-value.good { color: #16a34a; }
-        .metric-value.warn { color: #d97706; }
-        .metric-value.bad { color: #dc2626; }
-
-        /* Comparison Table */
-        .compare-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.75rem;
-        }
-        .compare-table th, .compare-table td {
-            padding: 8px 6px;
-            text-align: center;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .compare-table th {
-            background: #f8fafc;
-            font-weight: 600;
-            color: #64748b;
-        }
-        .compare-table .winner { background: #dcfce7; }
-
-        /* Bias-Variance Panel */
-        .bv-panel {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            border: 1px solid #fbbf24;
-            border-radius: 10px;
-            padding: 14px;
-            margin-top: 12px;
-        }
-        .bv-title {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #92400e;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .bv-dartboard {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            margin-bottom: 12px;
-        }
-        .dartboard-item {
-            text-align: center;
-        }
-        .dartboard-item canvas {
-            border-radius: 50%;
-            background: white;
-        }
-        .dartboard-label {
-            font-size: 0.65rem;
-            color: #78350f;
-            margin-top: 4px;
-            font-weight: 500;
-        }
-        .bv-explanation {
-            font-size: 0.75rem;
-            color: #78350f;
-            line-height: 1.5;
-        }
-        .bv-toggle {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-        .bv-toggle input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-        }
-        .bv-toggle label {
-            font-size: 0.8rem;
-            color: #78350f;
-            cursor: pointer;
-        }
-
-        /* Insight */
-        .insight-bar {
-            background: linear-gradient(135deg, #faf5ff, #f3e8ff);
-            border: 1px solid #c4b5fd;
-            border-radius: 10px;
-            padding: 14px 16px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        .insight-icon { font-size: 1.2rem; }
-        .insight-content { flex: 1; }
-        .insight-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #6d28d9;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-        .insight-text { font-size: 0.85rem; color: #4c1d95; }
-
-        /* Help */
-        .help-panel {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            overflow: hidden;
-        }
-        .help-header {
-            padding: 10px 14px;
-            display: flex;
-            justify-content: space-between;
-            cursor: pointer;
-            background: #f8fafc;
-        }
-        .help-title { font-size: 0.8rem; font-weight: 600; color: #475569; }
-        .help-toggle { font-size: 0.7rem; color: #64748b; }
-        .help-content {
-            padding: 14px;
-            display: none;
-            border-top: 1px solid #e2e8f0;
-        }
-        .help-content.visible { display: block; }
-        .help-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 8px;
-        }
-        .help-item {
-            display: flex;
-            gap: 8px;
-            font-size: 0.75rem;
-            color: #475569;
-        }
-
-        @media (max-width: 1000px) {
-            .start-banner { flex-direction: column; text-align: center; padding: 20px; }
-            .start-banner-steps { justify-content: center; }
-            .main-grid { grid-template-columns: 1fr; }
-            .sidebar { flex-direction: row; flex-wrap: wrap; }
-            .sidebar-card { flex: 1; min-width: 240px; }
-        }
-        @media (max-width: 650px) {
-            .chart-row { grid-template-columns: 1fr; }
-        }
+    </style>
+    <link rel="stylesheet" href="playground-base.css">
+    <style>
+        /* playground-specific */
+        .start-banner-icon { display: block; font-size: 1.5rem; flex-shrink: 0; }
+        .start-banner-content h2 { display: block; font-size: 1rem; margin-bottom: 6px; font-weight: 600; color: var(--text-primary); }
+        .start-banner-steps { display: flex; gap: 16px; flex-wrap: wrap; }
+        .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-secondary); }
+        .step-num { background: var(--accent-dim); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.75rem; color: var(--accent); }
+        .mode-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+        .mode-tab { padding: 10px 20px; background: transparent; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); transition: all 0.15s; }
+        .mode-tab:hover { border-color: var(--accent); color: var(--text-primary); }
+        .mode-tab.active { background: var(--accent); border-color: var(--accent); color: #000; }
+        .scenario-btn.stable { background: rgba(14,165,233,0.12); color: #0ea5e9; border: 1px solid #0ea5e9; }
+        .scenario-btn.bias { background: rgba(255,184,0,0.12); color: var(--warning); border: 1px solid var(--warning); }
+        .scenario-btn.variance { background: rgba(236,72,153,0.12); color: #ec4899; border: 1px solid #ec4899; }
+        .scenario-btn.challenge { background: var(--accent); color: #000; border: 1px solid var(--accent); }
+        .compare-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        .compare-table th, .compare-table td { padding: 8px 6px; text-align: center; border-bottom: 1px solid var(--border); }
+        .compare-table th { background: var(--surface-hover); font-weight: 600; color: var(--text-muted); }
+        .compare-table .winner { background: rgba(0,200,5,0.12); }
+        .bv-panel { background: var(--surface-hover); border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-top: 12px; }
+        .bv-title { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .bv-dartboard { display: flex; gap: 16px; justify-content: center; margin-bottom: 12px; }
+        .dartboard-item { text-align: center; }
+        .dartboard-item canvas { border-radius: 50%; }
+        .dartboard-label { font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+        .bv-explanation { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.5; }
+        .bv-toggle { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+        .bv-toggle input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--accent); }
+        .bv-toggle label { font-size: 0.8rem; color: var(--text-secondary); cursor: pointer; }
     </style>
 </head>
 <body>
@@ -616,6 +256,7 @@
         </div>
     </div>
 
+    <script src="playground-guided.js"></script>
     <script>
         // ============================================
         // STATE
@@ -952,7 +593,8 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
 
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
 
             const sx = x => pad.left + (x + 1) / 2 * plotW;
             const sy = y => pad.top + (1 - (y + 1) / 2) * plotH;
@@ -1009,7 +651,7 @@
             }
 
             // Grid
-            ctx.strokeStyle = '#e2e8f0';
+            ctx.strokeStyle = '#5a5c66';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(sx(0), pad.top);
@@ -1033,7 +675,8 @@
             const plotW = width - pad.left - pad.right;
             const plotH = height - pad.top - pad.bottom;
 
-            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, width, height);
 
             const sx = x => pad.left + (x + 1) / 2 * plotW;
             const sy = y => pad.top + (1 - (y + 1) / 2) * plotH;
@@ -1070,7 +713,7 @@
 
             // Legend
             ctx.font = '10px -apple-system';
-            ctx.fillStyle = '#64748b';
+            ctx.fillStyle = '#8b8d97';
             ctx.textAlign = 'left';
             ctx.fillText('Left dot = Single Tree | Right dot = Ensemble | Green = Correct', pad.left, height - 5);
         }
@@ -1343,14 +986,15 @@
             const cy = h / 2;
             const r = Math.min(w, h) / 2 - 4;
             
-            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = '#141518';
+            ctx.fillRect(0, 0, w, h);
             
-            ctx.fillStyle = '#f8fafc';
+            ctx.fillStyle = '#1a1b1f';
             ctx.beginPath();
             ctx.arc(cx, cy, r, 0, Math.PI * 2);
             ctx.fill();
             
-            ctx.strokeStyle = '#e2e8f0';
+            ctx.strokeStyle = '#5a5c66';
             ctx.lineWidth = 1;
             for (let i = 1; i <= 3; i++) {
                 ctx.beginPath();
@@ -1362,7 +1006,7 @@
             ctx.beginPath();
             ctx.arc(cx, cy, 6, 0, Math.PI * 2);
             ctx.fill();
-            ctx.strokeStyle = trueLabel === 1 ? '#ef4444' : '#3b82f6';
+            ctx.strokeStyle = trueLabel === 1 ? '#ef4444' : '#60a5fa';
             ctx.lineWidth = 2;
             ctx.stroke();
             
@@ -1395,6 +1039,94 @@
 
         splitData();
         drawAll();
+
+        if (typeof PlaygroundGuided !== 'undefined') PlaygroundGuided.init({
+            key: 'ensembles',
+            steps: [
+                {
+                    title: "One tree is fragile",
+                    context: "A single decision tree on this data. Click <strong>Re-roll</strong> a few times to see how the tree changes with different random samples.",
+                    question: "When you re-roll the data, does the single tree stay stable?",
+                    options: [
+                        { id: 'no', label: "No -- the tree changes dramatically each time (high variance)" },
+                        { id: 'yes', label: 'Yes -- the tree is consistent across samples' },
+                        { id: 'sometimes', label: 'Sometimes stable, sometimes not' }
+                    ],
+                    correctId: 'no',
+                    reveal: "A single deep tree is <strong>high variance</strong>: small changes in training data produce very different trees. This instability means the model won't generalize reliably. Ensembles fix this by averaging many unstable models.",
+                    setup: {}
+                },
+                {
+                    title: "Bagging reduces variance",
+                    context: "Switch to <strong>Bagging</strong> mode. Each tree trains on a different bootstrap sample (random sample with replacement). The ensemble averages their votes.",
+                    question: "Why does averaging many trees reduce variance?",
+                    options: [
+                        { id: 'avg', label: 'Individual errors cancel out when you average -- some overpredict, some underpredict' },
+                        { id: 'best', label: 'The ensemble picks the single best tree' },
+                        { id: 'overfit', label: 'Each tree is deeper so it overfits less' }
+                    ],
+                    correctId: 'avg',
+                    reveal: "This is the key insight: if trees make <strong>uncorrelated errors</strong>, averaging reduces the variance by ~1/N (N = number of trees). Bootstrap sampling helps make errors less correlated by giving each tree a different view of the data.",
+                    setup: {}
+                },
+                {
+                    title: "Boosting reduces bias",
+                    context: "Switch to <strong>Boosting</strong> mode. Each new tree focuses on the mistakes of the previous ensemble. Adjust the learning rate to see its effect.",
+                    question: "What happens if the learning rate is too high?",
+                    options: [
+                        { id: 'overfit', label: 'The model overfits -- each tree corrects too aggressively' },
+                        { id: 'underfit', label: 'The model underfits -- it learns too slowly' },
+                        { id: 'same', label: 'Learning rate has no effect on ensembles' }
+                    ],
+                    correctId: 'overfit',
+                    reveal: "A high learning rate means each tree makes large corrections, so the ensemble can overfit to training noise. A lower learning rate requires more trees but generalizes better. The learning rate is boosting's regularization knob.",
+                    setup: {}
+                },
+                {
+                    title: "Bias-variance tradeoff",
+                    context: "Enable the <strong>variance visualization</strong> (dartboard). The center is the true target. Each dot is a prediction from a different bootstrap sample.",
+                    question: "Which ensemble method helps when the base learner underfits?",
+                    options: [
+                        { id: 'boosting', label: 'Boosting -- it sequentially corrects bias' },
+                        { id: 'bagging', label: 'Bagging -- it averages out the underfitting' },
+                        { id: 'either', label: 'Either method works equally well' }
+                    ],
+                    correctId: 'boosting',
+                    reveal: "Bagging reduces <strong>variance</strong> but doesn't fix bias. Boosting reduces <strong>bias</strong> by iteratively correcting errors. If your base model underfits (high bias), boosting is the right tool. If it overfits (high variance), bagging helps more.",
+                    setup: {}
+                }
+            ],
+            selfCheck: [
+                {
+                    prompt: "Random Forest is a bagging method. Why does it also randomize which features each tree considers at each split?",
+                    options: [
+                        { id: 'a', label: 'To make trees faster to train' },
+                        { id: 'b', label: 'To decorrelate the trees so averaging is more effective' },
+                        { id: 'c', label: 'To reduce the number of features used' }
+                    ],
+                    correctId: 'b',
+                    explanation: "If all trees see all features, they tend to split on the same dominant features and become correlated. Feature subsampling forces diversity, making errors more independent so that averaging works better."
+                },
+                {
+                    prompt: "You have a gradient-boosted model with 500 trees. Training accuracy is 99%, test accuracy is 78%. What should you try?",
+                    options: [
+                        { id: 'a', label: 'Add more trees to improve test accuracy' },
+                        { id: 'b', label: 'Reduce trees, lower learning rate, or increase regularization' },
+                        { id: 'c', label: 'Switch to bagging instead' }
+                    ],
+                    correctId: 'b',
+                    explanation: "The 21-point train-test gap signals overfitting. Adding more trees will make it worse. Instead: reduce max trees (early stopping), lower learning rate, increase min samples per leaf, or add subsampling. These regularize the boosting process."
+                }
+            ],
+            onStepEnter: function(idx, step) {
+                if (idx === 1) setMode('bagging');
+                else if (idx === 2) setMode('boosting');
+                else if (idx === 3) {
+                    const toggle = document.getElementById('showVarianceToggle');
+                    if (toggle && !toggle.checked) { toggle.checked = true; toggle.dispatchEvent(new Event('change', {bubbles:true})); }
+                }
+            }
+        });
     </script>
 </body>
 </html>

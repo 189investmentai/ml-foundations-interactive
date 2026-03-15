@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="2" stdDeviation="2" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+  
+  <text x="400" y="35" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="bold" fill="#1a1a1a">Decision Trees: 20 Questions</text>
+  <text x="400" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#666">Split customers into groups with yes/no questions</text>
+  
+  <rect x="300" y="80" width="200" height="50" rx="8" fill="#E3F2FD" stroke="#1976D2" stroke-width="2" filter="url(#shadow)"/>
+  <text x="400" y="100" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#1565C0" font-weight="bold">support_tickets &gt; 0?</text>
+  <text x="400" y="118" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">5,000 customers</text>
+  
+  <path d="M 350 130 L 200 170" stroke="#666" stroke-width="2" fill="none"/>
+  <path d="M 450 130 L 600 170" stroke="#666" stroke-width="2" fill="none"/>
+  <text x="260" y="145" font-family="Arial, sans-serif" font-size="11" fill="#4CAF50" font-weight="bold">No</text>
+  <text x="520" y="145" font-family="Arial, sans-serif" font-size="11" fill="#F44336" font-weight="bold">Yes</text>
+  
+  <rect x="100" y="175" width="180" height="50" rx="8" fill="#E8F5E9" stroke="#43A047" stroke-width="2" filter="url(#shadow)"/>
+  <text x="190" y="195" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#2E7D32" font-weight="bold">tenure &gt; 6 months?</text>
+  <text x="190" y="213" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">3,800 (6% churn)</text>
+  
+  <rect x="520" y="175" width="180" height="50" rx="8" fill="#FFEBEE" stroke="#E53935" stroke-width="2" filter="url(#shadow)"/>
+  <text x="610" y="195" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#C62828" font-weight="bold">logins_30d &lt; 5?</text>
+  <text x="610" y="213" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">1,200 (28% churn)</text>
+  
+  <path d="M 140 225 L 80 265" stroke="#666" stroke-width="2" fill="none"/>
+  <path d="M 240 225 L 300 265" stroke="#666" stroke-width="2" fill="none"/>
+  <path d="M 560 225 L 500 265" stroke="#666" stroke-width="2" fill="none"/>
+  <path d="M 660 225 L 720 265" stroke="#666" stroke-width="2" fill="none"/>
+  
+  <rect x="30" y="270" width="110" height="60" rx="8" fill="#C8E6C9" stroke="#66BB6A" stroke-width="2" filter="url(#shadow)"/>
+  <text x="85" y="293" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#2E7D32">SAFE</text>
+  <text x="85" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">2,900 customers</text>
+  <text x="85" y="322" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">3% churn</text>
+  
+  <rect x="250" y="270" width="110" height="60" rx="8" fill="#FFF9C4" stroke="#FBC02D" stroke-width="2" filter="url(#shadow)"/>
+  <text x="305" y="293" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#F57F17">WATCH</text>
+  <text x="305" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">900 customers</text>
+  <text x="305" y="322" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">12% churn</text>
+  
+  <rect x="440" y="270" width="110" height="60" rx="8" fill="#FFCCBC" stroke="#FF7043" stroke-width="2" filter="url(#shadow)"/>
+  <text x="495" y="293" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#E64A19">AT RISK</text>
+  <text x="495" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">600 customers</text>
+  <text x="495" y="322" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">22% churn</text>
+  
+  <rect x="660" y="270" width="110" height="60" rx="8" fill="#FFCDD2" stroke="#EF5350" stroke-width="2" filter="url(#shadow)"/>
+  <text x="715" y="293" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#C62828">HIGH RISK</text>
+  <text x="715" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">600 customers</text>
+  <text x="715" y="322" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">45% churn</text>
+  
+  <rect x="50" y="360" width="700" height="70" rx="8" fill="#FAFAFA" stroke="#E0E0E0" stroke-width="1"/>
+  <text x="400" y="385" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#333">Why Trees Work</text>
+  <text x="180" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#666">[+] Finds interactions automatically</text>
+  <text x="400" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#666">[+] Easy to explain</text>
+  <text x="620" y="410" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#666">[-] Can overfit (limit depth!)</text>
+</svg>

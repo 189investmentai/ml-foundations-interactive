@@ -5,276 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clustering Playground</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --accent: #14b8a6;
+            --accent-dim: rgba(20, 184, 166, 0.12);
         }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-        }
-
-        h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
-        .header-subtitle { font-size: 0.9rem; color: #64748b; }
-
-        .reset-btn {
-            background: white;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-        .reset-btn:hover { background: #f1f5f9; color: #475569; }
-
-        .start-banner {
-            background: linear-gradient(135deg, #14b8a6, #0d9488);
-            color: white;
-            border-radius: 16px;
-            padding: 24px 32px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-        .start-banner-icon { font-size: 2.5rem; flex-shrink: 0; }
-        .start-banner-content h2 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
-        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 12px; }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 320px;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .charts-area { display: flex; flex-direction: column; gap: 12px; }
-
-        .chart-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .chart-card {
-            background: white;
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .chart-title { font-size: 0.75rem; font-weight: 600; color: #475569; }
-        .chart-badge {
-            font-size: 0.65rem;
-            padding: 2px 8px;
-            border-radius: 10px;
-            background: #f1f5f9;
-            color: #64748b;
-        }
-
-        canvas { display: block; width: 100%; }
-        .chart-help {
-            margin-top: 8px;
-            font-size: 0.75rem;
-            color: #64748b;
-            line-height: 1.45;
-        }
-        .chart-interaction-hint {
-            margin-top: 6px;
-            font-size: 0.7rem;
-            color: #94a3b8;
-            font-style: italic;
-        }
-
-        .sidebar { display: flex; flex-direction: column; gap: 12px; }
-
-        .sidebar-card {
-            background: white;
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .sidebar-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-        }
-
-        .control-group { margin-bottom: 12px; }
-        .control-group:last-child { margin-bottom: 0; }
-        .control-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #334155;
-            margin-bottom: 6px;
-        }
-        .control-value {
-            font-family: 'SF Mono', Monaco, monospace;
-            background: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            color: #14b8a6;
-        }
-
-        select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            background: white;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 5px;
-            border-radius: 3px;
-            background: #e2e8f0;
-            outline: none;
-            -webkit-appearance: none;
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 14px; height: 14px;
-            border-radius: 50%;
-            background: #14b8a6;
-            cursor: pointer;
-        }
-
-        .btn {
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-primary {
-            background: #14b8a6;
-            color: white;
-        }
-        .btn-primary:hover { background: #0d9488; }
-        .btn-full { width: 100%; }
-
-        .btn-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 6px;
-            margin-bottom: 10px;
-        }
-        .btn-group .btn {
-            padding: 8px 4px;
-            font-size: 0.78rem;
-            text-align: center;
-        }
-        .btn-outline {
-            background: white;
-            color: #0f766e;
-            border: 1px solid #99f6e4;
-        }
-        .btn-outline:hover { background: #f0fdfa; }
-
-        .toggle-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.8rem;
-            color: #475569;
-            cursor: pointer;
-            user-select: none;
-            margin-top: 8px;
-        }
-        .toggle-label input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            accent-color: #14b8a6;
-        }
-
-        input[type="range"]:disabled {
-            opacity: 0.55;
-            cursor: not-allowed;
-        }
-
-        .metrics-panel {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-        .metric-card {
-            padding: 10px;
-            background: #f8fafc;
-            border-radius: 6px;
-            text-align: center;
-        }
-        .metric-card.highlight {
-            background: #ccfbf1;
-            border: 1px solid #5eead4;
-        }
-        .metric-name {
-            font-size: 0.65rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-        }
-        .metric-value {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #0f766e;
-            font-family: 'SF Mono', Monaco, monospace;
-        }
-
-        .insight-bar {
-            background: linear-gradient(135deg, #ccfbf1, #99f6e4);
-            border: 1px solid #5eead4;
-            border-radius: 10px;
-            padding: 14px 16px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        .insight-icon { font-size: 1.2rem; }
-        .insight-content { flex: 1; }
-        .insight-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #0f766e;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-        .insight-text { font-size: 0.85rem; color: #115e59; }
-
+    </style>
+    <link rel="stylesheet" href="playground-base.css">
+    <style>
+        #clusterChart { cursor: crosshair; }
         .presets-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -284,30 +22,45 @@
             display: flex;
             align-items: center;
             gap: 6px;
-            padding: 7px 10px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            padding: 8px 12px;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
             border-radius: 6px;
-            font-size: 0.72rem;
-            color: #334155;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.15s;
             text-align: left;
         }
         .preset-btn:hover {
-            background: #f0fdfa;
-            border-color: #99f6e4;
+            background: var(--accent-dim);
+            border-color: var(--accent);
+            color: var(--text-primary);
         }
         .preset-icon { font-size: 0.85rem; flex-shrink: 0; }
         .preset-name { line-height: 1.2; }
-
-        #clusterChart { cursor: crosshair; }
-
-        @media (max-width: 1000px) {
-            .start-banner { flex-direction: column; text-align: center; padding: 20px; }
-            .start-banner-steps { justify-content: center; }
-            .main-grid { grid-template-columns: 1fr; }
-            .chart-row { grid-template-columns: 1fr; }
+        .chart-help {
+            margin-top: 10px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        .chart-interaction-hint {
+            margin-top: 6px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .btn-group .btn { padding: 8px 4px; font-size: 0.78rem; text-align: center; }
+        input[type="range"]:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -318,15 +71,24 @@
                 <h1>Clustering Playground</h1>
                 <span class="header-subtitle">See how K-means finds natural groups in data</span>
             </div>
-            <button class="reset-btn" onclick="resetPlayground()">↻ Reset</button>
+            <div class="header-actions">
+                <button class="reset-btn" onclick="resetPlayground()">Reset</button>
+            </div>
         </header>
 
-        <div class="start-banner">
-            <div class="start-banner-icon">🎯</div>
-            <div class="start-banner-content">
-                <h2>K-Means in Action</h2>
-                <p>Elbow + silhouette are hints, not truth. K-means works best for blob-like clusters.</p>
-            </div>
+        <div class="context-bar">
+            K-means partitions data into K clusters by iteratively assigning points to the nearest centroid. 
+            Elbow + silhouette are hints, not truth. K-means works best for blob-like clusters.
+        </div>
+
+        <div class="scenarios-bar">
+            <span class="scenarios-label">Presets:</span>
+            <button class="scenario-btn" onclick="loadPreset('easy')">Easy Blobs</button>
+            <button class="scenario-btn" onclick="loadPreset('aniso')">Stretched</button>
+            <button class="scenario-btn" onclick="loadPreset('moons')">Two Moons</button>
+            <button class="scenario-btn" onclick="loadPreset('circles')">Circles</button>
+            <button class="scenario-btn" onclick="loadPreset('varied')">Varied Density</button>
+            <button class="scenario-btn" onclick="loadPreset('findK')">Find K</button>
         </div>
 
         <div class="main-grid">
@@ -337,7 +99,7 @@
                             <span class="chart-title">Data Points with Clusters</span>
                             <span class="chart-badge" id="nPoints">100 points</span>
                         </div>
-                        <canvas id="clusterChart" height="300"></canvas>
+                        <canvas id="clusterChart" height="280"></canvas>
                         <div class="chart-interaction-hint">Click to add points · Drag centroids to reposition</div>
                     </div>
                     <div class="chart-card">
@@ -345,10 +107,9 @@
                             <span class="chart-title">Elbow Plot</span>
                             <span class="chart-badge">inertia vs K</span>
                         </div>
-                        <canvas id="elbowChart" height="300"></canvas>
+                        <canvas id="elbowChart" height="280"></canvas>
                         <div class="chart-help">
-                            Inertia = sum of squared distances to centroids.<br>
-                            It always decreases as K increases; look for the bend where gains shrink.
+                            Inertia = sum of squared distances to centroids. It always decreases as K increases; look for the bend where gains shrink.
                         </div>
                     </div>
                 </div>
@@ -358,25 +119,22 @@
                         <span class="chart-title">Silhouette Scores by K</span>
                         <span class="chart-badge" id="bestK">best K = --</span>
                     </div>
-                    <canvas id="silhouetteChart" height="150"></canvas>
+                    <canvas id="silhouetteChart" height="140"></canvas>
                     <div class="chart-help">
-                        Silhouette ranges roughly -1 to 1; higher is better.<br>
-                        Prefer peaks, but treat unstable scores as a warning sign.
+                        Silhouette ranges roughly -1 to 1; higher is better. Prefer peaks, but treat unstable scores as a warning sign.
                     </div>
                 </div>
 
-                <div class="insight-bar">
-                    <div class="insight-icon">💡</div>
-                    <div class="insight-content">
-                        <div class="insight-title">Clustering Insight</div>
+                <div class="panel">
+                    <div class="insight-bar">
                         <div class="insight-text" id="insightText">Generate data and run K-means to see clustering in action.</div>
                     </div>
                 </div>
             </div>
 
             <div class="sidebar">
-                <div class="sidebar-card">
-                    <div class="sidebar-title">Data Generation</div>
+                <div class="panel">
+                    <div class="panel-title">Data Generation</div>
                     <div class="control-group">
                         <div class="control-label"><span>Data Pattern</span></div>
                         <select id="dataPattern" onchange="generateData()">
@@ -401,11 +159,11 @@
                         </div>
                         <input type="range" id="trueClustersSlider" min="2" max="6" step="1" value="3" oninput="scheduleGenerateData()">
                     </div>
-                    <button class="btn btn-primary btn-full" onclick="generateData()">Generate New Data</button>
+                    <button class="btn btn-primary" style="width:100%" onclick="generateData()">Generate New Data</button>
                 </div>
 
-                <div class="sidebar-card">
-                    <div class="sidebar-title">K-Means</div>
+                <div class="panel">
+                    <div class="panel-title">K-Means</div>
                     <div class="control-group">
                         <div class="control-label">
                             <span>Number of Clusters (K)</span>
@@ -414,7 +172,7 @@
                         <input type="range" id="kSlider" min="2" max="10" step="1" value="3" oninput="updateK()">
                     </div>
                     <div class="btn-group">
-                        <button class="btn btn-primary" id="animateBtn" onclick="toggleAnimate()">▶ Play</button>
+                        <button class="btn btn-primary" id="animateBtn" onclick="toggleAnimate()">Play</button>
                         <button class="btn btn-outline" onclick="stepKmeans()">Step</button>
                         <button class="btn btn-outline" onclick="applyCurrentK()">Apply K</button>
                     </div>
@@ -425,67 +183,38 @@
                         </div>
                         <input type="range" id="speedSlider" min="1" max="5" step="1" value="3" oninput="updateSpeed()">
                     </div>
-                    <label class="toggle-label">
-                        <input type="checkbox" id="showVoronoi" onchange="drawClusters()">
+                    <label style="display:flex;align-items:center;gap:8px;font-size:0.8rem;color:var(--text-secondary);cursor:pointer;margin-top:8px">
+                        <input type="checkbox" id="showVoronoi" onchange="drawClusters()" style="accent-color:var(--accent)">
                         <span>Show decision boundaries</span>
                     </label>
                 </div>
 
-                <div class="sidebar-card">
-                    <div class="sidebar-title">Metrics</div>
-                    <div class="metrics-panel">
-                        <div class="metric-card highlight">
-                            <div class="metric-name">Silhouette</div>
+                <div class="panel">
+                    <div class="panel-title">Metrics</div>
+                    <div class="metrics-grid">
+                        <div class="metric-box">
+                            <div class="metric-label">Silhouette</div>
                             <div class="metric-value" id="silhouetteValue">--</div>
                         </div>
-                        <div class="metric-card highlight">
-                            <div class="metric-name">Inertia</div>
+                        <div class="metric-box">
+                            <div class="metric-label">Inertia</div>
                             <div class="metric-value" id="inertiaValue">--</div>
                         </div>
-                        <div class="metric-card">
-                            <div class="metric-name">Iterations</div>
+                        <div class="metric-box">
+                            <div class="metric-label">Iterations</div>
                             <div class="metric-value" id="iterValue">--</div>
                         </div>
-                        <div class="metric-card">
-                            <div class="metric-name">Clusters</div>
+                        <div class="metric-box">
+                            <div class="metric-label">Clusters</div>
                             <div class="metric-value" id="clustersFound">--</div>
                         </div>
-                    </div>
-                </div>
-
-                <div class="sidebar-card">
-                    <div class="sidebar-title">Challenge Presets</div>
-                    <div class="presets-grid">
-                        <button class="preset-btn" onclick="loadPreset('easy')">
-                            <span class="preset-icon">🟢</span>
-                            <span class="preset-name">Easy blobs</span>
-                        </button>
-                        <button class="preset-btn" onclick="loadPreset('aniso')">
-                            <span class="preset-icon">🟡</span>
-                            <span class="preset-name">Stretched</span>
-                        </button>
-                        <button class="preset-btn" onclick="loadPreset('moons')">
-                            <span class="preset-icon">🔴</span>
-                            <span class="preset-name">Two moons</span>
-                        </button>
-                        <button class="preset-btn" onclick="loadPreset('circles')">
-                            <span class="preset-icon">🔴</span>
-                            <span class="preset-name">Circles</span>
-                        </button>
-                        <button class="preset-btn" onclick="loadPreset('varied')">
-                            <span class="preset-icon">🟠</span>
-                            <span class="preset-name">Varied density</span>
-                        </button>
-                        <button class="preset-btn" onclick="loadPreset('findK')">
-                            <span class="preset-icon">🔍</span>
-                            <span class="preset-name">Find K</span>
-                        </button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="playground-guided.js"></script>
     <script>
     const dpr = window.devicePixelRatio || 1;
     const K_MIN = 2;
@@ -519,8 +248,6 @@
 
     let dragState = null;
     let lastPlotTransform = null;
-
-    /* ── Utility ─────────────────────────────────────────────── */
 
     function createEmptyCache() {
         return { inertias:[], silhouettes:[], bestByK:{}, bestK:null, version:-1 };
@@ -586,8 +313,6 @@
         return t < 0.5 ? 2*t*t : -1 + (4-2*t)*t;
     }
 
-    /* ── Coordinate Conversion ──────────────────────────────── */
-
     function pixelToData(px, py) {
         const t = lastPlotTransform;
         if (!t) return null;
@@ -604,8 +329,6 @@
             t.pad.top + (1 - (y - t.minY) / (t.maxY - t.minY || 1)) * t.plotH
         ];
     }
-
-    /* ── True-Cluster Control ───────────────────────────────── */
 
     function updateTrueClusterControl(pattern) {
         const slider = document.getElementById('trueClustersSlider');
@@ -624,8 +347,6 @@
         valueEl.textContent = slider.value;
         return parseInt(slider.value, 10);
     }
-
-    /* ── Data Generation ────────────────────────────────────── */
 
     function generateData() {
         stopAnimate();
@@ -685,8 +406,6 @@
         applyCurrentK();
     }
 
-    /* ── Distance Matrix ────────────────────────────────────── */
-
     function buildDistanceMatrix() {
         const n = data.length;
         const m = Array.from({length:n}, ()=> new Float32Array(n));
@@ -714,8 +433,6 @@
         newRow[n] = 0;
         distanceMatrix.push(newRow);
     }
-
-    /* ── K-Means Algorithm ──────────────────────────────────── */
 
     function initCentroidsKmeansPP(k, rng) {
         if (data.length === 0) return [];
@@ -814,8 +531,6 @@
         return { ...best, silhouette: calcSilhouette(best.labels, k) };
     }
 
-    /* ── Metrics ────────────────────────────────────────────── */
-
     function calcInertia(labs, cents) {
         if (!labs || labs.length !== data.length || !cents || cents.length === 0) return 0;
         let sum = 0;
@@ -857,8 +572,6 @@
         return valid > 0 ? total / valid : 0;
     }
 
-    /* ── Metrics Cache / Sweep ──────────────────────────────── */
-
     function updateMetricsDisplay(sil, inertia, iters, clusters) {
         document.getElementById('silhouetteValue').textContent = Number.isFinite(sil) ? sil.toFixed(3) : '--';
         document.getElementById('inertiaValue').textContent = Number.isFinite(inertia) ? inertia.toFixed(0) : '--';
@@ -882,8 +595,6 @@
         drawSilhouettePlot(silhouettes);
         document.getElementById('bestK').textContent = `best K = ${metricsCache.bestK}`;
     }
-
-    /* ── Apply / Step / Animate ─────────────────────────────── */
 
     function updateK() {
         const k = document.getElementById('kSlider').value;
@@ -945,8 +656,6 @@
             : `Step ${stepState.iterations}: reassigned points, then updated centroids.`;
     }
 
-    /* ── Animation System ───────────────────────────────────── */
-
     function toggleAnimate() {
         if (animRunning) stopAnimate();
         else startAnimate();
@@ -961,14 +670,14 @@
         animPrevCentroids = centroids.map(c=>[...c]);
         animNextCentroids = null;
         animStepStartTime = 0;
-        document.getElementById('animateBtn').textContent = '⏸ Pause';
+        document.getElementById('animateBtn').textContent = 'Pause';
         animFrameId = requestAnimationFrame(animLoop);
     }
 
     function stopAnimate() {
         animRunning = false;
         if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
-        document.getElementById('animateBtn').textContent = '▶ Play';
+        document.getElementById('animateBtn').textContent = 'Play';
         if (animNextCentroids) {
             centroids = animNextCentroids.map(c=>[...c]);
             animNextCentroids = null;
@@ -1026,8 +735,6 @@
         animStepInterval = speedIntervals[v-1];
     }
 
-    /* ── Drawing: Cluster Chart ─────────────────────────────── */
-
     function drawClusters() {
         const canvas = document.getElementById('clusterChart');
         const { width, height, ctx } = setupCanvas(canvas);
@@ -1035,7 +742,8 @@
         const plotW = width - pad.left - pad.right;
         const plotH = height - pad.top - pad.bottom;
 
-        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = '#141518';
+        ctx.fillRect(0, 0, width, height);
         if (data.length === 0) return;
 
         const xs = data.map(d=>d[0]), ys = data.map(d=>d[1]);
@@ -1047,8 +755,7 @@
         const sx = x => pad.left + ((x-minX)/(maxX-minX||1))*plotW;
         const sy = y => pad.top + (1-(y-minY)/(maxY-minY||1))*plotH;
 
-        // Grid
-        ctx.strokeStyle = '#e2e8f0';
+        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
         ctx.lineWidth = 1;
         for (let i = 0; i <= 4; i++) {
             const gx = pad.left + (i/4)*plotW;
@@ -1057,7 +764,6 @@
             ctx.beginPath(); ctx.moveTo(pad.left, gy); ctx.lineTo(width-pad.right, gy); ctx.stroke();
         }
 
-        // Voronoi decision boundaries
         if (document.getElementById('showVoronoi').checked && centroids.length > 0) {
             const step = 6;
             for (let px = pad.left; px < pad.left + plotW; px += step) {
@@ -1069,33 +775,30 @@
                         const d = squaredDistance([dx,dy], centroids[c]);
                         if (d < bd) { bd = d; bc = c; }
                     }
-                    ctx.fillStyle = hexAlpha(colors[bc % colors.length], 0.10);
+                    ctx.fillStyle = hexAlpha(colors[bc % colors.length], 0.15);
                     ctx.fillRect(px, py, step, step);
                 }
             }
         }
 
-        // Points
         const isClustered = labels.length === data.length;
         for (let i = 0; i < data.length; i++) {
-            ctx.fillStyle = isClustered ? colors[labels[i] % colors.length] : '#94a3b8';
+            ctx.fillStyle = isClustered ? colors[labels[i] % colors.length] : '#8b8d97';
             ctx.beginPath();
             ctx.arc(sx(data[i][0]), sy(data[i][1]), 4, 0, Math.PI*2);
             ctx.fill();
         }
 
-        // Centroids
         for (let c = 0; c < centroids.length; c++) {
             const cx = sx(centroids[c][0]), cy = sy(centroids[c][1]);
             ctx.fillStyle = colors[c % colors.length];
-            ctx.strokeStyle = 'white';
+            ctx.strokeStyle = '#f5f5f7';
             ctx.lineWidth = 2.5;
             ctx.beginPath();
             ctx.arc(cx, cy, 11, 0, Math.PI*2);
             ctx.fill();
             ctx.stroke();
-            // X mark
-            ctx.strokeStyle = 'white';
+            ctx.strokeStyle = '#f5f5f7';
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(cx-4, cy-4); ctx.lineTo(cx+4, cy+4);
@@ -1103,8 +806,6 @@
             ctx.stroke();
         }
     }
-
-    /* ── Drawing: Elbow & Silhouette ────────────────────────── */
 
     function redrawMetricCharts() {
         if (metricsCache.version === dataVersion && metricsCache.inertias.length > 0) {
@@ -1119,7 +820,8 @@
         const pad = { top: 20, right: 20, bottom: 35, left: 50 };
         const plotW = width-pad.left-pad.right;
         const plotH = height-pad.top-pad.bottom;
-        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = '#141518';
+        ctx.fillRect(0, 0, width, height);
         if (!inertias || inertias.length === 0) return;
 
         const maxI = Math.max(...inertias), minI = Math.min(...inertias);
@@ -1148,7 +850,7 @@
         ctx.beginPath(); ctx.moveTo(sx(curK), pad.top); ctx.lineTo(sx(curK), height-pad.bottom); ctx.stroke();
         ctx.setLineDash([]);
 
-        ctx.fillStyle = '#64748b'; ctx.font = '10px -apple-system'; ctx.textAlign = 'center';
+        ctx.fillStyle = '#8b8d97'; ctx.font = '10px -apple-system'; ctx.textAlign = 'center';
         for (let k = K_MIN; k <= K_MAX; k += 2) ctx.fillText(k.toString(), sx(k), height-10);
         ctx.fillText('K', width/2, height-20);
         ctx.save(); ctx.translate(15, height/2); ctx.rotate(-Math.PI/2); ctx.fillText('Inertia', 0, 0); ctx.restore();
@@ -1160,7 +862,8 @@
         const pad = { top: 15, right: 20, bottom: 30, left: 50 };
         const plotW = width-pad.left-pad.right;
         const plotH = height-pad.top-pad.bottom;
-        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = '#141518';
+        ctx.fillRect(0, 0, width, height);
         if (!silhouettes || silhouettes.length === 0) return;
 
         const minS = Math.min(...silhouettes, -0.1), maxS = Math.max(...silhouettes, 0.5);
@@ -1169,7 +872,7 @@
         const bestS = Math.max(...silhouettes);
         const zeroY = yScale(0);
 
-        ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(pad.left, zeroY); ctx.lineTo(width-pad.right, zeroY); ctx.stroke();
 
         for (let k = K_MIN; k <= K_MAX; k++) {
@@ -1177,9 +880,9 @@
             const x = pad.left + ((k-K_MIN)/(K_MAX-K_MIN+1))*plotW + 2;
             const y = yScale(s);
             const top = Math.min(y, zeroY), h = Math.max(Math.abs(zeroY-y), 1);
-            ctx.fillStyle = s === bestS ? '#0d9488' : '#5eead4';
+            ctx.fillStyle = s === bestS ? '#14b8a6' : '#5eead4';
             ctx.fillRect(x, top, barW, h);
-            ctx.fillStyle = '#64748b'; ctx.font = '9px -apple-system'; ctx.textAlign = 'center';
+            ctx.fillStyle = '#8b8d97'; ctx.font = '9px -apple-system'; ctx.textAlign = 'center';
             ctx.fillText(k.toString(), x+barW/2, height-10);
             ctx.fillText(s.toFixed(2), x+barW/2, top-3);
         }
@@ -1189,8 +892,6 @@
         ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(mx, height-18, 8, 0, Math.PI*2); ctx.stroke();
     }
-
-    /* ── Insight ────────────────────────────────────────────── */
 
     function updateInsight() {
         const pattern = document.getElementById('dataPattern').value;
@@ -1210,8 +911,6 @@
         }
         document.getElementById('insightText').textContent = msg;
     }
-
-    /* ── Click-to-Add & Drag Centroids ──────────────────────── */
 
     function getCanvasCoords(e) {
         const canvas = document.getElementById('clusterChart');
@@ -1314,8 +1013,6 @@
         });
     })();
 
-    /* ── Challenge Presets ──────────────────────────────────── */
-
     const presets = {
         easy:    { pattern:'blobs',       n:200, trueK:3, k:3, hint:'K-means shines on well-separated blobs.' },
         aniso:   { pattern:'anisotropic', n:200, trueK:3, k:3, hint:'Elongated clusters challenge K-means.' },
@@ -1337,8 +1034,6 @@
         generateData();
         document.getElementById('insightText').textContent = p.hint;
     }
-
-    /* ── Reset ──────────────────────────────────────────────── */
 
     function resetPlayground() {
         stopAnimate();
@@ -1362,16 +1057,94 @@
         generateData();
     }
 
-    /* ── Resize ─────────────────────────────────────────────── */
-
     window.addEventListener('resize', () => {
         drawClusters();
         redrawMetricCharts();
     });
 
-    /* ── Init ───────────────────────────────────────────────── */
-
     generateData();
+
+    if (typeof PlaygroundGuided !== 'undefined') PlaygroundGuided.init({
+        key: 'clustering',
+        steps: [
+            {
+                title: "K-means on clean blobs",
+                context: "Start with <strong>Blob Clusters</strong>, 3 true clusters, K=3. Press Apply K.",
+                question: "When K matches the true number of clusters, silhouette score will be:",
+                options: [
+                    { id: 'high', label: 'High (close to 1) -- clusters are well-separated' },
+                    { id: 'low', label: 'Low -- K-means always struggles' },
+                    { id: 'zero', label: 'Close to zero' }
+                ],
+                correctId: 'high',
+                reveal: "When K matches reality and clusters are well-separated, silhouette scores are high (>0.5). Each point is much closer to its own cluster center than to the nearest other cluster.",
+                setup: {}
+            },
+            {
+                title: "Reading the elbow plot",
+                context: "Look at the <strong>Elbow Plot</strong>. Inertia always decreases as K increases.",
+                question: "Why can't you just pick the K with lowest inertia?",
+                options: [
+                    { id: 'always', label: 'Inertia always decreases -- at K=N each point is its own cluster with inertia 0' },
+                    { id: 'wrong', label: 'Lower inertia means worse clustering' },
+                    { id: 'stops', label: 'Inertia stops decreasing at the correct K' }
+                ],
+                correctId: 'always',
+                reveal: "Inertia is monotonically decreasing with K. The 'elbow' is where the rate of decrease slows -- adding more clusters gives diminishing returns. This bend <em>suggests</em> the right K but is subjective. Combine with silhouette for a more robust choice.",
+                setup: {}
+            },
+            {
+                title: "K-means fails on non-convex shapes",
+                context: "Load the <strong>Two Moons</strong> preset. Set K=2 and apply.",
+                question: "Why does K-means fail on crescent-shaped clusters?",
+                options: [
+                    { id: 'convex', label: 'K-means assumes blob-shaped (convex) clusters -- it uses distance to centroids' },
+                    { id: 'k', label: 'We chose the wrong K' },
+                    { id: 'noise', label: 'The data is too noisy' }
+                ],
+                correctId: 'convex',
+                reveal: "K-means partitions space into Voronoi cells around centroids -- always convex regions. Moon-shaped or ring-shaped clusters need density-based methods (DBSCAN) or spectral clustering that can follow non-convex boundaries.",
+                setup: {}
+            }
+        ],
+        selfCheck: [
+            {
+                prompt: "You run K-means with K=5 and get silhouette score 0.15. What does this mean?",
+                options: [
+                    { id: 'a', label: 'Clusters overlap heavily -- the data may not have 5 distinct groups' },
+                    { id: 'b', label: 'Excellent clustering' },
+                    { id: 'c', label: 'You need more data' }
+                ],
+                correctId: 'a',
+                explanation: "Silhouette near 0 means points are roughly equidistant between their cluster and the nearest other cluster. Try different K values, or consider that the data may not have clear cluster structure at all."
+            },
+            {
+                prompt: "K-means gives different results each time you run it. Why?",
+                options: [
+                    { id: 'a', label: 'Random centroid initialization -- different starts can converge to different local optima' },
+                    { id: 'b', label: 'The algorithm is non-deterministic by design' },
+                    { id: 'c', label: "It doesn't -- K-means is fully deterministic" }
+                ],
+                correctId: 'a',
+                explanation: "K-means only guarantees convergence to a local minimum, which depends on initial centroid positions. Run it multiple times (n_init in sklearn) and keep the best result. K-means++ initialization helps but doesn't eliminate the issue."
+            }
+        ],
+        onStepEnter: function(idx, step) {
+                if (idx === 0) {
+                    loadPreset('easy');
+                    document.getElementById('kSlider').value = 3;
+                    document.getElementById('kValue').textContent = '3';
+                    applyCurrentK();
+                } else if (idx === 1) {
+                    // Leave settings; step focuses on elbow plot
+                } else if (idx === 2) {
+                    loadPreset('moons');
+                    document.getElementById('kSlider').value = 2;
+                    document.getElementById('kValue').textContent = '2';
+                    applyCurrentK();
+                }
+            }
+    });
     </script>
 </body>
 </html>

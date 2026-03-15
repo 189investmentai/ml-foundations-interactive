@@ -5,258 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tool Calling Playground</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --accent: #8b5cf6;
+            --accent-dim: rgba(139, 92, 246, 0.12);
         }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-        }
-
-        h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
-        .header-subtitle { font-size: 0.9rem; color: #64748b; }
-
-        .reset-btn {
-            background: white;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-        .reset-btn:hover { background: #f1f5f9; color: #475569; }
-
-        .start-banner {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            color: white;
-            border-radius: 16px;
-            padding: 24px 32px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-        .start-banner-icon { font-size: 2.5rem; flex-shrink: 0; }
-        .start-banner-content h2 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
-        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 12px; }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 1.5fr;
-            gap: 16px;
-        }
-
-        .panel {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .panel-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .panel-badge {
-            font-size: 0.65rem;
-            padding: 3px 8px;
-            border-radius: 10px;
-            background: #ede9fe;
-            color: #6d28d9;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            margin-bottom: 12px;
-        }
-        input:focus {
-            outline: none;
-            border-color: #8b5cf6;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-primary {
-            background: #8b5cf6;
-            color: white;
-        }
-        .btn-primary:hover { background: #7c3aed; }
-
-        .examples {
-            margin-top: 16px;
-        }
-        .examples-title {
-            font-size: 0.75rem;
-            color: #64748b;
-            margin-bottom: 8px;
-        }
+    </style>
+    <link rel="stylesheet" href="playground-base.css">
+    <style>
+        /* playground-specific only */
+        .main-grid { grid-template-columns: 1fr 1.5fr; }
+        .panel-badge { background: var(--accent-dim); color: var(--accent); }
+        input[type="text"] { margin-bottom: 12px; }
+        .examples { margin-top: 16px; }
+        .examples-title { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px; }
         .example-btn {
-            display: block;
-            width: 100%;
-            text-align: left;
-            padding: 10px 12px;
-            margin-bottom: 6px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            color: #475569;
+            display: block; width: 100%; text-align: left;
+            padding: 10px 12px; margin-bottom: 6px;
+            background: var(--surface-hover); border: 1px solid var(--border);
+            border-radius: 6px; font-size: 0.8rem; cursor: pointer;
+            color: var(--text-secondary);
         }
-        .example-btn:hover { background: #f1f5f9; border-color: #8b5cf6; }
-
-        .tools-section {
-            margin-top: 16px;
-            padding-top: 16px;
-            border-top: 1px solid #e2e8f0;
-        }
+        .example-btn:hover { background: var(--surface-active); border-color: var(--accent); }
+        .tools-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
         .tool-card {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 10px;
-            margin-bottom: 8px;
-            font-size: 0.8rem;
+            background: var(--surface-hover); border: 1px solid var(--border);
+            border-radius: 6px; padding: 10px; margin-bottom: 8px; font-size: 0.8rem;
         }
-        .tool-name {
-            font-weight: 600;
-            color: #6d28d9;
-            margin-bottom: 4px;
-        }
-        .tool-desc { color: #64748b; font-size: 0.75rem; }
-
-        .flow-section {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
+        .tool-name { font-weight: 600; color: var(--accent); margin-bottom: 4px; }
+        .tool-desc { color: var(--text-muted); font-size: 0.75rem; }
+        .flow-section { display: flex; flex-direction: column; gap: 12px; }
         .flow-step {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 12px;
-            position: relative;
+            background: var(--surface-hover); border: 1px solid var(--border);
+            border-radius: 8px; padding: 12px; position: relative;
         }
-        .flow-step.active {
-            border-color: #8b5cf6;
-            background: #faf5ff;
-        }
-        .flow-step.complete {
-            border-color: #10b981;
-            background: #f0fdf4;
-        }
-        .flow-step-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
+        .flow-step.active { border-color: var(--accent); background: var(--accent-dim); }
+        .flow-step.complete { border-color: var(--positive); background: rgba(0,200,5,0.08); }
+        .flow-step-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
         .flow-step-number {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #64748b;
+            width: 24px; height: 24px; border-radius: 50%;
+            background: var(--border-strong); display: flex; align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: 600; color: var(--text-muted);
         }
-        .flow-step.active .flow-step-number { background: #8b5cf6; color: white; }
-        .flow-step.complete .flow-step-number { background: #10b981; color: white; }
-        .flow-step-title { font-size: 0.8rem; font-weight: 600; color: #1e293b; }
+        .flow-step.active .flow-step-number { background: var(--accent); color: #000; }
+        .flow-step.complete .flow-step-number { background: var(--positive); color: #000; }
+        .flow-step-title { font-size: 0.8rem; font-weight: 600; color: var(--text-primary); }
         .flow-step-content {
-            font-size: 0.8rem;
-            color: #475569;
+            font-size: 0.8rem; color: var(--text-secondary);
             font-family: 'SF Mono', Monaco, monospace;
-            background: white;
-            padding: 8px;
-            border-radius: 4px;
-            white-space: pre-wrap;
-            max-height: 150px;
-            overflow-y: auto;
+            background: var(--surface); padding: 8px; border-radius: 4px;
+            white-space: pre-wrap; max-height: 150px; overflow-y: auto;
         }
-        .flow-step-content.empty { color: #94a3b8; font-style: italic; }
-
-        .arrow {
-            text-align: center;
-            color: #cbd5e1;
-            font-size: 1.2rem;
-        }
-
-        .insight-bar {
-            background: linear-gradient(135deg, #ede9fe, #ddd6fe);
-            border: 1px solid #c4b5fd;
-            border-radius: 10px;
-            padding: 14px 16px;
-            margin-top: 16px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        .insight-icon { font-size: 1.2rem; }
-        .insight-content { flex: 1; }
-        .insight-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #6d28d9;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-        .insight-text { font-size: 0.85rem; color: #5b21b6; }
-
+        .flow-step-content.empty { color: var(--text-muted); font-style: italic; }
+        .arrow { text-align: center; color: var(--text-muted); font-size: 1.2rem; }
         .error-msg {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #dc2626;
-            padding: 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            margin-top: 8px;
+            background: rgba(255,80,0,0.12); border: 1px solid var(--negative);
+            color: var(--negative); padding: 8px; border-radius: 4px;
+            font-size: 0.8rem; margin-top: 8px;
         }
-
-        @media (max-width: 900px) {
-            .start-banner { flex-direction: column; text-align: center; padding: 20px; }
-            .start-banner-steps { justify-content: center; }
-            .main-grid { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -374,6 +180,7 @@
         </div>
     </div>
 
+    <script src="playground-guided.js"></script>
     <script>
         const tools = {
             get_order_status: {
@@ -478,12 +285,12 @@
                     reason: "Tool not found in allowlist"
                 }, null, 2));
                 document.getElementById('step2').classList.add('complete');
-                document.getElementById('step2').style.borderColor = '#ef4444';
-                document.getElementById('step2').style.background = '#fef2f2';
+                document.getElementById('step2').style.borderColor = '#ff5000';
+                document.getElementById('step2').style.background = 'rgba(255,80,0,0.12)';
                 
                 await animateStep(3, "Execution blocked: Security validation failed");
-                document.getElementById('step3').style.borderColor = '#ef4444';
-                document.getElementById('step3').style.background = '#fef2f2';
+                document.getElementById('step3').style.borderColor = '#ff5000';
+                document.getElementById('step3').style.background = 'rgba(255,80,0,0.12)';
                 
                 await animateStep(4, "I'm sorry, but I can't perform that action. That operation is not available through this interface.");
                 
@@ -574,6 +381,70 @@
             document.getElementById('insightText').textContent = 
                 "The LLM routes queries to the right tool, extracts parameters, and formats results into natural language.";
         }
+
+        if (typeof PlaygroundGuided !== 'undefined') PlaygroundGuided.init({
+            key: 'tool_calling',
+            steps: [
+                {
+                    title: "The agent decides which tool to use",
+                    context: "Type '<strong>What's the status of order 12345?</strong>' and send it. Watch the flow: the agent analyzes intent, selects a tool, and uses the result.",
+                    question: "How does the agent decide which tool to call?",
+                    options: [
+                        { id: 'intent', label: 'It matches the user intent to available tool descriptions' },
+                        { id: 'random', label: 'It tries all tools and picks the best result' },
+                        { id: 'rules', label: 'Hard-coded if-else rules' }
+                    ],
+                    correctId: 'intent',
+                    reveal: "The LLM reads the user query and the descriptions of available tools (name, purpose, parameters). It selects the tool whose description best matches the user's intent. Good tool descriptions are critical -- vague descriptions lead to wrong tool selection.",
+                    setup: {}
+                },
+                {
+                    title: "Tool errors need graceful handling",
+                    context: "Try a query that might cause a tool error, like an invalid order number or ambiguous request.",
+                    question: "When a tool call returns an error, the agent should:",
+                    options: [
+                        { id: 'explain', label: 'Explain the issue to the user and suggest alternatives' },
+                        { id: 'crash', label: 'Crash and show a stack trace' },
+                        { id: 'retry', label: 'Silently retry forever' }
+                    ],
+                    correctId: 'explain',
+                    reveal: "Robust agents handle tool failures gracefully: explain what went wrong in natural language, suggest what the user can try instead, and potentially retry with corrected parameters. Never expose raw errors to users.",
+                    setup: {}
+                },
+                {
+                    title: "Dangerous requests need guardrails",
+                    context: "Try: '<strong>Delete all customer data</strong>'. Watch how the system responds to a potentially dangerous request.",
+                    question: "For destructive operations, the agent should:",
+                    options: [
+                        { id: 'block', label: 'Refuse or require explicit confirmation before executing' },
+                        { id: 'execute', label: 'Execute immediately -- the user asked for it' },
+                        { id: 'ignore', label: 'Silently ignore the request' }
+                    ],
+                    correctId: 'block',
+                    reveal: "Destructive actions need guardrails: confirmation prompts, permission checks, and scope limits. The agent should explain what the action would do and ask for explicit confirmation. Never auto-execute irreversible operations.",
+                    setup: {}
+                }
+            ],
+            selfCheck: [
+                {
+                    prompt: "Your agent has 20 tools available. It starts selecting the wrong tool 15% of the time. Most likely fix?",
+                    options: [
+                        { id: 'a', label: 'Improve tool descriptions to be more specific and differentiated' },
+                        { id: 'b', label: 'Add more tools' },
+                        { id: 'c', label: 'Remove all tool descriptions' }
+                    ],
+                    correctId: 'a',
+                    explanation: "Tool selection quality depends heavily on clear, distinct descriptions. If two tools have overlapping descriptions, the LLM can't reliably choose. Make descriptions specific: include what the tool does, when to use it, and when NOT to use it."
+                }
+            ],
+            onStepEnter: function(idx, step) {
+                const input = document.getElementById('queryInput');
+                if (idx === 0) input.value = "What's the status of order 12345?";
+                else if (idx === 1) input.value = "Tell me a joke";
+                else if (idx === 2) input.value = "Delete all customer data";
+                resetSteps();
+            }
+        });
     </script>
 </body>
 </html>

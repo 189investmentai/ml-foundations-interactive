@@ -5,128 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agent Memory Playground</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --accent: #f59e0b;
+            --accent-dim: rgba(245, 158, 11, 0.12);
         }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-        }
-
-        h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
-        .header-subtitle { font-size: 0.9rem; color: #64748b; }
-
-        .reset-btn {
-            background: white;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-        .reset-btn:hover { background: #f1f5f9; color: #475569; }
-
-        .start-banner {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: white;
-            border-radius: 16px;
-            padding: 24px 32px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-        .start-banner-icon { font-size: 2.5rem; flex-shrink: 0; }
-        .start-banner-content h2 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
-        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 12px; }
-
+    </style>
+    <link rel="stylesheet" href="playground-base.css">
+    <style>
+        /* playground-specific only */
+        .main-grid { grid-template-columns: 1fr 1fr 1fr; }
+        .panel-badge { background: var(--accent-dim); color: var(--accent); }
         .presets-bar {
-            background: white;
+            background: var(--surface);
+            border: 1px solid var(--border);
             border-radius: 10px;
             padding: 12px 16px;
             margin-bottom: 16px;
             display: flex;
             align-items: center;
             gap: 10px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
             flex-wrap: wrap;
         }
-        .presets-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-        }
+        .presets-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
         .preset-btn {
             padding: 6px 12px;
-            border: none;
+            border: 1px solid var(--border);
             border-radius: 16px;
             cursor: pointer;
             font-size: 0.75rem;
             font-weight: 500;
             transition: all 0.2s;
-            background: #fef3c7;
-            color: #92400e;
+            background: var(--accent-dim);
+            color: var(--accent);
         }
-        .preset-btn:hover { background: #fde68a; }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 16px;
-        }
-
-        .panel {
-            background: white;
-            border-radius: 12px;
-            padding: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .panel-title {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .panel-badge {
-            font-size: 0.65rem;
-            padding: 3px 8px;
-            border-radius: 10px;
-            background: #fef3c7;
-            color: #92400e;
-        }
+        .preset-btn:hover { background: var(--surface-hover); border-color: var(--accent); }
 
         .chat-container {
             height: 300px;
             overflow-y: auto;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
             border-radius: 6px;
             padding: 12px;
             margin-bottom: 12px;
-            background: #f8fafc;
+            background: var(--bg);
         }
 
         .chat-empty {
@@ -154,12 +75,12 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .message.user {
-            background: #dbeafe;
+            background: var(--accent-dim);
             margin-left: 20%;
         }
         .message.assistant {
-            background: white;
-            border: 1px solid #e2e8f0;
+            background: var(--surface);
+            border: 1px solid var(--border);
             margin-right: 20%;
         }
         .message.system {
@@ -173,7 +94,7 @@
         .message-label {
             font-size: 0.65rem;
             font-weight: 600;
-            color: #64748b;
+            color: var(--text-muted);
             margin-bottom: 4px;
         }
         .typing-indicator span {
@@ -199,9 +120,11 @@
         .input-row input {
             flex: 1;
             padding: 10px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
             border-radius: 6px;
             font-size: 0.85rem;
+            background: var(--surface);
+            color: var(--text-primary);
         }
         .input-row input:focus {
             outline: none;
@@ -230,13 +153,13 @@
         .memory-title {
             font-size: 0.75rem;
             font-weight: 600;
-            color: #64748b;
+            color: var(--text-muted);
             margin-bottom: 6px;
             text-transform: uppercase;
         }
         .memory-box {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
             border-radius: 6px;
             padding: 10px;
             font-size: 0.8rem;
@@ -263,12 +186,12 @@
             display: flex;
             justify-content: space-between;
             font-size: 0.75rem;
-            color: #64748b;
+            color: var(--text-muted);
             margin-bottom: 4px;
         }
         .meter-bar {
             height: 8px;
-            background: #e2e8f0;
+            background: var(--border-strong);
             border-radius: 4px;
             overflow: hidden;
         }
@@ -283,8 +206,8 @@
         .entity-tag {
             display: inline-block;
             padding: 2px 8px;
-            background: #dbeafe;
-            color: #1e40af;
+            background: var(--accent-dim);
+            color: var(--accent);
             border-radius: 10px;
             font-size: 0.75rem;
             margin: 2px;
@@ -300,8 +223,8 @@
             align-items: center;
             gap: 8px;
             padding: 8px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
             border-radius: 6px;
             margin-bottom: 6px;
             font-size: 0.8rem;
@@ -313,7 +236,7 @@
             width: 20px;
             height: 20px;
             border-radius: 50%;
-            background: #e2e8f0;
+            background: var(--border-strong);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -326,14 +249,11 @@
         .plan-step.active .step-num { background: #f59e0b; color: white; }
 
         .insight-bar {
-            background: linear-gradient(135deg, #fef3c7, #fde68a);
-            border: 1px solid #fcd34d;
+            background: var(--surface);
+            border: 1px solid var(--border);
             border-radius: 10px;
             padding: 14px 16px;
             margin-top: 16px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
         }
         .insight-icon { font-size: 1.2rem; }
         .insight-content { flex: 1; }
@@ -439,7 +359,7 @@
                 </div>
                 
                 <div id="planContainer">
-                    <p style="font-size: 0.85rem; color: #64748b; padding: 20px; text-align: center;">
+                    <p style="font-size: 0.85rem; color: var(--text-muted); padding: 20px; text-align: center;">
                         Ask for a complex task to see planning in action.<br><br>
                         Try: "I want to return order ORD-12345"
                     </p>
@@ -456,6 +376,7 @@
         </div>
     </div>
 
+    <script src="playground-guided.js"></script>
     <script>
         let messages = [];
         let entities = { orders: [], products: [], dates: [] };
@@ -716,8 +637,8 @@
             currentPlan = plan;
             const allDone = isPlanComplete(plan);
             document.getElementById('planStatus').textContent = allDone ? 'Complete' : 'Active';
-            document.getElementById('planStatus').style.background = allDone ? '#dcfce7' : '#fef3c7';
-            document.getElementById('planStatus').style.color = allDone ? '#166534' : '#92400e';
+            document.getElementById('planStatus').style.background = allDone ? 'rgba(0,200,5,0.15)' : 'rgba(245,158,11,0.12)';
+            document.getElementById('planStatus').style.color = allDone ? '#00c805' : '#f59e0b';
 
             let planHtml = '';
             plan.forEach(p => {
@@ -848,14 +769,14 @@
                 </div>
             `;
             document.getElementById('planContainer').innerHTML = `
-                <p style="font-size: 0.85rem; color: #64748b; padding: 20px; text-align: center;">
+                <p style="font-size: 0.85rem; color: var(--text-muted); padding: 20px; text-align: center;">
                     Ask for a complex task to see planning in action.<br><br>
                     Try: "I want to return order ORD-12345"
                 </p>
             `;
             document.getElementById('planStatus').textContent = 'Idle';
-            document.getElementById('planStatus').style.background = '#fef3c7';
-            document.getElementById('planStatus').style.color = '#92400e';
+            document.getElementById('planStatus').style.background = 'rgba(245,158,11,0.12)';
+            document.getElementById('planStatus').style.color = '#f59e0b';
             document.getElementById('summaryBox').classList.remove('warning');
             document.getElementById('sendBtn').disabled = false;
             document.getElementById('insightText').innerHTML = 
@@ -866,6 +787,66 @@
         }
 
         updateUI();
+
+        if (typeof PlaygroundGuided !== 'undefined') PlaygroundGuided.init({
+            key: 'agent_memory',
+            steps: [
+                {
+                    title: "Context window is finite",
+                    context: "Watch the <strong>Context Meter</strong> as you send messages. Each message consumes tokens from the fixed context window.",
+                    question: "When the context window fills up, the agent will:",
+                    options: [
+                        { id: 'forget', label: 'Lose access to earlier messages -- it literally forgets' },
+                        { id: 'expand', label: 'Automatically expand its memory' },
+                        { id: 'compress', label: 'Compress everything perfectly' }
+                    ],
+                    correctId: 'forget',
+                    reveal: "LLMs have a fixed context window (4K-128K tokens). When it fills, the oldest messages get dropped. This means the agent can forget your name, order number, or earlier instructions mid-conversation. Memory management is essential.",
+                    setup: {}
+                },
+                {
+                    title: "Entity memory extracts key facts",
+                    context: "Mention specific details: order numbers, names, dates. Watch the <strong>Entity Memory</strong> panel extract and store them.",
+                    question: "Entity memory helps by:",
+                    options: [
+                        { id: 'extract', label: 'Extracting key facts that persist even when old messages are dropped' },
+                        { id: 'nothing', label: "It doesn't help -- it's just for display" },
+                        { id: 'slow', label: 'Slowing down the agent to save memory' }
+                    ],
+                    correctId: 'extract',
+                    reveal: "Entity memory stores structured key-value pairs (customer: Alice, order: ORD-123) that persist across the conversation. When old messages are evicted from context, these extracted facts remain accessible.",
+                    setup: {}
+                },
+                {
+                    title: "Planning for complex tasks",
+                    context: "Ask for a complex multi-step task: '<strong>I want to return order ORD-12345</strong>'. Watch the Planning panel.",
+                    question: "Why does the agent create a plan for complex requests?",
+                    options: [
+                        { id: 'steps', label: 'Complex tasks need multiple tool calls in the right order -- a plan tracks progress' },
+                        { id: 'display', label: 'Just for user display' },
+                        { id: 'speed', label: 'Plans make the agent faster' }
+                    ],
+                    correctId: 'steps',
+                    reveal: "A return involves: look up order, check eligibility, create return label, update status. The plan decomposes this into steps, tracks which are done, and ensures the agent doesn't skip or repeat steps -- crucial when context window pressure forces message eviction.",
+                    setup: {}
+                }
+            ],
+            selfCheck: [
+                {
+                    prompt: "Your customer service agent forgets the customer's name after 10 messages. Best architectural fix?",
+                    options: [
+                        { id: 'a', label: 'Add entity memory that extracts and persists key facts outside the context window' },
+                        { id: 'b', label: 'Use a bigger context window' },
+                        { id: 'c', label: 'Ask the customer to repeat their name' }
+                    ],
+                    correctId: 'a',
+                    explanation: "A bigger window delays the problem but doesn't solve it. Entity memory extracts critical facts (name, order ID, issue type) into a structured store that's always included in the prompt, regardless of conversation length."
+                }
+            ],
+            onStepEnter: function(idx, step) {
+                if (idx === 2) document.getElementById('userInput').value = "I want to return order ORD-12345";
+            }
+        });
     </script>
 </body>
 </html>

@@ -5,232 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attention Playground</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --accent: #ec4899;
+            --accent-dim: rgba(236, 72, 153, 0.12);
         }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 24px;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 24px;
-        }
-
-        h1 { font-size: 1.5rem; color: #0f172a; margin-bottom: 4px; }
-        .header-subtitle { font-size: 0.9rem; color: #64748b; }
-
-        .reset-btn {
-            background: white;
-            color: #64748b;
-            border: 1px solid #e2e8f0;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
-        }
-        .reset-btn:hover { background: #f1f5f9; color: #475569; }
-
-        .start-banner {
-            background: linear-gradient(135deg, #ec4899, #db2777);
-            color: white;
-            border-radius: 16px;
-            padding: 24px 32px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 24px;
-        }
-        .start-banner-icon { font-size: 2.5rem; flex-shrink: 0; }
-        .start-banner-content h2 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 600; }
-        .start-banner-content p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 12px; }
-        .start-banner-steps { display: flex; gap: 24px; flex-wrap: wrap; }
-        .start-step { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
-        .step-num {
-            background: rgba(255,255,255,0.2);
-            width: 24px; height: 24px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 600; font-size: 0.75rem;
-        }
-
+    </style>
+    <link rel="stylesheet" href="playground-base.css">
+    <style>
+        /* Attention playground-specific */
+        .main-grid { grid-template-columns: 1fr 300px; }
         .input-section {
-            background: white;
+            background: var(--surface);
+            border: 1px solid var(--border);
             border-radius: 10px;
             padding: 16px;
             margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-
-        .input-row {
-            display: flex;
-            gap: 12px;
-            align-items: flex-end;
-        }
-
-        .input-group {
-            flex: 1;
-        }
+        .input-row { display: flex; gap: 12px; align-items: flex-end; }
+        .input-group { flex: 1; }
         .input-label {
             font-size: 0.75rem;
             font-weight: 600;
-            color: #64748b;
+            color: var(--text-muted);
             text-transform: uppercase;
             margin-bottom: 6px;
         }
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 1rem;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-primary {
-            background: #ec4899;
-            color: white;
-        }
-        .btn-primary:hover { background: #db2777; }
-
-        .presets {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
+        .presets { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
         .preset-btn {
             padding: 6px 12px;
-            background: #f1f5f9;
-            border: none;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
             border-radius: 20px;
             font-size: 0.75rem;
             cursor: pointer;
-            color: #475569;
+            color: var(--text-secondary);
+            transition: all 0.15s;
         }
-        .preset-btn:hover { background: #e2e8f0; }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 300px;
-            gap: 16px;
-        }
-
+        .preset-btn:hover { background: var(--surface-active); color: var(--text-primary); }
         .viz-area {
-            background: white;
+            background: var(--surface);
+            border: 1px solid var(--border);
             border-radius: 10px;
             padding: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
         .viz-title {
             font-size: 0.85rem;
             font-weight: 600;
-            color: #1e293b;
+            color: var(--text-primary);
             margin-bottom: 12px;
         }
-
-        .tokens-row {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
+        .tokens-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
         .token {
             padding: 8px 14px;
-            background: #f1f5f9;
+            background: var(--surface-hover);
             border-radius: 6px;
             font-size: 0.9rem;
             cursor: pointer;
             transition: all 0.2s;
             border: 2px solid transparent;
+            color: var(--text-primary);
         }
-        .token:hover { background: #e2e8f0; }
+        .token:hover { background: var(--surface-active); }
         .token.selected {
-            background: #fce7f3;
-            border-color: #ec4899;
-            color: #be185d;
+            background: var(--accent-dim);
+            border-color: var(--accent);
+            color: var(--accent);
         }
-
-        .attention-matrix {
-            overflow-x: auto;
-        }
-        .matrix-table {
-            border-collapse: collapse;
-            font-size: 0.75rem;
-        }
+        .attention-matrix { overflow-x: auto; }
+        .matrix-table { border-collapse: collapse; font-size: 0.75rem; }
         .matrix-table th, .matrix-table td {
             padding: 8px 12px;
             text-align: center;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
         }
         .matrix-table th {
-            background: #f8fafc;
+            background: var(--surface-hover);
             font-weight: 600;
-            color: #64748b;
+            color: var(--text-muted);
         }
-        .matrix-table td {
-            position: relative;
-        }
-        .attention-cell {
-            display: block;
-            padding: 4px;
-            border-radius: 4px;
-        }
-
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .sidebar-card {
-            background: white;
-            border-radius: 12px;
-            padding: 14px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .sidebar-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 10px;
-        }
-
-        .attention-bar {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 8px;
-        }
+        .attention-cell { display: block; padding: 4px; border-radius: 4px; }
+        .attention-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
         .attention-bar-label {
             width: 80px;
             font-size: 0.75rem;
-            color: #64748b;
+            color: var(--text-muted);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
@@ -238,59 +97,32 @@
         .attention-bar-fill {
             flex: 1;
             height: 20px;
-            background: #f1f5f9;
+            background: var(--surface-hover);
             border-radius: 4px;
             overflow: hidden;
         }
         .attention-bar-inner {
             height: 100%;
-            background: linear-gradient(90deg, #ec4899, #f472b6);
+            background: var(--accent);
             transition: width 0.3s;
         }
         .attention-bar-value {
             width: 40px;
             font-size: 0.7rem;
-            font-family: 'SF Mono', Monaco, monospace;
-            color: #64748b;
+            font-family: 'SF Mono', ui-monospace, monospace;
+            color: var(--text-muted);
             text-align: right;
         }
-
         .insight-bar {
-            background: linear-gradient(135deg, #fce7f3, #fbcfe8);
-            border: 1px solid #f9a8d4;
+            background: var(--accent-dim);
+            border: 1px solid var(--accent);
             border-radius: 10px;
             padding: 14px 16px;
             margin-top: 16px;
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
         }
-        .insight-icon { font-size: 1.2rem; }
-        .insight-content { flex: 1; }
-        .insight-title {
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #be185d;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-        .insight-text { font-size: 0.85rem; color: #9d174d; }
-
-        select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            background: white;
-            margin-bottom: 10px;
-        }
-
-        @media (max-width: 900px) {
-            .start-banner { flex-direction: column; text-align: center; padding: 20px; }
-            .start-banner-steps { justify-content: center; }
-            .main-grid { grid-template-columns: 1fr; }
-        }
+        .insight-text { color: var(--text-secondary); }
+        .sidebar-card select { margin-bottom: 10px; }
+        @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -358,7 +190,7 @@
                         <option value="2">Head 3: Positional</option>
                         <option value="3">Head 4: Mixed</option>
                     </select>
-                    <p style="font-size: 0.75rem; color: #64748b;">Different heads learn different patterns.</p>
+                    <p style="font-size: 0.75rem; color: var(--text-muted);">Different heads learn different patterns.</p>
                 </div>
 
                 <div class="sidebar-card">
@@ -368,7 +200,7 @@
 
                 <div class="sidebar-card">
                     <div class="sidebar-title">Selected Token</div>
-                    <div id="selectedInfo" style="font-size: 0.85rem; color: #475569;">
+                    <div id="selectedInfo" style="font-size: 0.85rem; color: var(--text-secondary);">
                         Click a token to see details
                     </div>
                 </div>
@@ -376,6 +208,7 @@
         </div>
     </div>
 
+    <script src="playground-guided.js"></script>
     <script>
         let tokens = [];
         let selectedToken = -1;
@@ -521,7 +354,7 @@
                     const highlight = selectedToken === i;
                     const bg = highlight 
                         ? `rgba(236, 72, 153, ${alpha})`
-                        : `rgba(148, 163, 184, ${alpha * 0.5})`;
+                        : `rgba(255, 255, 255, ${alpha * 0.15})`;
                     
                     html += `<td><span class="attention-cell" style="background: ${bg}">${w.toFixed(2)}</span></td>`;
                 }
@@ -536,7 +369,7 @@
             const container = document.getElementById('attentionBars');
             
             if (selectedToken < 0 || tokens.length === 0) {
-                container.innerHTML = '<p style="font-size: 0.8rem; color: #94a3b8;">Select a token first</p>';
+                container.innerHTML = '<p style="font-size: 0.8rem; color: var(--text-muted);">Select a token first</p>';
                 return;
             }
             
@@ -616,7 +449,7 @@
             attentionWeights = [];
             document.getElementById('tokensRow').innerHTML = '';
             document.getElementById('attentionMatrix').innerHTML = '';
-            document.getElementById('attentionBars').innerHTML = '<p style="font-size: 0.8rem; color: #94a3b8;">Select a token first</p>';
+            document.getElementById('attentionBars').innerHTML = '<p style="font-size: 0.8rem; color: var(--text-muted);">Select a token first</p>';
             document.getElementById('selectedInfo').innerHTML = 'Click a token to see details';
             document.getElementById('insightText').textContent = 'Click a token above to see which other tokens it attends to.';
         }
@@ -629,6 +462,75 @@
         // Auto-select a pronoun or the first token so the page starts with something interesting
         const autoIdx = tokens.findIndex(t => ['it', 'he', 'she', 'they'].includes(t.toLowerCase()));
         selectToken(autoIdx >= 0 ? autoIdx : 0);
+
+        if (typeof PlaygroundGuided !== 'undefined') PlaygroundGuided.init({
+            key: 'attention',
+            steps: [
+                {
+                    title: "Ambiguous words need context",
+                    context: "Type '<strong>The bank was steep</strong>' and analyze. Click on the word 'bank' to see what it attends to.",
+                    question: "The word 'bank' is ambiguous. Attention helps by:",
+                    options: [
+                        { id: 'context', label: "Looking at surrounding words ('steep') to decide it means riverbank, not financial bank" },
+                        { id: 'dict', label: 'Looking up the dictionary definition' },
+                        { id: 'first', label: 'Always using the most common meaning' }
+                    ],
+                    correctId: 'context',
+                    reveal: "Self-attention lets each word 'look at' every other word in the sentence. The word 'bank' attends strongly to 'steep', which disambiguates it toward the riverbank meaning. This context-dependent representation is the core power of transformers.",
+                    setup: {}
+                },
+                {
+                    title: "Multiple heads capture different patterns",
+                    context: "Switch between attention heads using the selector. Notice each head attends to different word relationships.",
+                    question: "Why do transformers use multiple attention heads?",
+                    options: [
+                        { id: 'multi', label: 'Each head can learn a different type of relationship (syntactic, semantic, positional)' },
+                        { id: 'speed', label: 'Multiple heads train faster' },
+                        { id: 'redundant', label: 'For redundancy in case one head fails' }
+                    ],
+                    correctId: 'multi',
+                    reveal: "Different heads specialize: one might track subject-verb agreement, another tracks pronoun references, another handles positional patterns. Multi-head attention captures <em>multiple</em> types of relationships simultaneously, then combines them.",
+                    setup: {}
+                },
+                {
+                    title: "Long-range dependencies",
+                    context: "Try a sentence with a long-range dependency: '<strong>The cat that the dog chased ran away</strong>'.",
+                    question: "Attention handles long-range dependencies better than RNNs because:",
+                    options: [
+                        { id: 'direct', label: 'Any word can directly attend to any other word, regardless of distance' },
+                        { id: 'sequential', label: 'It processes words sequentially like RNNs' },
+                        { id: 'memory', label: 'It has unlimited memory' }
+                    ],
+                    correctId: 'direct',
+                    reveal: "In an RNN, information must flow sequentially through every intermediate word, degrading with distance. Self-attention creates <strong>direct connections</strong> between any pair of words. 'Cat' can directly attend to 'ran' even with several words between them.",
+                    setup: {}
+                }
+            ],
+            selfCheck: [
+                {
+                    prompt: "Self-attention has O(n^2) complexity where n is sequence length. Why is this a problem for long documents?",
+                    options: [
+                        { id: 'a', label: 'Memory and compute grow quadratically -- a 10x longer document costs 100x more' },
+                        { id: 'b', label: 'It has no impact on performance' },
+                        { id: 'c', label: 'Only affects training, not inference' }
+                    ],
+                    correctId: 'a',
+                    explanation: "Each token attends to every other token, creating an n*n attention matrix. For n=512 that's 262K entries; for n=32K it's over 1 billion. This quadratic cost is why context window limits exist and why efficient attention variants (sparse, linear) are actively researched."
+                }
+            ],
+            onStepEnter: function(idx, step) {
+                const input = document.getElementById('sentenceInput');
+                if (!input) return;
+                if (idx === 0) {
+                    input.value = 'The bank was steep';
+                    processInput();
+                } else if (idx === 2) {
+                    input.value = 'The cat that the dog chased ran away';
+                    processInput();
+                }
+                // Step 1: leave for user to explore heads
+            }
+        });
     </script>
 </body>
 </html>
