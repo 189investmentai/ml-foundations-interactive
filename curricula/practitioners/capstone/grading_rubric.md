@@ -20,10 +20,10 @@ Use this rubric for self-assessment and peer review.
 
 | Score | Criteria |
 |-------|----------|
-| 8 | Creative, well-engineered features from events; clear rationale; no leakage |
-| 6-7 | Good features; minor issues or limited creativity |
-| 4-5 | Basic features; some leakage risk or poor rationale |
-| 2-3 | Minimal feature engineering |
+| 8 | Creative features from **both** customer + events data; clear rationale; no leakage; includes aggregations (counts, recency) |
+| 6-7 | Good features from events; minor issues or limited creativity |
+| 4-5 | Basic features; events data underused; some leakage risk |
+| 2-3 | Minimal feature engineering; events data ignored |
 | 0-1 | No feature engineering or major leakage |
 
 ### Model Development (10 points)
@@ -40,9 +40,9 @@ Use this rubric for self-assessment and peer review.
 
 | Score | Criteria |
 |-------|----------|
-| 7 | Clear cost analysis; threshold optimized for business value; trade-offs articulated |
-| 5-6 | Good threshold selection; some cost analysis |
-| 3-4 | Basic threshold; limited business alignment |
+| 7 | Clear cost analysis; threshold optimized for business value; trade-offs articulated; **comparison to random baseline** |
+| 5-6 | Good threshold selection; some cost analysis; baseline mentioned |
+| 3-4 | Basic threshold; limited business alignment; no baseline |
 | 1-2 | Arbitrary threshold; no business consideration |
 | 0 | No threshold analysis |
 

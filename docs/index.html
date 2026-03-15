@@ -3,205 +3,542 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ML Foundations - Full Curriculum</title>
+  <title>ML Foundations: Master ML Without the Math PhD</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #fafafa;
-      --surface: #ffffff;
-      --text: #1a1a2e;
-      --muted: #6b7280;
-      --accent-dm: #6366f1;
-      --accent-dm-light: #eef2ff;
-      --accent-pr: #0891b2;
-      --accent-pr-light: #ecfeff;
-      --border: #e5e7eb;
+      --green: #00C805;
+      --green-dark: #00a004;
+      --green-light: #ccf5cd;
+      --green-bg: #f0faf0;
+      --black: #1C1C1E;
+      --black-deep: #0d0d0e;
+      --gray-900: #2c2c2e;
+      --gray-700: #48484a;
+      --gray-500: #8e8e93;
+      --gray-400: #aeaeb2;
+      --gray-300: #d1d1d6;
+      --gray-200: #e5e5ea;
+      --gray-100: #f2f2f7;
+      --gray-50: #f9f9fb;
+      --white: #ffffff;
+      --dm-accent: #6366f1;
+      --dm-light: #eef2ff;
+      --pr-accent: #0891b2;
+      --pr-light: #ecfeff;
       --radius: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --radius-pill: 100px;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--white);
+      color: var(--black);
       line-height: 1.6;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+    .container { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
 
-    /* Hero */
-    .hero {
-      padding: 80px 0 60px;
-      text-align: center;
+    /* ── Nav ── */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--gray-200);
+      transition: box-shadow 0.3s;
     }
-    .hero-badge {
-      display: inline-block;
-      padding: 6px 16px;
-      border-radius: 100px;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-      margin-bottom: 20px;
+    .nav.scrolled { box-shadow: 0 1px 12px rgba(0,0,0,0.06); }
+    .nav-inner {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-    .hero h1 {
-      font-size: clamp(2rem, 5vw, 3rem);
+    .nav-brand {
+      font-size: 1.05rem;
       font-weight: 800;
-      line-height: 1.15;
-      margin-bottom: 16px;
+      color: var(--black);
+      text-decoration: none;
       letter-spacing: -0.02em;
     }
-    .hero p {
-      font-size: 1.125rem;
-      color: var(--muted);
-      max-width: 640px;
-      margin: 0 auto 32px;
+    .nav-brand span { color: var(--green); }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--gray-700);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--black); }
+    .nav-cta {
+      background: var(--green) !important;
+      color: var(--white) !important;
+      padding: 10px 22px;
+      border-radius: var(--radius-pill);
+      transition: background 0.2s, transform 0.15s !important;
+    }
+    .nav-cta:hover {
+      background: var(--green-dark) !important;
+      transform: scale(1.02);
+    }
+    @media (max-width: 640px) {
+      .nav-links { gap: 16px; }
+      .nav-links li:not(:last-child) { display: none; }
     }
 
-    /* Stats */
-    .stats {
+    /* ── Hero ── */
+    .hero {
+      padding: 160px 0 120px;
+      text-align: center;
+      background: var(--white);
+      overflow: hidden;
+    }
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      border-radius: var(--radius-pill);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      background: var(--green-bg);
+      color: var(--green-dark);
+      margin-bottom: 32px;
+    }
+    .hero-pill::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+    .hero h1 {
+      font-size: clamp(2.75rem, 6.5vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1.06;
+      letter-spacing: -0.04em;
+      margin-bottom: 24px;
+      color: var(--black);
+    }
+    .hero h1 .green { color: var(--green); }
+    .hero-sub {
+      font-size: 1.2rem;
+      color: var(--gray-500);
+      max-width: 520px;
+      margin: 0 auto 48px;
+      line-height: 1.7;
+      font-weight: 500;
+    }
+    .hero-actions {
       display: flex;
+      gap: 16px;
       justify-content: center;
-      gap: 48px;
-      margin-bottom: 20px;
       flex-wrap: wrap;
     }
-    .stat { text-align: center; }
-    .stat-number {
-      font-size: 2rem;
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 36px;
+      border-radius: var(--radius-pill);
+      font-size: 1rem;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s;
+      font-family: inherit;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-green {
+      background: var(--green);
+      color: var(--white);
+    }
+    .btn-green:hover {
+      background: var(--green-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(0,200,5,0.25);
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--black);
+      border: 2px solid var(--gray-300);
+    }
+    .btn-outline:hover {
+      border-color: var(--black);
+      background: var(--gray-50);
+    }
+    .btn-sm {
+      padding: 12px 24px;
+      font-size: 0.9rem;
+    }
+
+    /* ── Scroll Reveal ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── Stats Bar ── */
+    .stats-bar {
+      padding: 64px 0;
+      background: var(--gray-50);
+      border-top: 1px solid var(--gray-200);
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 32px;
+      text-align: center;
+    }
+    .stat-num {
+      font-size: 2.5rem;
       font-weight: 800;
-      line-height: 1.2;
+      color: var(--green);
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 8px;
     }
     .stat-label {
       font-size: 0.85rem;
-      color: var(--muted);
+      font-weight: 600;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Section Shared ── */
+    .section { padding: 100px 0; }
+    .section-dark {
+      background: var(--black);
+      color: var(--white);
+    }
+    .section-gray { background: var(--gray-50); }
+    .section-head {
+      text-align: center;
+      margin-bottom: 64px;
+    }
+    .section-head h2 {
+      font-size: clamp(2rem, 4.5vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+      line-height: 1.1;
+    }
+    .section-dark .section-head h2 { color: var(--white); }
+    .section-head p {
+      font-size: 1.05rem;
+      color: var(--gray-500);
+      max-width: 520px;
+      margin: 0 auto;
       font-weight: 500;
     }
+    .section-dark .section-head p { color: var(--gray-400); }
 
-    /* Differentiators */
-    .diff-row {
+    /* ── How It Works ── */
+    .loop-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin: 48px 0;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 2px;
+      background: var(--gray-200);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
     }
-    .diff-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
+    .section-dark .loop-grid { background: var(--gray-700); }
+    .loop-card {
+      background: var(--white);
+      padding: 36px 24px;
       text-align: center;
+      position: relative;
     }
-    .diff-card .icon { font-size: 1.75rem; margin-bottom: 10px; }
-    .diff-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
-    .diff-card p { font-size: 0.82rem; color: var(--muted); }
+    .section-dark .loop-card { background: var(--gray-900); }
+    .loop-num {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--green);
+      color: var(--white);
+      font-weight: 800;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+    .loop-card h4 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+    .loop-card p {
+      font-size: 0.8rem;
+      color: var(--gray-500);
+      line-height: 1.4;
+    }
+    .section-dark .loop-card p { color: var(--gray-400); }
 
-    /* Stream section */
-    .stream {
-      padding: 64px 0;
+    /* ── Who For ── */
+    .who-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
     }
-    .stream + .stream {
-      border-top: 1px solid var(--border);
+    .who-card {
+      padding: 48px 40px;
+      border-radius: var(--radius-xl);
+      border: 2px solid var(--gray-200);
+      transition: border-color 0.25s, box-shadow 0.25s;
     }
-    .stream-header {
-      margin-bottom: 40px;
+    .who-card:hover {
+      border-color: var(--green);
+      box-shadow: 0 12px 40px rgba(0,200,5,0.08);
     }
-    .stream-badge {
+    .who-card-badge {
       display: inline-block;
-      padding: 5px 14px;
-      border-radius: 100px;
-      font-size: 12px;
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.04em;
       text-transform: uppercase;
-      margin-bottom: 12px;
+      margin-bottom: 20px;
     }
-    .stream-badge.dm { background: var(--accent-dm-light); color: var(--accent-dm); }
-    .stream-badge.pr { background: var(--accent-pr-light); color: var(--accent-pr); }
-
-    .stream-header h2 {
-      font-size: 1.75rem;
+    .who-card-badge.dm { background: var(--dm-light); color: var(--dm-accent); }
+    .who-card-badge.pr { background: var(--pr-light); color: var(--pr-accent); }
+    .who-card h3 {
+      font-size: 1.5rem;
       font-weight: 800;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+    .who-card p {
+      font-size: 0.95rem;
+      color: var(--gray-500);
+      line-height: 1.7;
+    }
+
+    /* ── Value Props ── */
+    .value-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .value-card {
+      background: var(--white);
+      border-radius: var(--radius-xl);
+      padding: 48px 40px;
+      border: 2px solid var(--gray-200);
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .section-gray .value-card { background: var(--white); }
+    .value-card:hover {
+      border-color: var(--green);
+      box-shadow: 0 12px 40px rgba(0,200,5,0.08);
+    }
+    .value-badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+    .value-badge.dm { background: var(--dm-light); color: var(--dm-accent); }
+    .value-badge.pr { background: var(--pr-light); color: var(--pr-accent); }
+    .value-card h3 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 20px;
       letter-spacing: -0.01em;
     }
-    .stream-header p {
-      color: var(--muted);
-      font-size: 1rem;
-      max-width: 600px;
+    .value-list {
+      list-style: none;
+      font-size: 0.95rem;
+      color: var(--gray-500);
     }
-
-    .stream-meta {
-      display: flex;
-      gap: 24px;
-      margin-top: 16px;
-      flex-wrap: wrap;
-    }
-    .stream-meta span {
-      font-size: 0.85rem;
-      color: var(--muted);
+    .value-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--gray-100);
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 12px;
     }
-    .stream-meta span strong { color: var(--text); }
+    .value-list li:last-child { border-bottom: none; }
+    .value-list li::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      flex-shrink: 0;
+    }
+    .value-list strong { color: var(--black); font-weight: 700; }
 
-    /* Deliverable pills */
-    .deliverables {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 20px;
-    }
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 4px 12px;
-      border-radius: 100px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      border: 1px solid var(--border);
-      background: var(--surface);
-    }
-
-    /* Module list */
-    .module-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-      background: var(--border);
-      border-radius: var(--radius);
+    /* ── Differentiators ── */
+    .diff-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+      background: rgba(255,255,255,0.1);
+      border-radius: var(--radius-lg);
       overflow: hidden;
-      border: 1px solid var(--border);
     }
+    .diff-card {
+      background: var(--gray-900);
+      padding: 40px 28px;
+      transition: background 0.2s;
+    }
+    .diff-card:hover { background: var(--gray-700); }
+    .diff-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius);
+      background: rgba(0,200,5,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      margin-bottom: 20px;
+    }
+    .diff-card h3 {
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: var(--white);
+    }
+    .diff-card p {
+      font-size: 0.85rem;
+      color: var(--gray-400);
+      line-height: 1.6;
+    }
+
+    /* ── Curriculum Streams ── */
+    .stream { padding: 100px 0; }
+    .stream-dm { background: var(--white); }
+    .stream-pr { background: var(--black-deep); color: var(--white); }
+
+    .stream-head {
+      margin-bottom: 48px;
+    }
+    .stream-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: var(--radius-pill);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .stream-badge.dm { background: var(--dm-light); color: var(--dm-accent); }
+    .stream-badge.pr { background: rgba(8,145,178,0.15); color: #67e8f9; }
+    .stream-head h2 {
+      font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+    .stream-head p {
+      font-size: 1rem;
+      color: var(--gray-500);
+      max-width: 560px;
+      font-weight: 500;
+    }
+    .stream-pr .stream-head p { color: var(--gray-400); }
+
+    /* Module List */
+    .module-list {
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      border: 1px solid var(--gray-200);
+    }
+    .stream-pr .module-list { border-color: rgba(255,255,255,0.08); }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gray-500);
+      padding: 14px 24px;
+      background: var(--gray-50);
+    }
+    .stream-pr .section-label {
+      background: rgba(255,255,255,0.03);
+      color: var(--gray-400);
+    }
+
     .module-item {
       display: grid;
-      grid-template-columns: 48px 1fr auto;
+      grid-template-columns: 52px 1fr auto;
       align-items: center;
       gap: 16px;
-      padding: 16px 20px;
-      background: var(--surface);
+      padding: 18px 24px;
+      background: var(--white);
+      border-top: 1px solid var(--gray-100);
       transition: background 0.15s;
     }
-    .module-item:hover { background: #f9fafb; }
+    .module-item:hover { background: var(--gray-50); }
+    .stream-pr .module-item {
+      background: var(--black-deep);
+      border-top-color: rgba(255,255,255,0.04);
+    }
+    .stream-pr .module-item:hover { background: rgba(255,255,255,0.03); }
+
     .module-num {
       font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--muted);
+      font-weight: 800;
+      color: var(--gray-400);
       text-align: center;
+      font-variant-numeric: tabular-nums;
     }
     .module-info h3 {
       font-size: 0.95rem;
       font-weight: 700;
       margin-bottom: 2px;
+      letter-spacing: -0.01em;
     }
+    .stream-pr .module-info h3 { color: var(--white); }
     .module-info p {
       font-size: 0.82rem;
-      color: var(--muted);
-      line-height: 1.4;
+      color: var(--gray-500);
+      line-height: 1.45;
     }
+    .stream-pr .module-info p { color: var(--gray-400); }
+
     .module-tags {
       display: flex;
       gap: 6px;
@@ -212,202 +549,361 @@
       height: 8px;
       border-radius: 50%;
       opacity: 0.7;
+      transition: opacity 0.15s;
     }
-    .tag[title]:hover { opacity: 1; }
-    .tag.lesson { background: #10b981; }
+    .tag:hover { opacity: 1; }
+    .tag.lesson { background: var(--green); }
     .tag.quiz { background: #f59e0b; }
     .tag.drill { background: #ef4444; }
-    .tag.lab { background: #6366f1; }
+    .tag.lab { background: var(--dm-accent); }
     .tag.cheat { background: #8b5cf6; }
-    .tag.play { background: #0891b2; }
+    .tag.play { background: var(--pr-accent); }
 
-    /* Tag legend */
     .tag-legend {
       display: flex;
-      gap: 16px;
+      gap: 20px;
       flex-wrap: wrap;
-      margin-top: 16px;
+      margin-top: 20px;
       padding: 0 4px;
     }
     .tag-legend-item {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       font-size: 0.75rem;
-      color: var(--muted);
+      font-weight: 600;
+      color: var(--gray-500);
     }
-
-    /* Section dividers */
-    .section-label {
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      padding: 10px 20px;
-      background: #f3f4f6;
-    }
+    .stream-pr .tag-legend-item { color: var(--gray-400); }
 
     /* Sample CTA */
     .sample-cta {
-      margin-top: 32px;
-      padding: 24px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
+      margin-top: 40px;
+      padding: 32px;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius-lg);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 24px;
       flex-wrap: wrap;
     }
-    .sample-cta-text h3 {
-      font-size: 1rem;
-      font-weight: 700;
+    .stream-pr .sample-cta {
+      background: rgba(255,255,255,0.03);
+      border-color: rgba(255,255,255,0.08);
+    }
+    .sample-cta h3 {
+      font-size: 1.05rem;
+      font-weight: 800;
       margin-bottom: 4px;
     }
-    .sample-cta-text p {
-      font-size: 0.85rem;
-      color: var(--muted);
+    .sample-cta p {
+      font-size: 0.88rem;
+      color: var(--gray-500);
     }
-    .sample-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 24px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-    .sample-btn.dm {
-      background: var(--accent-dm);
-      color: white;
-    }
-    .sample-btn.dm:hover { background: #4f46e5; }
-    .sample-btn.pr {
-      background: var(--accent-pr);
-      color: white;
-    }
-    .sample-btn.pr:hover { background: #0e7490; }
+    .stream-pr .sample-cta p { color: var(--gray-400); }
 
-    /* Footer */
+    /* ── FAQ ── */
+    .faq-list { max-width: 640px; margin: 0 auto; }
+    .faq-item {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .faq-item:first-child { border-top: 1px solid var(--gray-200); }
+    .faq-item h4 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      letter-spacing: -0.01em;
+    }
+    .faq-item p {
+      font-size: 0.95rem;
+      color: var(--gray-500);
+      line-height: 1.7;
+      font-weight: 500;
+    }
+    .faq-item p strong { color: var(--black); }
+
+    /* ── Final CTA ── */
+    .final-cta {
+      padding: 100px 0;
+      background: var(--black);
+      text-align: center;
+      color: var(--white);
+    }
+    .final-cta h2 {
+      font-size: clamp(2rem, 4.5vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+      line-height: 1.1;
+    }
+    .final-cta p {
+      font-size: 1.05rem;
+      color: var(--gray-400);
+      max-width: 480px;
+      margin: 0 auto 40px;
+      font-weight: 500;
+    }
+    .final-cta-actions {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-white {
+      background: var(--white);
+      color: var(--black);
+    }
+    .btn-white:hover {
+      background: var(--gray-100);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(255,255,255,0.1);
+    }
+    .btn-outline-light {
+      background: transparent;
+      color: var(--white);
+      border: 2px solid var(--gray-700);
+    }
+    .btn-outline-light:hover {
+      border-color: var(--gray-400);
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* ── Footer ── */
     footer {
       padding: 48px 0;
       text-align: center;
-      border-top: 1px solid var(--border);
-      margin-top: 24px;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
     }
     footer p {
       font-size: 0.85rem;
-      color: var(--muted);
+      color: var(--gray-500);
+      font-weight: 500;
     }
-    footer a { color: var(--text); }
-
-    /* Toggle button for sections */
-    .section-toggle {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 16px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--muted);
-      cursor: pointer;
-      margin-top: 12px;
-      transition: all 0.15s;
+    footer a {
+      color: var(--black);
+      text-decoration: none;
+      font-weight: 700;
     }
-    .section-toggle:hover { border-color: var(--text); color: var(--text); }
+    footer a:hover { color: var(--green); }
 
-    @media (max-width: 640px) {
-      .hero { padding: 48px 0 40px; }
-      .stats { gap: 24px; }
-      .module-item { grid-template-columns: 36px 1fr; }
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .hero { padding: 120px 0 80px; }
+      .hero-actions { flex-direction: column; align-items: center; }
+      .btn { width: 100%; max-width: 320px; justify-content: center; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+      .loop-grid { grid-template-columns: repeat(2, 1fr); }
+      .loop-card:last-child { grid-column: 1 / -1; }
+      .who-grid { grid-template-columns: 1fr; }
+      .value-grid { grid-template-columns: 1fr; }
+      .diff-grid { grid-template-columns: repeat(2, 1fr); }
+      .module-item { grid-template-columns: 40px 1fr; }
       .module-tags { display: none; }
       .sample-cta { flex-direction: column; text-align: center; }
+      .final-cta-actions { flex-direction: column; align-items: center; }
+    }
+    @media (max-width: 480px) {
+      .loop-grid { grid-template-columns: 1fr; }
+      .loop-card:last-child { grid-column: auto; }
+      .diff-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
+  <!-- Nav -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-brand">ML <span>Foundations</span></a>
+      <ul class="nav-links">
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#decision-makers">Decision Makers</a></li>
+        <li><a href="#practitioners">Practitioners</a></li>
+        <li><a href="#decision-makers" class="nav-cta">Get Started</a></li>
+      </ul>
+    </div>
+  </nav>
+
   <!-- Hero -->
   <section class="hero">
     <div class="container">
-      <div class="hero-badge" style="background:#f0fdf4;color:#16a34a;">Interactive &middot; Self-Paced &middot; No Fluff</div>
-      <h1>ML Foundations</h1>
-      <p>Two practical curricula for professionals who want to understand and apply machine learning - without sitting through lectures or fighting with environments.</p>
-      <div class="stats">
-        <div class="stat">
-          <div class="stat-number">2</div>
-          <div class="stat-label">Curricula</div>
-        </div>
-        <div class="stat">
-          <div class="stat-number">10 + 22</div>
+      <div class="hero-pill">Self-Paced &middot; One-Time Purchase</div>
+      <h1>Master ML.<br><span class="green">Without the PhD.</span></h1>
+      <p class="hero-sub">The ML course built for how you actually work. No live sessions. No subscriptions. Just hands-on learning that fits your schedule.</p>
+      <div class="hero-actions">
+        <a href="#decision-makers" class="btn btn-green">For Decision Makers</a>
+        <a href="#practitioners" class="btn btn-outline">For Practitioners</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Bar -->
+  <section class="stats-bar">
+    <div class="container">
+      <div class="stats-grid reveal">
+        <div>
+          <div class="stat-num">33</div>
           <div class="stat-label">Modules</div>
         </div>
-        <div class="stat">
-          <div class="stat-number">22</div>
-          <div class="stat-label">Interactive Playgrounds</div>
+        <div>
+          <div class="stat-num">31</div>
+          <div class="stat-label">Colab Labs</div>
         </div>
-        <div class="stat">
-          <div class="stat-number">6</div>
-          <div class="stat-label">Deliverables per Module</div>
+        <div>
+          <div class="stat-num">33</div>
+          <div class="stat-label">Debug Drills</div>
+        </div>
+        <div>
+          <div class="stat-num">0</div>
+          <div class="stat-label">Live Sessions</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="section section-dark" id="how-it-works">
+    <div class="container">
+      <div class="section-head reveal">
+        <h2>Every module follows<br>the same loop</h2>
+        <p>No passive watching. You read, build, break, and fix.</p>
+      </div>
+      <div class="loop-grid reveal">
+        <div class="loop-card">
+          <div class="loop-num">1</div>
+          <h4>Read</h4>
+          <p>Micro-lesson<br>~15 min</p>
+        </div>
+        <div class="loop-card">
+          <div class="loop-num">2</div>
+          <h4>Decide</h4>
+          <p>Scenarios<br>~10 min</p>
+        </div>
+        <div class="loop-card">
+          <div class="loop-num">3</div>
+          <h4>Build</h4>
+          <p>Hands-on lab<br>~20 min</p>
+        </div>
+        <div class="loop-card">
+          <div class="loop-num">4</div>
+          <h4>Debug</h4>
+          <p>Fix broken pipeline<br>~15 min</p>
+        </div>
+        <div class="loop-card">
+          <div class="loop-num">5</div>
+          <h4>Reference</h4>
+          <p>Cheat sheet<br>to keep</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Who Is This For -->
+  <section class="section">
+    <div class="container">
+      <div class="section-head reveal">
+        <h2>Two curricula.<br>Pick yours.</h2>
+        <p>Different roles need different depth. Choose the one that matches how you work.</p>
+      </div>
+      <div class="who-grid reveal">
+        <div class="who-card">
+          <div class="who-card-badge dm">Decision Makers</div>
+          <h3>ML for Business Leaders</h3>
+          <p>PMs, analysts, and leaders who work <em>with</em> ML teams but don't build models. Learn to frame problems, evaluate results, and communicate with stakeholders.</p>
+        </div>
+        <div class="who-card">
+          <div class="who-card-badge pr">Practitioners</div>
+          <h3>ML for Builders</h3>
+          <p>Engineers and data scientists who <em>build</em> and <em>deploy</em> models. Hands-on Python, Colab notebooks, and production-focused drills with real pipelines.</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Differentiators -->
-  <div class="container">
-    <div class="diff-row">
-      <div class="diff-card">
-        <div class="icon">🧪</div>
-        <h3>Learn by Doing</h3>
-        <p>Every module: Read &rarr; Decide &rarr; Build &rarr; Debug &rarr; Explain</p>
+  <section class="section section-dark">
+    <div class="container">
+      <div class="section-head reveal">
+        <h2>Not another video course</h2>
+        <p>We built this differently. Here's what makes it work.</p>
       </div>
-      <div class="diff-card">
-        <div class="icon">🎮</div>
-        <h3>Interactive Playgrounds</h3>
-        <p>HTML simulations that let you drag, tweak, and see ML concepts in real time</p>
-      </div>
-      <div class="diff-card">
-        <div class="icon">🐛</div>
-        <h3>Debug Drills</h3>
-        <p>Intentionally broken notebooks - find the bug, fix it, write the postmortem</p>
-      </div>
-      <div class="diff-card">
-        <div class="icon">📊</div>
-        <h3>One Case Company</h3>
-        <p>StreamCart - subscription e-commerce with churn, fraud, and LTV problems</p>
+      <div class="diff-grid reveal">
+        <div class="diff-card">
+          <div class="diff-icon">&#9654;</div>
+          <h3>Hands-On, Not Passive</h3>
+          <p>No 20-hour lecture marathons. Read, build, debug, explain. You learn by doing.</p>
+        </div>
+        <div class="diff-card">
+          <div class="diff-icon">&#9632;</div>
+          <h3>One Case Company</h3>
+          <p>StreamCart: subscription e-commerce with churn, fraud, LTV. Continuity across every module.</p>
+        </div>
+        <div class="diff-card">
+          <div class="diff-icon">&#9881;</div>
+          <h3>Debug-First Pedagogy</h3>
+          <p>Intentionally broken notebooks. Find the bug, fix it, write the postmortem.</p>
+        </div>
+        <div class="diff-card">
+          <div class="diff-icon">&#9998;</div>
+          <h3>Free Tools Only</h3>
+          <p>Google Colab, Google Forms, and a browser. No paid software, no Docker, no cloud accounts. Just a Google login.</p>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- Decision Makers Stream -->
-  <section class="stream" id="decision-makers">
+  <!-- What You Get -->
+  <section class="section section-gray">
     <div class="container">
-      <div class="stream-header">
-        <div class="stream-badge dm">Decision Makers</div>
-        <h2>ML Foundations for Business</h2>
-        <p>For PMs, analysts, and leaders who work with ML teams but don't build models. Learn to frame, evaluate, and communicate about ML projects with confidence.</p>
-        <div class="stream-meta">
-          <span><strong>10</strong> modules</span>
-          <span><strong>60–90 min</strong> per module</span>
-          <span><strong>Zero</strong> prerequisites</span>
+      <div class="section-head reveal">
+        <h2>What's included</h2>
+        <p>Concrete deliverables, not lecture hours. Here's exactly what you get.</p>
+      </div>
+      <div class="value-grid reveal">
+        <div class="value-card">
+          <div class="value-badge dm">Decision Makers</div>
+          <h3>10 Modules, Full Stack</h3>
+          <ul class="value-list">
+            <li><strong>10</strong> Colab labs with guided code</li>
+            <li><strong>10</strong> debug drills with answer keys</li>
+            <li><strong>120</strong> scenario-based quiz questions</li>
+            <li><strong>10</strong> cheat sheets to keep</li>
+            <li>Capstone project with rubric</li>
+            <li>Answer keys for everything</li>
+          </ul>
         </div>
-        <div class="deliverables">
-          <span class="pill">📖 Micro-lesson</span>
-          <span class="pill">📝 Quiz</span>
-          <span class="pill">🐛 Debug Drill</span>
-          <span class="pill">🧪 Practice Lab</span>
-          <span class="pill">📋 Cheatsheet</span>
-          <span class="pill">💬 Explain-it Prompt</span>
+        <div class="value-card">
+          <div class="value-badge pr">Practitioners</div>
+          <h3>23 Modules, Production-Ready</h3>
+          <ul class="value-list">
+            <li><strong>21</strong> Colab labs</li>
+            <li><strong>23</strong> debug drills</li>
+            <li><strong>25</strong> interactive HTML playgrounds</li>
+            <li><strong>23</strong> quizzes via Google Forms</li>
+            <li><strong>23</strong> cheat sheets</li>
+            <li>Capstone project with rubric</li>
+            <li>Answer keys for everything</li>
+          </ul>
         </div>
       </div>
+    </div>
+  </section>
 
-      <div class="module-list">
+  <!-- Decision Makers Stream -->
+  <section class="stream stream-dm" id="decision-makers">
+    <div class="container">
+      <div class="stream-head reveal">
+        <div class="stream-badge dm">Decision Makers</div>
+        <h2>ML Foundations for Business</h2>
+        <p>Frame, evaluate, and communicate about ML projects with confidence. Zero prerequisites.</p>
+      </div>
+
+      <div class="module-list reveal">
         <div class="section-label">Framing &amp; First Models</div>
         <div class="module-item">
           <div class="module-num">01</div>
@@ -427,7 +923,7 @@
           <div class="module-num">02</div>
           <div class="module-info">
             <h3>Your First Prediction Model</h3>
-            <p>Logistic regression - turn customer features into a churn probability you can act on</p>
+            <p>Logistic regression—turn customer features into a churn probability you can act on</p>
           </div>
           <div class="module-tags">
             <div class="tag lesson" title="Lesson"></div>
@@ -441,7 +937,7 @@
           <div class="module-num">03</div>
           <div class="module-info">
             <h3>When Linear Isn't Enough</h3>
-            <p>Decision trees - when the relationship between features and outcomes isn't a straight line</p>
+            <p>Decision trees—when the relationship between features and outcomes isn't a straight line</p>
           </div>
           <div class="module-tags">
             <div class="tag lesson" title="Lesson"></div>
@@ -455,7 +951,7 @@
           <div class="module-num">04</div>
           <div class="module-info">
             <h3>Combining Many Weak Learners</h3>
-            <p>Gradient boosting - squeeze more accuracy from tree-based models</p>
+            <p>Gradient boosting—squeeze more accuracy from tree-based models</p>
           </div>
           <div class="module-tags">
             <div class="tag lesson" title="Lesson"></div>
@@ -471,7 +967,7 @@
           <div class="module-num">05</div>
           <div class="module-info">
             <h3>Features Make or Break Your Model</h3>
-            <p>Feature engineering - build features that help and avoid ones that quietly destroy models</p>
+            <p>Feature engineering—build features that help and avoid ones that quietly destroy models</p>
           </div>
           <div class="module-tags">
             <div class="tag lesson" title="Lesson"></div>
@@ -485,7 +981,7 @@
           <div class="module-num">06</div>
           <div class="module-info">
             <h3>Is Your Model Actually Good?</h3>
-            <p>Evaluation - how to know if a model is actually useful for the business, not just the notebook</p>
+            <p>Evaluation—how to know if a model is actually useful for the business, not just the notebook</p>
           </div>
           <div class="module-tags">
             <div class="tag lesson" title="Lesson"></div>
@@ -501,7 +997,7 @@
           <div class="module-num">07</div>
           <div class="module-info">
             <h3>Finding Structure Without Labels</h3>
-            <p>Clustering and anomaly detection - find patterns when you don't know what you're looking for</p>
+            <p>Clustering and anomaly detection—find patterns when you don't know what you're looking for</p>
           </div>
           <div class="module-tags">
             <div class="tag lesson" title="Lesson"></div>
@@ -515,7 +1011,7 @@
           <div class="module-num">08</div>
           <div class="module-info">
             <h3>Teaching Machines What "Similar" Means</h3>
-            <p>Embeddings and similarity search - how machines understand semantic relationships</p>
+            <p>Embeddings and similarity search—how machines understand semantic relationships</p>
           </div>
           <div class="module-tags">
             <div class="tag lesson" title="Lesson"></div>
@@ -531,7 +1027,7 @@
           <div class="module-num">09</div>
           <div class="module-info">
             <h3>From Keywords to Meaning</h3>
-            <p>NLP to transformers - from keyword search to machines that understand language</p>
+            <p>NLP to transformers—from keyword search to machines that understand language</p>
           </div>
           <div class="module-tags">
             <div class="tag lesson" title="Lesson"></div>
@@ -545,7 +1041,7 @@
           <div class="module-num">10</div>
           <div class="module-info">
             <h3>Working with LLMs</h3>
-            <p>Prompting, RAG, agents, and guardrails - build reliable systems on models that sometimes lie</p>
+            <p>Prompting, RAG, agents, and guardrails—build reliable systems on models that sometimes lie</p>
           </div>
           <div class="module-tags">
             <div class="tag lesson" title="Lesson"></div>
@@ -566,53 +1062,38 @@
       </div>
 
       <div class="sample-cta">
-        <div class="sample-cta-text">
-          <h3>Try the full Module 1 for free</h3>
-          <p>"Is This Even an ML Problem?" - includes all 6 deliverables so you can experience the complete teaching loop.</p>
+        <div>
+          <h3>Try Module 1 for free</h3>
+          <p>"Is This Even an ML Problem?"—includes the lesson, quiz, lab, debug drill, and cheat sheet so you can experience the complete learning loop.</p>
         </div>
-        <a href="https://www.notion.so/Free-Sample-ML-Foundations-for-Business-310d25c7612f81d89d97dc3f947d06c5?source=copy_link" class="sample-btn dm">View Free Sample &rarr;</a>
+        <a href="https://www.notion.so/Free-Sample-ML-Foundations-for-Business-310d25c7612f81d89d97dc3f947d06c5?source=copy_link" class="btn btn-green btn-sm">View Free Sample</a>
       </div>
     </div>
   </section>
 
   <!-- Practitioners Stream -->
-  <section class="stream" id="practitioners">
+  <section class="stream stream-pr" id="practitioners">
     <div class="container">
-      <div class="stream-header">
+      <div class="stream-head reveal">
         <div class="stream-badge pr">Practitioners</div>
         <h2>ML Practitioners Course</h2>
-        <p>For engineers and data scientists who build and deploy models. Hands-on coding with interactive playgrounds, Colab notebooks, and production-focused drills.</p>
-        <div class="stream-meta">
-          <span><strong>23</strong> modules</span>
-          <span><strong>30–45 min</strong> per module</span>
-          <span><strong>Python &amp; pandas</strong> expected</span>
-        </div>
-        <div class="deliverables">
-          <span class="pill">📖 Micro-lesson</span>
-          <span class="pill">🎮 Interactive Playground</span>
-          <span class="pill">📝 Quiz</span>
-          <span class="pill">🐛 Debug Drill</span>
-          <span class="pill">🧪 Practice Lab</span>
-          <span class="pill">📋 Cheatsheet</span>
-        </div>
+        <p>Hands-on coding with interactive playgrounds, Colab notebooks, and production-focused drills. Python &amp; pandas expected.</p>
       </div>
 
-      <div class="module-list">
+      <div class="module-list reveal">
         <div class="section-label">Foundations</div>
         <div class="module-item">
           <div class="module-num">00</div>
           <div class="module-info">
-            <h3>Welcome - How to Get the Most from This Course</h3>
+            <h3>Welcome: How to Get the Most from This Course</h3>
             <p>Course structure, the StreamCart case company, and how each module's teaching loop works</p>
           </div>
-          <div class="module-tags">
-            <div class="tag lesson" title="Lesson"></div>
-          </div>
+          <div class="module-tags"><div class="tag lesson" title="Lesson"></div></div>
         </div>
         <div class="module-item">
           <div class="module-num">01</div>
           <div class="module-info">
-            <h3>The ML Map - Where Things Break</h3>
+            <h3>The ML Map: Where Things Break</h3>
             <p>See the full ML pipeline end-to-end and learn where most bugs happen in practice</p>
           </div>
           <div class="module-tags">
@@ -625,7 +1106,7 @@
         <div class="module-item">
           <div class="module-num">02</div>
           <div class="module-info">
-            <h3>Data Leakage - The Silent Model Killer</h3>
+            <h3>Data Leakage: The Silent Model Killer</h3>
             <p>Recognize and prevent data leakage before it inflates your metrics and destroys production performance</p>
           </div>
           <div class="module-tags">
@@ -640,7 +1121,7 @@
         <div class="module-item">
           <div class="module-num">03</div>
           <div class="module-info">
-            <h3>Linear Regression - Predicting with Straight Lines</h3>
+            <h3>Linear Regression: Predicting with Straight Lines</h3>
             <p>How linear models make predictions, why they fail, and when they're all you need</p>
           </div>
           <div class="module-tags">
@@ -655,7 +1136,7 @@
         <div class="module-item">
           <div class="module-num">04</div>
           <div class="module-info">
-            <h3>Logistic Regression - Classification with Probabilities</h3>
+            <h3>Logistic Regression: Classification with Probabilities</h3>
             <p>Predict probabilities, understand the sigmoid, and learn why threshold choice matters more than accuracy</p>
           </div>
           <div class="module-tags">
@@ -670,7 +1151,7 @@
         <div class="module-item">
           <div class="module-num">05</div>
           <div class="module-info">
-            <h3>Decision Trees - 20 Questions for ML</h3>
+            <h3>Decision Trees: 20 Questions for ML</h3>
             <p>How trees make predictions, Gini impurity, overfitting control, and interpretability trade-offs</p>
           </div>
           <div class="module-tags">
@@ -685,8 +1166,8 @@
         <div class="module-item">
           <div class="module-num">06</div>
           <div class="module-info">
-            <h3>Ensemble Methods - The Wisdom of Crowds</h3>
-            <p>Why ensembles outperform single models - Random Forests, bagging, and boosting compared</p>
+            <h3>Ensemble Methods: The Wisdom of Crowds</h3>
+            <p>Why ensembles outperform single models—Random Forests, bagging, and boosting compared</p>
           </div>
           <div class="module-tags">
             <div class="tag lesson" title="Lesson"></div>
@@ -700,8 +1181,8 @@
         <div class="module-item">
           <div class="module-num">07</div>
           <div class="module-info">
-            <h3>Optimization - How Models Learn</h3>
-            <p>Gradient descent, learning rate, convergence - the mechanics behind parameter updates</p>
+            <h3>Optimization: How Models Learn</h3>
+            <p>Gradient descent, learning rate, convergence—the mechanics behind parameter updates</p>
           </div>
           <div class="module-tags">
             <div class="tag lesson" title="Lesson"></div>
@@ -717,8 +1198,8 @@
         <div class="module-item">
           <div class="module-num">08</div>
           <div class="module-info">
-            <h3>Regression Metrics - Measuring Prediction Quality</h3>
-            <p>MSE, MAE, R² - which regression metric to use and how to interpret residual patterns</p>
+            <h3>Regression Metrics: Measuring Prediction Quality</h3>
+            <p>MSE, MAE, R²—which regression metric to use and how to interpret residual patterns</p>
           </div>
           <div class="module-tags">
             <div class="tag lesson" title="Lesson"></div>
@@ -732,8 +1213,8 @@
         <div class="module-item">
           <div class="module-num">09</div>
           <div class="module-info">
-            <h3>Classification Metrics - Beyond Accuracy</h3>
-            <p>Why accuracy lies - precision, recall, F1, AUC, and choosing the right metric for your action</p>
+            <h3>Classification Metrics: Beyond Accuracy</h3>
+            <p>Why accuracy lies—precision, recall, F1, AUC, and choosing the right metric for your action</p>
           </div>
           <div class="module-tags">
             <div class="tag lesson" title="Lesson"></div>
@@ -747,8 +1228,8 @@
         <div class="module-item">
           <div class="module-num">10</div>
           <div class="module-info">
-            <h3>Feature Engineering - Making Data Speak</h3>
-            <p>Turn raw data into features models can actually use - encoding, scaling, interactions, and time features</p>
+            <h3>Feature Engineering: Making Data Speak</h3>
+            <p>Turn raw data into features models can actually use—encoding, scaling, interactions, and time features</p>
           </div>
           <div class="module-tags">
             <div class="tag lesson" title="Lesson"></div>
@@ -762,7 +1243,7 @@
         <div class="module-item">
           <div class="module-num">11</div>
           <div class="module-info">
-            <h3>Regularization - Preventing Overfitting</h3>
+            <h3>Regularization: Preventing Overfitting</h3>
             <p>L1 vs. L2, why regularization works, and how to tune the strength parameter</p>
           </div>
           <div class="module-tags">
@@ -779,7 +1260,7 @@
         <div class="module-item">
           <div class="module-num">12</div>
           <div class="module-info">
-            <h3>Embeddings - Turning Anything into Numbers</h3>
+            <h3>Embeddings: Turning Anything into Numbers</h3>
             <p>How embeddings work, word2vec intuition, and using embeddings for similarity search</p>
           </div>
           <div class="module-tags">
@@ -794,7 +1275,7 @@
         <div class="module-item">
           <div class="module-num">13</div>
           <div class="module-info">
-            <h3>Clustering - Finding Hidden Groups</h3>
+            <h3>Clustering: Finding Hidden Groups</h3>
             <p>K-Means, hierarchical clustering, silhouette scores, and when clustering helps vs. hurts</p>
           </div>
           <div class="module-tags">
@@ -809,8 +1290,8 @@
         <div class="module-item">
           <div class="module-num">14</div>
           <div class="module-info">
-            <h3>Retrieval - Finding Needles in Haystacks</h3>
-            <p>TF-IDF, vector search, re-ranking - the foundations you need before building RAG</p>
+            <h3>Retrieval: Finding Needles in Haystacks</h3>
+            <p>TF-IDF, vector search, re-ranking—the foundations you need before building RAG</p>
           </div>
           <div class="module-tags">
             <div class="tag lesson" title="Lesson"></div>
@@ -826,7 +1307,7 @@
         <div class="module-item">
           <div class="module-num">15</div>
           <div class="module-info">
-            <h3>Neural Networks - Learning Representations</h3>
+            <h3>Neural Networks: Learning Representations</h3>
             <p>How neural networks learn, backpropagation intuition, and when to use them vs. simpler models</p>
           </div>
           <div class="module-tags">
@@ -841,7 +1322,7 @@
         <div class="module-item">
           <div class="module-num">16</div>
           <div class="module-info">
-            <h3>CNNs - Learning from Spatial Structure</h3>
+            <h3>CNNs: Learning from Spatial Structure</h3>
             <p>How convolutions detect patterns, pooling reduces dimensions, and why CNNs beat dense networks on images</p>
           </div>
           <div class="module-tags">
@@ -856,7 +1337,7 @@
         <div class="module-item">
           <div class="module-num">17</div>
           <div class="module-info">
-            <h3>Transformers - The Architecture Behind Modern AI</h3>
+            <h3>Transformers: The Architecture Behind Modern AI</h3>
             <p>Self-attention, positional encoding, and why transformers changed everything</p>
           </div>
           <div class="module-tags">
@@ -873,8 +1354,8 @@
         <div class="module-item">
           <div class="module-num">18</div>
           <div class="module-info">
-            <h3>LLM Fundamentals - Prompting, RAG, and Fine-Tuning</h3>
-            <p>Get the best results from LLMs through prompting strategies, retrieval augmentation, and fine-tuning</p>
+            <h3>LLM Fundamentals: Prompting, RAG, and When to Fine-Tune</h3>
+            <p>Prompting strategies, retrieval-augmented generation, and knowing when fine-tuning is worth it vs. overkill</p>
           </div>
           <div class="module-tags">
             <div class="tag lesson" title="Lesson"></div>
@@ -888,7 +1369,7 @@
         <div class="module-item">
           <div class="module-num">19</div>
           <div class="module-info">
-            <h3>Tool Calling - LLMs That Take Action</h3>
+            <h3>Tool Calling: LLMs That Take Action</h3>
             <p>Give LLMs the ability to call functions, query databases, and interact with external systems</p>
           </div>
           <div class="module-tags">
@@ -903,7 +1384,7 @@
         <div class="module-item">
           <div class="module-num">20</div>
           <div class="module-info">
-            <h3>Agent Memory &amp; Planning</h3>
+            <h3>Agent Memory &amp; Planning: Thinking Over Multiple Steps</h3>
             <p>Give agents persistent memory and implement multi-step planning with ReAct and reflection</p>
           </div>
           <div class="module-tags">
@@ -918,7 +1399,7 @@
         <div class="module-item">
           <div class="module-num">21</div>
           <div class="module-info">
-            <h3>Guardrails - Safety, Validation, and Evaluation</h3>
+            <h3>Guardrails: Safety, Validation, and Evaluation</h3>
             <p>Build robust AI systems with input validation, output filtering, and systematic evaluation</p>
           </div>
           <div class="module-tags">
@@ -935,8 +1416,8 @@
         <div class="module-item">
           <div class="module-num">22</div>
           <div class="module-info">
-            <h3>MLOps - From Notebook to Production</h3>
-            <p>Move models from experimentation to production - packaging, serving, CI/CD, and versioning</p>
+            <h3>MLOps: From Notebook to Production</h3>
+            <p>Move models from experimentation to production—packaging, serving, CI/CD, and versioning</p>
           </div>
           <div class="module-tags">
             <div class="tag lesson" title="Lesson"></div>
@@ -950,7 +1431,7 @@
         <div class="module-item">
           <div class="module-num">23</div>
           <div class="module-info">
-            <h3>Monitoring - Keeping Models Healthy in Production</h3>
+            <h3>Monitoring: Keeping Models Healthy in Production</h3>
             <p>Detect model degradation, set up drift alerts, and know when to retrain</p>
           </div>
           <div class="module-tags">
@@ -974,11 +1455,54 @@
       </div>
 
       <div class="sample-cta">
-        <div class="sample-cta-text">
-          <h3>Try the full Module 5 for free</h3>
-          <p>"Decision Trees" - includes interactive playground, Colab lab, debug drill, quiz, and cheatsheet.</p>
+        <div>
+          <h3>Try Module 5 for free</h3>
+          <p>"Decision Trees"—includes interactive playground, Colab lab, debug drill, quiz, and cheatsheet.</p>
         </div>
-        <a href="https://www.notion.so/Free-Sample-ML-Practitioners-Course-310d25c7612f81b78346fcfc95977be3?source=copy_link" class="sample-btn pr">View Free Sample &rarr;</a>
+        <a href="https://www.notion.so/Free-Sample-ML-Practitioners-Course-310d25c7612f81b78346fcfc95977be3?source=copy_link" class="btn btn-green btn-sm">View Free Sample</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section section-gray">
+    <div class="container">
+      <div class="section-head reveal">
+        <h2>Questions</h2>
+      </div>
+      <div class="faq-list reveal">
+        <div class="faq-item">
+          <h4>Who is this for?</h4>
+          <p><strong>Decision Makers</strong> is for PMs, analysts, and leaders who work with ML teams but don't build models. <strong>Practitioners</strong> is for engineers and data scientists who build and deploy models. Pick the curriculum that matches your role.</p>
+        </div>
+        <div class="faq-item">
+          <h4>Do I need to know Python?</h4>
+          <p>Decision Makers: No. The labs use Colab with guided code—you can run and tweak without prior Python experience. Practitioners: Yes. Comfort with Python and pandas is expected.</p>
+        </div>
+        <div class="faq-item">
+          <h4>What tools do I need?</h4>
+          <p>Just a Google account. Everything runs in Colab (free tier). No local setup, Docker, or cloud accounts required.</p>
+        </div>
+        <div class="faq-item">
+          <h4>How long does it take?</h4>
+          <p>Decision Makers: ~60-90 min per module, roughly 15-20 hours total. Practitioners: ~30-45 min per module, roughly 15-20 hours. Both are self-paced.</p>
+        </div>
+        <div class="faq-item">
+          <h4>Is there support?</h4>
+          <p>This is a fully async, one-time-purchase product. No live office hours or community. You get comprehensive answer keys, rubrics, and troubleshooting docs for every exercise.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="final-cta">
+    <div class="container reveal">
+      <h2>Ready to start learning?</h2>
+      <p>Try a free module from either curriculum. No account required—just open the link and go.</p>
+      <div class="final-cta-actions">
+        <a href="https://www.notion.so/Free-Sample-ML-Foundations-for-Business-310d25c7612f81d89d97dc3f947d06c5?source=copy_link" class="btn btn-white">Decision Makers: Free Sample</a>
+        <a href="https://www.notion.so/Free-Sample-ML-Practitioners-Course-310d25c7612f81b78346fcfc95977be3?source=copy_link" class="btn btn-outline-light">Practitioners: Free Sample</a>
       </div>
     </div>
   </section>
@@ -986,9 +1510,26 @@
   <!-- Footer -->
   <footer>
     <div class="container">
-      <p>ML Foundations - Built around <a href="https://github.com/189investmentai/ml-foundations-interactive">StreamCart</a>, a fictional subscription e-commerce company.</p>
+      <p>ML Foundations. Built around <a href="https://github.com/189investmentai/ml-foundations-interactive">StreamCart</a>, a fictional subscription e-commerce company.</p>
     </div>
   </footer>
+
+  <script>
+    const nav = document.getElementById('nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 10);
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
 
 </body>
 </html>

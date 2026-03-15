@@ -42,11 +42,11 @@
 ## Part 2: Feature Engineering (20 points)
 
 ### 5 - Excellent (18-20 pts)
-- 3+ meaningful engineered features
+- 3+ meaningful engineered features (including at least one from events data)
 - Each feature has clear business logic
 - Complete leakage audit with reasoning
 - No features use future information
-- Features show creativity (interactions, trends)
+- Features show creativity (interactions, trends, event aggregations)
 
 ### 4 - Good (14-17 pts)
 - 3 features created

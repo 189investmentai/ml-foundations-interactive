@@ -78,12 +78,12 @@
             border-radius: 4px;
         }
         .pixel {
-            width: 32px;
-            height: 32px;
+            width: 22px;
+            height: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.65rem;
+            font-size: 0.5rem;
             font-family: 'SF Mono', ui-monospace, monospace;
             transition: all 0.15s;
         }
@@ -150,12 +150,12 @@
             margin: 0 auto;
         }
         .output-pixel {
-            width: 32px;
-            height: 32px;
+            width: 22px;
+            height: 22px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.6rem;
+            font-size: 0.45rem;
             font-family: 'SF Mono', ui-monospace, monospace;
             transition: all 0.15s;
         }
@@ -241,16 +241,19 @@
             color: var(--text-muted);
         }
         .draw-canvas {
-            border: 1px solid var(--border);
+            border: 2px solid var(--border);
             border-radius: 8px;
             cursor: crosshair;
             image-rendering: pixelated;
+            touch-action: none;
+            background: #000;
         }
         .draw-tools {
             display: flex;
             gap: 8px;
             margin-top: 12px;
             justify-content: center;
+            flex-wrap: wrap;
         }
         .tool-btn {
             padding: 6px 12px;
@@ -368,11 +371,82 @@
         }
         .speed-slider { width: 120px; }
 
+        .realworld-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+        .realworld-card {
+            background: var(--surface-hover);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+        }
+        .realworld-card h3 {
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .realworld-card h3 span { font-size: 1.2rem; }
+        .realworld-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        .realworld-demo {
+            border-radius: 8px;
+            overflow: hidden;
+            background: #1e1e2e;
+        }
+        .realworld-canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+        .feature-hierarchy {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 20px;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+        .hierarchy-stage {
+            text-align: center;
+        }
+        .hierarchy-stage .stage-visual {
+            width: 60px;
+            height: 60px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 6px;
+        }
+        .hierarchy-stage .stage-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+        .hierarchy-arrow {
+            color: var(--accent);
+            font-size: 1.5rem;
+        }
+
         @media (max-width: 900px) {
             .step-grid { grid-template-columns: 1fr; }
             .draw-container { grid-template-columns: 1fr; }
             .compare-grid { grid-template-columns: repeat(2, 1fr); }
             .spatial-demo { grid-template-columns: 1fr; }
+            .realworld-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -389,13 +463,13 @@
         </header>
 
         <div class="context-bar">
-            A convolution slides a small filter over an image, computing weighted sums at each position. Different filters detect different features -- edges, textures, shapes.
+            A convolution slides a small filter over an image, computing weighted sums at each position. Different filters detect different features: edges, textures, shapes.
         </div>
 
         <div class="cnn-tabs">
             <button class="cnn-tab active" onclick="showPanel(0)">Step by Step</button>
             <button class="cnn-tab" onclick="showPanel(1)">Draw & Detect</button>
-            <button class="cnn-tab" onclick="showPanel(2)">Compare Filters</button>
+            <button class="cnn-tab" onclick="showPanel(2)">Real World</button>
             <button class="cnn-tab" onclick="showPanel(3)">Why Spatial?</button>
         </div>
 
@@ -413,23 +487,41 @@
                 <div class="filter-display" id="filterDisplay"></div>
             </div>
 
-            <div class="step-grid">
+            <div style="display:flex;flex-wrap:wrap;gap:24px;align-items:start;justify-content:center">
                 <div class="image-area">
-                    <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:8px;text-align:center">Input Image (7x7)</div>
-                    <div class="pixel-grid" id="inputGrid" style="grid-template-columns:repeat(7,1fr)"></div>
+                    <div style="font-size:0.8rem;font-weight:600;color:var(--text-primary);margin-bottom:10px;text-align:center">Input (12x12)</div>
+                    <div style="display:flex;gap:16px;align-items:start">
+                        <div style="flex-shrink:0;text-align:center">
+                            <div style="font-size:0.65rem;color:var(--text-muted);margin-bottom:4px">Image</div>
+                            <canvas id="inputCanvas" width="264" height="264" style="border:1px solid var(--border);border-radius:6px"></canvas>
+                        </div>
+                        <div style="flex-shrink:0;text-align:center">
+                            <div style="font-size:0.65rem;color:var(--text-muted);margin-bottom:4px">Pixel values</div>
+                            <div class="pixel-grid" id="inputGrid"></div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="arrow-label">
-                    <div class="arrow">&rarr;</div>
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;align-self:center;gap:8px;min-width:60px">
+                    <div style="font-size:2rem;color:var(--accent)">&rarr;</div>
                     <div id="calculationBox" class="calculation-box">
                         <div class="calc-title">Calculation at this position:</div>
                         <div id="calcContent"></div>
                     </div>
                 </div>
 
-                <div class="output-area" style="text-align:center">
-                    <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:8px">Output (5x5)</div>
-                    <div class="output-grid" id="outputGrid" style="grid-template-columns:repeat(5,1fr)"></div>
+                <div class="output-area">
+                    <div style="font-size:0.8rem;font-weight:600;color:var(--text-primary);margin-bottom:10px;text-align:center">Output (10x10)</div>
+                    <div style="display:flex;gap:16px;align-items:start">
+                        <div style="flex-shrink:0;text-align:center">
+                            <div style="font-size:0.65rem;color:var(--text-muted);margin-bottom:4px">Filter response</div>
+                            <div class="output-grid" id="outputGrid"></div>
+                        </div>
+                        <div style="flex-shrink:0;text-align:center">
+                            <div style="font-size:0.65rem;color:var(--text-muted);margin-bottom:4px">Result image</div>
+                            <canvas id="outputCanvas" width="220" height="220" style="border:1px solid var(--border);border-radius:6px"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -452,65 +544,97 @@
 
         <div class="cnn-panel" id="panel1">
             <div class="cnn-panel-title">Draw your own image and see what filters detect</div>
-            <div class="cnn-panel-desc">Draw on the left canvas. Watch how different filters respond to edges you create.</div>
+            <div class="cnn-panel-desc">Draw on the canvas below. Watch how different edge filters respond in real-time.</div>
 
             <div class="draw-container">
                 <div class="draw-section">
                     <h3>Your Drawing</h3>
-                    <canvas id="drawCanvas" class="draw-canvas" width="224" height="224"></canvas>
+                    <canvas id="drawCanvas" class="draw-canvas" width="200" height="200"></canvas>
                     <div class="draw-tools">
-                        <button class="tool-btn active" onclick="setDrawTool('draw')">Draw</button>
-                        <button class="tool-btn" onclick="setDrawTool('erase')">Erase</button>
+                        <button class="tool-btn active" data-tool="draw">Draw</button>
+                        <button class="tool-btn" data-tool="erase">Erase</button>
                         <button class="tool-btn" onclick="clearDrawing()">Clear</button>
-                        <button class="tool-btn" onclick="loadPresetDrawing()">Load Sample</button>
+                        <button class="tool-btn" onclick="loadPreset('seven')">Load "7"</button>
+                        <button class="tool-btn" onclick="loadPreset('box')">Load Box</button>
                     </div>
                 </div>
                 <div class="draw-section">
-                    <h3>Vertical Edge Filter</h3>
-                    <canvas id="drawOutputV" class="draw-canvas" width="224" height="224"></canvas>
-                    <div style="font-size:0.75rem;color:var(--text-muted);margin-top:8px">Bright = strong vertical edge detected</div>
+                    <h3>Vertical Edge Response</h3>
+                    <canvas id="drawOutputV" class="draw-canvas" width="200" height="200" style="cursor:default;background:#111"></canvas>
+                    <div style="font-size:0.75rem;color:var(--text-muted);margin-top:8px">Bright = vertical edge detected</div>
                 </div>
                 <div class="draw-section">
-                    <h3>Horizontal Edge Filter</h3>
-                    <canvas id="drawOutputH" class="draw-canvas" width="224" height="224"></canvas>
-                    <div style="font-size:0.75rem;color:var(--text-muted);margin-top:8px">Bright = strong horizontal edge detected</div>
+                    <h3>Horizontal Edge Response</h3>
+                    <canvas id="drawOutputH" class="draw-canvas" width="200" height="200" style="cursor:default;background:#111"></canvas>
+                    <div style="font-size:0.75rem;color:var(--text-muted);margin-top:8px">Bright = horizontal edge detected</div>
                 </div>
+            </div>
+
+            <div class="insight-box" style="margin-top:24px">
+                <h4>Try This</h4>
+                <p>Draw a vertical line and notice it lights up the vertical filter output. Draw a horizontal line and it lights up the horizontal filter output. Draw a diagonal and both respond partially. This is exactly how CNNs decompose shapes into oriented edges.</p>
             </div>
         </div>
 
         <div class="cnn-panel" id="panel2">
-            <div class="cnn-panel-title">Same image, different filters, different features</div>
-            <div class="cnn-panel-desc">Each filter extracts different information from the same image. CNNs learn which filters are useful for the task.</div>
+            <div class="cnn-panel-title">Real-World CNN Applications</div>
+            <div class="cnn-panel-desc">CNNs power most modern computer vision. Here's how they work in practice.</div>
 
-            <div class="compare-grid">
-                <div class="compare-item">
-                    <h4>Original</h4>
-                    <canvas id="compareOriginal" class="compare-canvas" width="112" height="112"></canvas>
-                    <div class="compare-insight">The input image</div>
+            <div class="realworld-grid">
+                <div class="realworld-card">
+                    <h3><span>👤</span> Face Detection</h3>
+                    <div class="realworld-desc">
+                        CNNs detect faces by learning hierarchical features: edges in early layers, then eyes/nose/mouth shapes, then full face patterns.
+                    </div>
+                    <div class="realworld-demo">
+                        <canvas id="faceCanvas" class="realworld-canvas" width="400" height="300"></canvas>
+                    </div>
+                    <div style="margin-top:12px">
+                        <button class="filter-btn active" onclick="showFaceScene('group')">Group Photo</button>
+                        <button class="filter-btn" onclick="showFaceScene('single')">Portrait</button>
+                    </div>
                 </div>
-                <div class="compare-item">
-                    <h4>Vertical Edges</h4>
-                    <canvas id="compareVertical" class="compare-canvas" width="112" height="112"></canvas>
-                    <div class="compare-insight">Finds left-right transitions</div>
-                </div>
-                <div class="compare-item">
-                    <h4>Horizontal Edges</h4>
-                    <canvas id="compareHorizontal" class="compare-canvas" width="112" height="112"></canvas>
-                    <div class="compare-insight">Finds top-bottom transitions</div>
-                </div>
-                <div class="compare-item">
-                    <h4>All Edges (Sobel)</h4>
-                    <canvas id="compareSobel" class="compare-canvas" width="112" height="112"></canvas>
-                    <div class="compare-insight">Combines both directions</div>
+
+                <div class="realworld-card">
+                    <h3><span>🚗</span> Object Detection</h3>
+                    <div class="realworld-desc">
+                        Self-driving cars use CNNs to detect pedestrians, vehicles, signs. The network outputs bounding boxes and class labels.
+                    </div>
+                    <div class="realworld-demo">
+                        <canvas id="objectCanvas" class="realworld-canvas" width="400" height="300"></canvas>
+                    </div>
+                    <div style="margin-top:12px">
+                        <button class="filter-btn active" onclick="showObjectScene('street')">Street Scene</button>
+                        <button class="filter-btn" onclick="showObjectScene('parking')">Parking Lot</button>
+                    </div>
                 </div>
             </div>
 
-            <div style="margin-top:24px;text-align:center">
-                <span style="font-size:0.85rem;margin-right:12px;color:var(--text-secondary)">Try different images:</span>
-                <button class="filter-btn active" onclick="setCompareImage('digit')">Digit "7"</button>
-                <button class="filter-btn" onclick="setCompareImage('square')">Square</button>
-                <button class="filter-btn" onclick="setCompareImage('cross')">Cross</button>
-                <button class="filter-btn" onclick="setCompareImage('circle')">Circle</button>
+            <div class="feature-hierarchy">
+                <div class="hierarchy-stage">
+                    <div class="stage-visual">/</div>
+                    <div class="stage-label">Layer 1: Edges</div>
+                </div>
+                <div class="hierarchy-arrow">&rarr;</div>
+                <div class="hierarchy-stage">
+                    <div class="stage-visual">◐</div>
+                    <div class="stage-label">Layer 2: Textures</div>
+                </div>
+                <div class="hierarchy-arrow">&rarr;</div>
+                <div class="hierarchy-stage">
+                    <div class="stage-visual">👁</div>
+                    <div class="stage-label">Layer 3: Parts</div>
+                </div>
+                <div class="hierarchy-arrow">&rarr;</div>
+                <div class="hierarchy-stage">
+                    <div class="stage-visual">👤</div>
+                    <div class="stage-label">Layer 4: Objects</div>
+                </div>
+            </div>
+
+            <div class="insight-box">
+                <h4>The Key Insight: Hierarchical Features</h4>
+                <p>CNNs don't jump from pixels to "face". They build up: edges combine into curves, curves into shapes (eye, nose), shapes into parts (face region), parts into objects. Each layer builds on the previous one. This hierarchy emerges automatically from training, not from manual design.</p>
             </div>
         </div>
 
@@ -564,7 +688,7 @@
     let drawTool = 'draw';
     let isDrawing = false;
     let currentFilter = 'vertical';
-    let currentCompareImage = 'digit';
+    let lastDrawPoint = null;
 
     const filters = {
         vertical: [[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]],
@@ -574,15 +698,27 @@
         sobelY: [[-1, -2, -1], [0, 0, 0], [1, 2, 1]]
     };
 
+    // 12x12 side-view car (facing right)
+    // B=background, C=body, W=window, T=tire, R=road
+    const B = 240, C = 50, W = 150, T = 15, R = 180;
     const sampleImage = [
-        [20, 20, 20, 200, 200, 200, 200],
-        [20, 20, 20, 200, 200, 200, 200],
-        [20, 20, 20, 200, 200, 200, 200],
-        [20, 20, 20, 200, 200, 200, 200],
-        [20, 20, 20, 200, 200, 200, 200],
-        [20, 20, 20, 200, 200, 200, 200],
-        [20, 20, 20, 200, 200, 200, 200]
+        [B, B, B, B, B, B, B, B, B, B, B, B],
+        [B, B, B, B, B, B, B, B, B, B, B, B],
+        [B, B, B, B, B, C, C, C, C, B, B, B],
+        [B, B, B, B, C, W, W, C, W, C, B, B],
+        [B, B, C, C, C, C, C, C, C, C, C, B],
+        [B, B, C, C, C, C, C, C, C, C, C, B],
+        [B, B, C, C, C, C, C, C, C, C, C, B],
+        [B, B, C, C, C, C, C, C, C, C, C, B],
+        [B, B, C, T, T, C, C, C, T, T, C, B],
+        [B, B, B, T, T, B, B, B, T, T, B, B],
+        [R, R, R, R, R, R, R, R, R, R, R, R],
+        [R, R, R, R, R, R, R, R, R, R, R, R],
     ];
+    const IMG_SIZE = sampleImage.length;
+    const KERNEL_SIZE = 3;
+    const OUT_SIZE = IMG_SIZE - KERNEL_SIZE + 1;
+    const TOTAL_STEPS = OUT_SIZE * OUT_SIZE;
 
     function showPanel(index) {
         document.querySelectorAll('.cnn-panel').forEach((p, i) => {
@@ -593,27 +729,57 @@
         });
         currentPanel = index;
         if (index === 1) initDrawPanel();
-        if (index === 2) updateCompare();
+        if (index === 2) initRealWorldPanel();
         if (index === 3) initSpatialDemo();
     }
 
+    const CELL = 25;
+
     function initStepPanel() {
+        renderInputCanvas();
         renderInputGrid();
         renderOutputGrid();
         updateFilterDisplay();
         updateCalculation();
     }
 
+    function renderInputCanvas() {
+        const canvas = document.getElementById('inputCanvas');
+        const ctx = canvas.getContext('2d');
+        const cellSize = canvas.width / IMG_SIZE;
+        for (let y = 0; y < IMG_SIZE; y++) {
+            for (let x = 0; x < IMG_SIZE; x++) {
+                const v = sampleImage[y][x];
+                ctx.fillStyle = `rgb(${v},${v},${v})`;
+                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+            }
+        }
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        ctx.lineWidth = 0.5;
+        for (let i = 1; i < IMG_SIZE; i++) {
+            ctx.beginPath();
+            ctx.moveTo(i * cellSize, 0);
+            ctx.lineTo(i * cellSize, canvas.height);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(0, i * cellSize);
+            ctx.lineTo(canvas.width, i * cellSize);
+            ctx.stroke();
+        }
+    }
+
     function renderInputGrid() {
         const grid = document.getElementById('inputGrid');
         grid.innerHTML = '';
-        for (let y = 0; y < 7; y++) {
-            for (let x = 0; x < 7; x++) {
+        grid.style.gridTemplateColumns = `repeat(${IMG_SIZE}, 1fr)`;
+        for (let y = 0; y < IMG_SIZE; y++) {
+            for (let x = 0; x < IMG_SIZE; x++) {
                 const pixel = document.createElement('div');
                 pixel.className = 'pixel';
-                pixel.style.background = `rgb(${sampleImage[y][x]}, ${sampleImage[y][x]}, ${sampleImage[y][x]})`;
-                pixel.style.color = sampleImage[y][x] > 127 ? '#1e293b' : '#e2e8f0';
-                pixel.textContent = sampleImage[y][x];
+                const v = sampleImage[y][x];
+                pixel.style.background = `rgb(${v},${v},${v})`;
+                pixel.style.color = v > 127 ? '#1e293b' : '#e2e8f0';
+                pixel.textContent = v;
                 pixel.dataset.x = x;
                 pixel.dataset.y = y;
                 grid.appendChild(pixel);
@@ -625,9 +791,10 @@
     function renderOutputGrid() {
         const grid = document.getElementById('outputGrid');
         grid.innerHTML = '';
+        grid.style.gridTemplateColumns = `repeat(${OUT_SIZE}, 1fr)`;
         const output = computeFullOutput();
-        for (let y = 0; y < 5; y++) {
-            for (let x = 0; x < 5; x++) {
+        for (let y = 0; y < OUT_SIZE; y++) {
+            for (let x = 0; x < OUT_SIZE; x++) {
                 const pixel = document.createElement('div');
                 pixel.className = 'output-pixel';
                 const val = output[y][x];
@@ -642,15 +809,48 @@
                 grid.appendChild(pixel);
             }
         }
+        renderOutputCanvas(output);
         highlightCurrentOutput();
+    }
+
+    function renderOutputCanvas(output) {
+        const canvas = document.getElementById('outputCanvas');
+        const ctx = canvas.getContext('2d');
+        const cellSize = canvas.width / OUT_SIZE;
+
+        let maxAbs = 0;
+        for (let y = 0; y < OUT_SIZE; y++)
+            for (let x = 0; x < OUT_SIZE; x++)
+                maxAbs = Math.max(maxAbs, Math.abs(output[y][x]));
+        if (maxAbs === 0) maxAbs = 1;
+
+        for (let y = 0; y < OUT_SIZE; y++) {
+            for (let x = 0; x < OUT_SIZE; x++) {
+                const brightness = Math.round((Math.abs(output[y][x]) / maxAbs) * 255);
+                ctx.fillStyle = `rgb(${brightness},${brightness},${brightness})`;
+                ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+            }
+        }
+        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+        ctx.lineWidth = 0.5;
+        for (let i = 1; i < OUT_SIZE; i++) {
+            ctx.beginPath();
+            ctx.moveTo(i * cellSize, 0);
+            ctx.lineTo(i * cellSize, canvas.height);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(0, i * cellSize);
+            ctx.lineTo(canvas.width, i * cellSize);
+            ctx.stroke();
+        }
     }
 
     function computeFullOutput() {
         const kernel = filters[currentFilter];
         const output = [];
-        for (let y = 0; y < 5; y++) {
+        for (let y = 0; y < OUT_SIZE; y++) {
             output[y] = [];
-            for (let x = 0; x < 5; x++) {
+            for (let x = 0; x < OUT_SIZE; x++) {
                 output[y][x] = computeConvolution(x, y, kernel);
             }
         }
@@ -659,8 +859,8 @@
 
     function computeConvolution(px, py, kernel) {
         let sum = 0;
-        for (let ky = 0; ky < 3; ky++) {
-            for (let kx = 0; kx < 3; kx++) {
+        for (let ky = 0; ky < KERNEL_SIZE; ky++) {
+            for (let kx = 0; kx < KERNEL_SIZE; kx++) {
                 sum += sampleImage[py + ky][px + kx] * kernel[ky][kx];
             }
         }
@@ -668,32 +868,65 @@
     }
 
     function highlightCurrentRegion() {
-        const py = Math.floor(stepPosition / 5);
-        const px = stepPosition % 5;
+        const py = Math.floor(stepPosition / OUT_SIZE);
+        const px = stepPosition % OUT_SIZE;
+
         document.querySelectorAll('#inputGrid .pixel').forEach(p => {
             const x = parseInt(p.dataset.x);
             const y = parseInt(p.dataset.y);
-            const inRegion = x >= px && x < px + 3 && y >= py && y < py + 3;
+            const inRegion = x >= px && x < px + KERNEL_SIZE && y >= py && y < py + KERNEL_SIZE;
             const isCenter = x === px + 1 && y === py + 1;
             p.classList.toggle('highlight', inRegion);
             p.classList.toggle('center', isCenter);
         });
+
+        renderInputCanvas();
+        const canvas = document.getElementById('inputCanvas');
+        const ctx = canvas.getContext('2d');
+        const cellSize = canvas.width / IMG_SIZE;
+
+        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        for (let ky = 0; ky < KERNEL_SIZE; ky++) {
+            for (let kx = 0; kx < KERNEL_SIZE; kx++) {
+                const v = sampleImage[py + ky][px + kx];
+                ctx.fillStyle = `rgb(${v},${v},${v})`;
+                ctx.fillRect((px + kx) * cellSize, (py + ky) * cellSize, cellSize, cellSize);
+            }
+        }
+        ctx.strokeStyle = '#7c3aed';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(px * cellSize + 1.5, py * cellSize + 1.5, KERNEL_SIZE * cellSize - 3, KERNEL_SIZE * cellSize - 3);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.strokeRect((px + 1) * cellSize + 1, (py + 1) * cellSize + 1, cellSize - 2, cellSize - 2);
+
         document.getElementById('positionText').textContent = `(${px}, ${py})`;
     }
 
     function highlightCurrentOutput() {
-        const py = Math.floor(stepPosition / 5);
-        const px = stepPosition % 5;
+        const py = Math.floor(stepPosition / OUT_SIZE);
+        const px = stepPosition % OUT_SIZE;
+
         document.querySelectorAll('#outputGrid .output-pixel').forEach(p => {
             const x = parseInt(p.dataset.x);
             const y = parseInt(p.dataset.y);
             p.classList.toggle('current', x === px && y === py);
         });
+
+        const canvas = document.getElementById('outputCanvas');
+        const ctx = canvas.getContext('2d');
+        const cellSize = canvas.width / OUT_SIZE;
+        const output = computeFullOutput();
+        renderOutputCanvas(output);
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(px * cellSize + 1.5, py * cellSize + 1.5, cellSize - 3, cellSize - 3);
     }
 
     function updateCalculation() {
-        const py = Math.floor(stepPosition / 5);
-        const px = stepPosition % 5;
+        const py = Math.floor(stepPosition / OUT_SIZE);
+        const px = stepPosition % OUT_SIZE;
         const kernel = filters[currentFilter];
         let html = '';
         let total = 0;
@@ -746,14 +979,14 @@
     }
 
     function nextStep() {
-        stepPosition = (stepPosition + 1) % 25;
+        stepPosition = (stepPosition + 1) % TOTAL_STEPS;
         highlightCurrentRegion();
         highlightCurrentOutput();
         updateCalculation();
     }
 
     function prevStep() {
-        stepPosition = (stepPosition - 1 + 25) % 25;
+        stepPosition = (stepPosition - 1 + TOTAL_STEPS) % TOTAL_STEPS;
         highlightCurrentRegion();
         highlightCurrentOutput();
         updateCalculation();
@@ -779,91 +1012,196 @@
         document.getElementById('speedLabel').textContent = e.target.value + 'ms';
     });
 
+    // ============ DRAW PANEL ============
     let drawPanelInited = false;
+    
     function initDrawPanel() {
         if (drawPanelInited) return;
         drawPanelInited = true;
+        
         const canvas = document.getElementById('drawCanvas');
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, 224, 224);
-        canvas.addEventListener('mousedown', startDraw);
-        canvas.addEventListener('mousemove', drawOnCanvas);
-        canvas.addEventListener('mouseup', endDraw);
-        canvas.addEventListener('mouseleave', endDraw);
-    }
-
-    function startDraw(e) { isDrawing = true; drawOnCanvas(e); }
-
-    function drawOnCanvas(e) {
-        if (!isDrawing) return;
-        const canvas = document.getElementById('drawCanvas');
-        const ctx = canvas.getContext('2d');
-        const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        ctx.fillStyle = drawTool === 'draw' ? 'white' : 'black';
-        ctx.beginPath();
-        ctx.arc(x, y, 12, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Mouse events
+        canvas.addEventListener('mousedown', handleDrawStart);
+        canvas.addEventListener('mousemove', handleDrawMove);
+        canvas.addEventListener('mouseup', handleDrawEnd);
+        canvas.addEventListener('mouseleave', handleDrawEnd);
+        
+        // Touch events
+        canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+        canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+        canvas.addEventListener('touchend', handleDrawEnd);
+        
+        // Tool buttons
+        document.querySelectorAll('#panel1 .tool-btn[data-tool]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                drawTool = btn.dataset.tool;
+                document.querySelectorAll('#panel1 .tool-btn[data-tool]').forEach(b => {
+                    b.classList.toggle('active', b === btn);
+                });
+            });
+        });
+        
         updateDrawOutputs();
     }
-
-    function endDraw() { isDrawing = false; }
-
-    function setDrawTool(tool) {
-        drawTool = tool;
-        document.querySelectorAll('.draw-tools .tool-btn').forEach(b => {
-            b.classList.toggle('active', b.textContent.toLowerCase() === tool);
-        });
+    
+    function getCanvasCoords(canvas, e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        return {
+            x: (e.clientX - rect.left) * scaleX,
+            y: (e.clientY - rect.top) * scaleY
+        };
     }
-
+    
+    function handleDrawStart(e) {
+        isDrawing = true;
+        const canvas = document.getElementById('drawCanvas');
+        const coords = getCanvasCoords(canvas, e);
+        lastDrawPoint = coords;
+        drawAt(coords.x, coords.y);
+    }
+    
+    function handleDrawMove(e) {
+        if (!isDrawing) return;
+        const canvas = document.getElementById('drawCanvas');
+        const coords = getCanvasCoords(canvas, e);
+        
+        // Draw line from last point to current for smooth strokes
+        if (lastDrawPoint) {
+            drawLine(lastDrawPoint.x, lastDrawPoint.y, coords.x, coords.y);
+        }
+        lastDrawPoint = coords;
+    }
+    
+    function handleDrawEnd() {
+        isDrawing = false;
+        lastDrawPoint = null;
+        updateDrawOutputs();
+    }
+    
+    function handleTouchStart(e) {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const canvas = document.getElementById('drawCanvas');
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const coords = {
+            x: (touch.clientX - rect.left) * scaleX,
+            y: (touch.clientY - rect.top) * scaleY
+        };
+        isDrawing = true;
+        lastDrawPoint = coords;
+        drawAt(coords.x, coords.y);
+    }
+    
+    function handleTouchMove(e) {
+        e.preventDefault();
+        if (!isDrawing) return;
+        const touch = e.touches[0];
+        const canvas = document.getElementById('drawCanvas');
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const coords = {
+            x: (touch.clientX - rect.left) * scaleX,
+            y: (touch.clientY - rect.top) * scaleY
+        };
+        if (lastDrawPoint) {
+            drawLine(lastDrawPoint.x, lastDrawPoint.y, coords.x, coords.y);
+        }
+        lastDrawPoint = coords;
+    }
+    
+    function drawAt(x, y) {
+        const canvas = document.getElementById('drawCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = drawTool === 'draw' ? '#fff' : '#000';
+        ctx.beginPath();
+        ctx.arc(x, y, 10, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
+    function drawLine(x1, y1, x2, y2) {
+        const canvas = document.getElementById('drawCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.strokeStyle = drawTool === 'draw' ? '#fff' : '#000';
+        ctx.lineWidth = 20;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        
+        // Update outputs during drawing for real-time feedback
+        requestAnimationFrame(updateDrawOutputs);
+    }
+    
     function clearDrawing() {
         const canvas = document.getElementById('drawCanvas');
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, 224, 224);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         updateDrawOutputs();
     }
-
-    function loadPresetDrawing() {
+    
+    function loadPreset(type) {
         const canvas = document.getElementById('drawCanvas');
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, 224, 224);
-        ctx.strokeStyle = 'white';
-        ctx.lineWidth = 20;
+        ctx.fillStyle = '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 16;
         ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(50, 50);
-        ctx.lineTo(174, 50);
-        ctx.lineTo(100, 174);
-        ctx.stroke();
+        ctx.lineJoin = 'round';
+        
+        if (type === 'seven') {
+            ctx.beginPath();
+            ctx.moveTo(40, 40);
+            ctx.lineTo(160, 40);
+            ctx.lineTo(90, 160);
+            ctx.stroke();
+        } else if (type === 'box') {
+            ctx.strokeRect(50, 50, 100, 100);
+        }
+        
         updateDrawOutputs();
     }
-
+    
     function updateDrawOutputs() {
         const inputCanvas = document.getElementById('drawCanvas');
         const inputCtx = inputCanvas.getContext('2d');
-        const imageData = inputCtx.getImageData(0, 0, 224, 224);
+        const imageData = inputCtx.getImageData(0, 0, inputCanvas.width, inputCanvas.height);
+        
+        const w = inputCanvas.width;
+        const h = inputCanvas.height;
         const gray = [];
-        for (let y = 0; y < 224; y++) {
+        for (let y = 0; y < h; y++) {
             gray[y] = [];
-            for (let x = 0; x < 224; x++) {
-                const i = (y * 224 + x) * 4;
+            for (let x = 0; x < w; x++) {
+                const i = (y * w + x) * 4;
                 gray[y][x] = imageData.data[i];
             }
         }
-        applyFilterToCanvas(gray, filters.vertical, 'drawOutputV');
-        applyFilterToCanvas(gray, filters.horizontal, 'drawOutputH');
+        
+        applyFilterToCanvas(gray, filters.vertical, 'drawOutputV', w, h);
+        applyFilterToCanvas(gray, filters.horizontal, 'drawOutputH', w, h);
     }
-
-    function applyFilterToCanvas(image, kernel, canvasId) {
+    
+    function applyFilterToCanvas(image, kernel, canvasId, w, h) {
         const canvas = document.getElementById(canvasId);
         const ctx = canvas.getContext('2d');
-        const output = ctx.createImageData(224, 224);
-        for (let y = 1; y < 223; y++) {
-            for (let x = 1; x < 223; x++) {
+        const output = ctx.createImageData(w, h);
+        
+        for (let y = 1; y < h - 1; y++) {
+            for (let x = 1; x < w - 1; x++) {
                 let sum = 0;
                 for (let ky = -1; ky <= 1; ky++) {
                     for (let kx = -1; kx <= 1; kx++) {
@@ -871,7 +1209,7 @@
                     }
                 }
                 const val = Math.min(255, Math.abs(sum));
-                const i = (y * 224 + x) * 4;
+                const i = (y * w + x) * 4;
                 output.data[i] = val;
                 output.data[i + 1] = val;
                 output.data[i + 2] = val;
@@ -881,121 +1219,304 @@
         ctx.putImageData(output, 0, 0);
     }
 
-    const compareImages = {
-        digit: generateDigit7(),
-        square: generateSquare(),
-        cross: generateCross(),
-        circle: generateCircle()
-    };
+    // ============ REAL WORLD PANEL ============
+    let realWorldInited = false;
 
-    function generateDigit7() {
-        const img = new Array(16).fill(0).map(() => new Array(16).fill(20));
-        for (let x = 3; x < 13; x++) { img[3][x] = 220; img[4][x] = 220; }
-        for (let i = 0; i < 10; i++) {
-            const x = 11 - Math.floor(i * 0.5);
-            const y = 5 + i;
-            if (y < 16 && x >= 0) { img[y][x] = 220; img[y][x-1] = 220; }
-        }
-        return img;
+    function initRealWorldPanel() {
+        if (realWorldInited) return;
+        realWorldInited = true;
+        showFaceScene('group');
+        showObjectScene('street');
     }
 
-    function generateSquare() {
-        const img = new Array(16).fill(0).map(() => new Array(16).fill(20));
-        for (let x = 3; x < 13; x++) { img[3][x] = 220; img[12][x] = 220; }
-        for (let y = 3; y < 13; y++) { img[y][3] = 220; img[y][12] = 220; }
-        return img;
+    function drawDetectionBox(ctx, x, y, w, h, color, label) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.5;
+        ctx.strokeRect(x, y, w, h);
+
+        ctx.font = 'bold 12px system-ui, sans-serif';
+        const textW = ctx.measureText(label).width + 10;
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y - 18, textW, 18);
+        ctx.fillStyle = '#000';
+        ctx.fillText(label, x + 5, y - 5);
     }
 
-    function generateCross() {
-        const img = new Array(16).fill(0).map(() => new Array(16).fill(20));
-        for (let i = 2; i < 14; i++) { img[8][i] = 220; img[i][8] = 220; }
-        return img;
+    function drawFace(ctx, cx, cy, scale, skinTone, hairColor) {
+        const s = scale;
+        // Hair back
+        ctx.fillStyle = hairColor;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy - 8 * s, 22 * s, 14 * s, 0, Math.PI, 2 * Math.PI);
+        ctx.fill();
+
+        // Face
+        ctx.fillStyle = skinTone;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy + 4 * s, 18 * s, 22 * s, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Eyes
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.ellipse(cx - 7 * s, cy - 2 * s, 5 * s, 3.5 * s, 0, 0, Math.PI * 2);
+        ctx.ellipse(cx + 7 * s, cy - 2 * s, 5 * s, 3.5 * s, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#2c1810';
+        ctx.beginPath();
+        ctx.arc(cx - 7 * s, cy - 2 * s, 2.5 * s, 0, Math.PI * 2);
+        ctx.arc(cx + 7 * s, cy - 2 * s, 2.5 * s, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Nose
+        ctx.strokeStyle = darken(skinTone, 30);
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy + 2 * s);
+        ctx.quadraticCurveTo(cx - 3 * s, cy + 8 * s, cx, cy + 9 * s);
+        ctx.stroke();
+
+        // Mouth
+        ctx.strokeStyle = darken(skinTone, 50);
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(cx, cy + 14 * s, 6 * s, 0.15 * Math.PI, 0.85 * Math.PI);
+        ctx.stroke();
+
+        // Hair top
+        ctx.fillStyle = hairColor;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy - 16 * s, 20 * s, 10 * s, 0, 0, Math.PI * 2);
+        ctx.fill();
     }
 
-    function generateCircle() {
-        const img = new Array(16).fill(0).map(() => new Array(16).fill(20));
-        const cx = 8, cy = 8, r = 5;
-        for (let y = 0; y < 16; y++) {
-            for (let x = 0; x < 16; x++) {
-                const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
-                if (Math.abs(dist - r) < 1.2) img[y][x] = 220;
-            }
-        }
-        return img;
+    function darken(hex, amount) {
+        const r = Math.max(0, parseInt(hex.slice(1, 3), 16) - amount);
+        const g = Math.max(0, parseInt(hex.slice(3, 5), 16) - amount);
+        const b = Math.max(0, parseInt(hex.slice(5, 7), 16) - amount);
+        return `rgb(${r},${g},${b})`;
     }
 
-    function setCompareImage(name) {
-        currentCompareImage = name;
-        document.querySelectorAll('#panel2 .filter-btn').forEach(b => {
-            b.classList.toggle('active', b.textContent.toLowerCase().includes(name));
+    function showFaceScene(scene) {
+        document.querySelectorAll('#panel2 .realworld-card:first-child .filter-btn').forEach(b => {
+            b.classList.toggle('active', b.textContent.toLowerCase().includes(scene));
         });
-        updateCompare();
-    }
 
-    function updateCompare() {
-        const img = compareImages[currentCompareImage];
-        drawCompareImage('compareOriginal', img);
-        drawCompareFiltered('compareVertical', img, filters.vertical);
-        drawCompareFiltered('compareHorizontal', img, filters.horizontal);
-        drawCompareSobel('compareSobel', img);
-    }
-
-    function drawCompareImage(canvasId, img) {
-        const canvas = document.getElementById(canvasId);
+        const canvas = document.getElementById('faceCanvas');
         const ctx = canvas.getContext('2d');
-        const scale = 7;
-        for (let y = 0; y < 16; y++) {
-            for (let x = 0; x < 16; x++) {
-                const val = img[y][x];
-                ctx.fillStyle = `rgb(${val}, ${val}, ${val})`;
-                ctx.fillRect(x * scale, y * scale, scale, scale);
-            }
+        const W = canvas.width, H = canvas.height;
+
+        // Background: indoor room
+        const bg = ctx.createLinearGradient(0, 0, 0, H);
+        bg.addColorStop(0, '#3d3250');
+        bg.addColorStop(1, '#2a2040');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+
+        // Wall texture
+        ctx.fillStyle = 'rgba(255,255,255,0.03)';
+        for (let i = 0; i < 20; i++) {
+            ctx.fillRect(Math.random() * W, Math.random() * H, Math.random() * 60 + 20, 1);
+        }
+
+        if (scene === 'group') {
+            const faces = [
+                { cx: 80,  cy: 130, s: 1.6, skin: '#e8c4a0', hair: '#3a2a1a' },
+                { cx: 200, cy: 120, s: 1.8, skin: '#c68642', hair: '#1a1a1a' },
+                { cx: 320, cy: 135, s: 1.5, skin: '#f5d0a9', hair: '#8b4513' },
+            ];
+
+            // Bodies
+            faces.forEach(f => {
+                ctx.fillStyle = ['#4a6fa5', '#c0392b', '#27ae60'][faces.indexOf(f)];
+                ctx.fillRect(f.cx - 25 * f.s, f.cy + 22 * f.s, 50 * f.s, 60 * f.s);
+            });
+
+            faces.forEach(f => drawFace(ctx, f.cx, f.cy, f.s, f.skin, f.hair));
+
+            drawDetectionBox(ctx, 48, 60, 65, 130, '#00ff88', 'Face 97%');
+            drawDetectionBox(ctx, 163, 48, 75, 140, '#00ff88', 'Face 99%');
+            drawDetectionBox(ctx, 288, 68, 62, 125, '#00ff88', 'Face 94%');
+        } else {
+            // Single portrait, larger
+            ctx.fillStyle = '#4a6fa5';
+            ctx.fillRect(140, 195, 120, 105);
+
+            drawFace(ctx, 200, 140, 3.0, '#e8c4a0', '#3a2a1a');
+
+            drawDetectionBox(ctx, 130, 55, 140, 175, '#00ff88', 'Face 99%');
+
+            // Landmarks
+            const landmarks = [
+                [175, 130], [225, 130],  // eyes
+                [200, 155],              // nose
+                [190, 175], [210, 175],  // mouth corners
+            ];
+            ctx.fillStyle = '#f1c40f';
+            landmarks.forEach(([lx, ly]) => {
+                ctx.beginPath();
+                ctx.arc(lx, ly, 3, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            ctx.font = '11px system-ui, sans-serif';
+            ctx.fillStyle = '#f1c40f';
+            ctx.fillText('Landmarks', 130, 50);
         }
     }
 
-    function drawCompareFiltered(canvasId, img, kernel) {
-        const canvas = document.getElementById(canvasId);
+    function drawCar(ctx, x, y, w, h, color) {
+        // Body
+        ctx.fillStyle = color;
+        const bodyH = h * 0.5;
+        const roofH = h * 0.4;
+        ctx.fillRect(x, y + roofH, w, bodyH);
+
+        // Roof
+        ctx.fillRect(x + w * 0.15, y, w * 0.7, roofH + 4);
+
+        // Windows
+        ctx.fillStyle = '#87ceeb';
+        ctx.fillRect(x + w * 0.18, y + 4, w * 0.28, roofH - 6);
+        ctx.fillRect(x + w * 0.52, y + 4, w * 0.28, roofH - 6);
+
+        // Wheels
+        ctx.fillStyle = '#1a1a2a';
+        ctx.beginPath();
+        ctx.arc(x + w * 0.22, y + h - 2, h * 0.15, 0, Math.PI * 2);
+        ctx.arc(x + w * 0.78, y + h - 2, h * 0.15, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#555';
+        ctx.beginPath();
+        ctx.arc(x + w * 0.22, y + h - 2, h * 0.07, 0, Math.PI * 2);
+        ctx.arc(x + w * 0.78, y + h - 2, h * 0.07, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Headlights
+        ctx.fillStyle = '#ffe066';
+        ctx.fillRect(x + w - 4, y + roofH + 6, 4, 8);
+        ctx.fillRect(x, y + roofH + 6, 4, 8);
+    }
+
+    function drawPerson(ctx, x, y, h) {
+        const headR = h * 0.1;
+        // Legs
+        ctx.fillStyle = '#2c3e50';
+        ctx.fillRect(x - headR * 0.8, y + h * 0.55, headR * 0.7, h * 0.45);
+        ctx.fillRect(x + headR * 0.1, y + h * 0.55, headR * 0.7, h * 0.45);
+        // Body
+        ctx.fillStyle = '#e74c3c';
+        ctx.fillRect(x - headR * 1.2, y + headR * 2.2, headR * 2.4, h * 0.35);
+        // Head
+        ctx.fillStyle = '#e8c4a0';
+        ctx.beginPath();
+        ctx.arc(x, y + headR, headR, 0, Math.PI * 2);
+        ctx.fill();
+        // Hair
+        ctx.fillStyle = '#3a2a1a';
+        ctx.beginPath();
+        ctx.arc(x, y + headR * 0.6, headR * 0.9, Math.PI, 2 * Math.PI);
+        ctx.fill();
+    }
+
+    function showObjectScene(scene) {
+        document.querySelectorAll('#panel2 .realworld-card:last-child .filter-btn').forEach(b => {
+            b.classList.toggle('active', b.textContent.toLowerCase().includes(scene));
+        });
+
+        const canvas = document.getElementById('objectCanvas');
         const ctx = canvas.getContext('2d');
-        const scale = 7;
-        for (let y = 0; y < 16; y++) {
-            for (let x = 0; x < 16; x++) {
-                let val = 0;
-                if (y > 0 && y < 15 && x > 0 && x < 15) {
-                    for (let ky = -1; ky <= 1; ky++) {
-                        for (let kx = -1; kx <= 1; kx++) {
-                            val += img[y + ky][x + kx] * kernel[ky + 1][kx + 1];
-                        }
-                    }
-                }
-                val = Math.min(255, Math.abs(val));
-                ctx.fillStyle = `rgb(${val}, ${val}, ${val})`;
-                ctx.fillRect(x * scale, y * scale, scale, scale);
+        const W = canvas.width, H = canvas.height;
+
+        // Sky
+        const sky = ctx.createLinearGradient(0, 0, 0, H * 0.5);
+        sky.addColorStop(0, '#1a1a3e');
+        sky.addColorStop(1, '#3a3a6e');
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, W, H * 0.5);
+
+        // Buildings
+        ctx.fillStyle = '#252540';
+        ctx.fillRect(10, 40, 60, 110);
+        ctx.fillRect(80, 60, 50, 90);
+        ctx.fillRect(300, 30, 70, 120);
+        ctx.fillStyle = '#ffe06622';
+        for (let bx of [20, 40, 90, 110, 315, 340, 355]) {
+            for (let by of [50, 70, 90, 110]) {
+                ctx.fillRect(bx, by, 8, 8);
             }
+        }
+
+        // Road
+        ctx.fillStyle = '#2a2a3a';
+        ctx.fillRect(0, H * 0.5, W, H * 0.5);
+
+        // Sidewalk
+        ctx.fillStyle = '#3a3a4a';
+        ctx.fillRect(0, H * 0.48, W, H * 0.06);
+
+        // Road markings
+        ctx.strokeStyle = '#ffffff55';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([25, 20]);
+        ctx.beginPath();
+        ctx.moveTo(0, H * 0.75);
+        ctx.lineTo(W, H * 0.75);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        if (scene === 'street') {
+            drawCar(ctx, 20, 185, 110, 65, '#3498db');
+            drawCar(ctx, 250, 175, 120, 70, '#e74c3c');
+            drawPerson(ctx, 175, 105, 70);
+            drawPerson(ctx, 195, 110, 60);
+
+            // Stop sign
+            ctx.fillStyle = '#7f8c8d';
+            ctx.fillRect(370, 80, 4, 70);
+            ctx.fillStyle = '#e74c3c';
+            ctx.beginPath();
+            const sx = 372, sy = 55, sr = 16;
+            for (let i = 0; i < 8; i++) {
+                const angle = (Math.PI / 8) + (i * Math.PI / 4);
+                const px = sx + sr * Math.cos(angle);
+                const py = sy + sr * Math.sin(angle);
+                i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 8px sans-serif';
+            ctx.fillText('STOP', 360, 58);
+
+            drawDetectionBox(ctx, 12, 170, 125, 85, '#3498db', 'Car 95%');
+            drawDetectionBox(ctx, 242, 158, 135, 92, '#3498db', 'Car 92%');
+            drawDetectionBox(ctx, 158, 100, 50, 80, '#00ff88', 'Person 89%');
+            drawDetectionBox(ctx, 350, 35, 45, 120, '#f1c40f', 'Sign 97%');
+        } else {
+            drawCar(ctx, 10, 180, 90, 55, '#2ecc71');
+            drawCar(ctx, 115, 175, 95, 60, '#9b59b6');
+            drawCar(ctx, 225, 178, 90, 58, '#1abc9c');
+            drawPerson(ctx, 350, 110, 65);
+
+            // Parking lines
+            ctx.strokeStyle = '#ffffff44';
+            ctx.lineWidth = 2;
+            for (let px = 5; px < 340; px += 105) {
+                ctx.beginPath();
+                ctx.moveTo(px, 250);
+                ctx.lineTo(px, 290);
+                ctx.stroke();
+            }
+
+            drawDetectionBox(ctx, 5, 165, 100, 75, '#3498db', 'Car 94%');
+            drawDetectionBox(ctx, 108, 158, 108, 82, '#3498db', 'Car 91%');
+            drawDetectionBox(ctx, 218, 162, 102, 78, '#3498db', 'Car 96%');
+            drawDetectionBox(ctx, 332, 105, 40, 75, '#00ff88', 'Person 87%');
         }
     }
 
-    function drawCompareSobel(canvasId, img) {
-        const canvas = document.getElementById(canvasId);
-        const ctx = canvas.getContext('2d');
-        const scale = 7;
-        for (let y = 0; y < 16; y++) {
-            for (let x = 0; x < 16; x++) {
-                let gx = 0, gy = 0;
-                if (y > 0 && y < 15 && x > 0 && x < 15) {
-                    for (let ky = -1; ky <= 1; ky++) {
-                        for (let kx = -1; kx <= 1; kx++) {
-                            gx += img[y + ky][x + kx] * filters.sobelX[ky + 1][kx + 1];
-                            gy += img[y + ky][x + kx] * filters.sobelY[ky + 1][kx + 1];
-                        }
-                    }
-                }
-                const val = Math.min(255, Math.sqrt(gx * gx + gy * gy));
-                ctx.fillStyle = `rgb(${val}, ${val}, ${val})`;
-                ctx.fillRect(x * scale, y * scale, scale, scale);
-            }
-        }
-    }
-
+    // ============ SPATIAL DEMO ============
     function initSpatialDemo() {
         const img = generateDigit7Large();
         drawSpatialCanvas('spatialOriginal', img);
@@ -1064,7 +1585,6 @@
         }
         initStepPanel();
         if (drawPanelInited) clearDrawing();
-        setCompareImage('digit');
     }
 
     initStepPanel();
@@ -1086,16 +1606,16 @@
                 setup: {}
             },
             {
-                title: "Different filters, different features",
-                context: "Switch to <strong>Compare Filters</strong> tab. See how vertical, horizontal, and Sobel filters extract different information from the same image.",
-                question: "A CNN learns these filters automatically. What determines which filters it learns?",
+                title: "Real-world CNN applications",
+                context: "Switch to the <strong>Real World</strong> tab. Observe how CNNs are used for face detection and object detection.",
+                question: "Why do CNNs detect faces by learning hierarchical features (edges, then parts, then faces)?",
                 options: [
-                    { id: 'task', label: 'The task -- backpropagation finds filters useful for the prediction goal' },
-                    { id: 'random', label: 'They stay random after training' },
-                    { id: 'manual', label: 'Engineers design them by hand' }
+                    { id: 'hierarchy', label: 'Complex objects are easier to recognize when broken into simpler components' },
+                    { id: 'speed', label: 'It makes the network faster' },
+                    { id: 'manual', label: 'Engineers programmed each feature by hand' }
                 ],
-                correctId: 'task',
-                reveal: "Unlike traditional computer vision where engineers design filters, CNNs learn them via backpropagation. Early layers learn edges and textures, deeper layers learn complex patterns (eyes, wheels, textures). The task objective drives what gets learned.",
+                correctId: 'hierarchy',
+                reveal: "A face is complex, but an edge is simple. By stacking layers, CNNs automatically learn to combine simple patterns (edges) into medium patterns (eye shapes) into complex patterns (faces). This hierarchy emerges from training data, not manual design.",
                 setup: {}
             },
             {
@@ -1116,7 +1636,7 @@
             {
                 prompt: "A 3x3 convolution filter on a 32x32 image produces a 30x30 output (no padding). Why does the output shrink?",
                 options: [
-                    { id: 'a', label: "The filter can't center on edge pixels -- it needs neighbors on all sides" },
+                    { id: 'a', label: "The filter can't center on edge pixels - it needs neighbors on all sides" },
                     { id: 'b', label: 'Information is lost' },
                     { id: 'c', label: 'The filter compresses the image' }
                 ],
@@ -1125,15 +1645,15 @@
             }
         ],
         onStepEnter: function(idx, step) {
-                if (idx === 0) {
-                    showPanel(0);
-                    setFilter('vertical');
-                } else if (idx === 1) {
-                    showPanel(2);
-                } else if (idx === 2) {
-                    showPanel(3);
-                }
+            if (idx === 0) {
+                showPanel(0);
+                setFilter('vertical');
+            } else if (idx === 1) {
+                showPanel(2);
+            } else if (idx === 2) {
+                showPanel(3);
             }
+        }
     });
     </script>
 </body>

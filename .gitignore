@@ -11,6 +11,9 @@ __pycache__/
 *.pyc
 .ipynb_checkpoints/
 
+# Notion build artifacts
+.notion-*
+
 # Environment
 .env
 .venv/

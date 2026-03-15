@@ -18,11 +18,11 @@ This capstone ties together everything you've learned:
 |--------|---------------------|
 | 01: Problem Framing | Define the ML task, target, and success metric |
 | 02: Logistic Regression | Build an interpretable baseline |
-| 03: Decision Trees | Explore feature interactions |
-| 04: Boosting | Train a production-grade model |
-| 05: Feature Engineering | Create predictive signals from raw data |
+| 03: Decision Trees | Understand feature interactions via tree-based models |
+| 04: Boosting | Train a production-grade model (LightGBM) |
+| 05: Feature Engineering | Create predictive signals from raw + events data |
 | 06: Evaluation | Choose the right threshold for 500 calls |
-| 07: Clustering | Segment customers for campaign targeting |
+| 07: Clustering | (Bonus) Segment customers for campaign targeting |
 | 08-10: (Bonus) | Add similarity search or explain decisions |
 
 ---
@@ -32,7 +32,7 @@ This capstone ties together everything you've learned:
 ### Required (Pass/Fail)
 
 1. **Framing Document** - Complete the 7-line ML problem framing template
-2. **Feature Engineering** - Create at least 3 meaningful derived features
+2. **Feature Engineering** - Create at least 3 meaningful derived features (use events data too)
 3. **Model Training** - Train at least 2 models (baseline + advanced)
 4. **Evaluation** - Report Precision@500, Lift, and business impact
 5. **Recommendation** - Write a 200-word PM update recommending action
@@ -60,7 +60,7 @@ This add-on is graded separately (+5 to +10 bonus points) and is recommended if 
 
 - **Runtime:** Must run top-to-bottom in <15 minutes on free Colab
 - **Libraries:** pandas, numpy, sklearn, lightgbm only (no custom installs)
-- **Data:** Use the provided StreamCart dataset
+- **Data:** Use the provided StreamCart datasets (customers + events)
 - **Capacity:** Retention team can call exactly 500 customers/week
 
 ---

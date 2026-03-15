@@ -2,7 +2,7 @@
 
 **Estimated Time:** 8-12 hours (can be spread across multiple sessions)
 
-**Prerequisites:** Completion of Modules 0-22
+**Prerequisites:** Completion of Modules 0–23
 
 ---
 
@@ -73,7 +73,7 @@ Support tickets for retrieval and response generation.
 | resolution | How ticket was resolved |
 
 ### 4. `streamcart_products.csv`
-Product catalog for context.
+Product catalog for reference context (optional — use for richer response generation).
 
 | Column | Description |
 |--------|-------------|
@@ -116,6 +116,8 @@ Build a retrieval system for help articles.
 ### Part 3: Response Generation (25%)
 
 Build an LLM-powered response generator.
+
+> **Free Colab note:** You may simulate the LLM with rule-based logic. The rubric evaluates your pipeline design, prompt engineering, and context usage — not whether you called a live API.
 
 **Requirements:**
 - [ ] RAG pipeline: retrieve context → generate response
