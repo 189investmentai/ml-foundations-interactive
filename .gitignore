@@ -14,6 +14,20 @@ __pycache__/
 # Notion build artifacts
 .notion-*
 
+# ── Paid content (lives on Notion, not GitHub) ──
+# Coursework: cheatsheets, micro-lessons, quizzes, scenarios, rubrics
+**/content/**/*.md
+**/cheatsheets/
+**/rubrics/
+**/getting-started.md
+**/progress-tracker.md
+
+# Google Forms quiz scripts (contain questions + answers)
+**/google-forms/scripts/
+**/google-forms/quiz-urls.md
+**/google_forms/*.gs
+**/google_forms/helpers.gs
+
 # Environment
 .env
 .venv/
