@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ML Foundations — Practical ML Learning for Decision Makers and Practitioners</title>
+  <title>ML Fluency — Practical ML Learning for Decision Makers and Practitioners</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -61,9 +61,32 @@
       min-height: 74px;
     }
     .brand {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: flex-start;
       font-weight: 800;
       font-size: 1.05rem;
       letter-spacing: -0.03em;
+      line-height: 1;
+      gap: 4px;
+    }
+    .brand-main {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 6px;
+      font-size: 1.02rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--light-text);
+      white-space: nowrap;
+    }
+    .brand-main span { color: var(--brand); }
+    .brand-sub {
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      color: var(--light-muted);
+      line-height: 1.1;
     }
     .brand span { color: var(--brand); }
     .nav-links {
@@ -611,7 +634,7 @@
 <body>
   <nav class="nav">
     <div class="container nav-inner">
-      <a class="brand" href="#">ML <span>Foundations</span></a>
+      <a class="brand" href="#"><div class="brand-main">ML <span>Fluency</span></div><div class="brand-sub">Practical ML for real work</div></a>
       <div class="nav-links">
         <a href="#tracks">Tracks</a>
         <a href="#how">How it works</a>
@@ -629,7 +652,7 @@
         <h1>Learn machine learning in a way that actually matches your role.</h1>
         <p>
           Most ML education is either <strong>too academic</strong> or <strong>too notebook-driven</strong>.
-          ML Foundations is different: two separate tracks, one for <strong>decision makers</strong> and one for <strong>practitioners</strong>, built around realistic business scenarios instead of disconnected toy examples.
+          ML Fluency is different: two separate tracks, one for <strong>decision makers</strong> and one for <strong>practitioners</strong>, built around realistic business scenarios instead of disconnected toy examples.
         </p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="#samples">Explore free samples</a>
@@ -896,7 +919,7 @@
   </section>
 
   <footer>
-    <div class="container">ML Foundations — practical ML education for decision makers and practitioners, built around one cohesive business context instead of fragmented toy problems.</div>
+    <div class="container">ML Fluency — practical ML education for decision makers and practitioners, built around one cohesive business context instead of fragmented toy problems.</div>
   </footer>
 </body>
 </html>
